@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Heebo, Rubik } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
 import { LOGO_SRC } from "@/components/Logo";
 
 const heebo = Heebo({
@@ -63,9 +61,7 @@ export default function RootLayout({
   return (
     <html lang="he" dir="rtl">
       <body className={`${heebo.variable} ${rubik.variable} font-body overflow-x-hidden`}>
-        <Header />
-        <main className="overflow-x-hidden">{children}</main>
-        <Footer />
+        {children}
       </body>
     </html>
   );

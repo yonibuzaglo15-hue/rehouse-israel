@@ -16,3 +16,12 @@ export {
   getUsersByRole,
 } from "./users";
 export { getPasswordHashRecord, verifyUserPassword } from "./password";
+export {
+  SESSION_COOKIE_NAME,
+  createSessionToken,
+  getSession,
+  sessionCookieOptions,
+  verifySessionToken,
+} from "./session";
+export type { SessionPayload } from "./session";
+export { mustChangePasswordOnLogin } from "./user-flags";
