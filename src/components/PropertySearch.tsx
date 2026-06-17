@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Shield, Car, Sun, RotateCcw } from "lucide-react";
+import { Search, X, Shield, Car, Sun, RotateCcw, ChevronDown, Check } from "lucide-react";
 import type { City, PropertyFilters } from "@/lib/types";
 import {
   CITIES,
@@ -89,7 +89,7 @@ function DashboardFilters({
   const update = useCallback(
     <K extends keyof PropertyFilters>(key: K, value: PropertyFilters[K]) => {
       const next = { ...filters, [key]: value };
-      if (key === "city") next.neighborhood = "";
+      if (key === "city") next.neighborhoods = [];
       onFiltersChange(next);
     },
     [filters, onFiltersChange]
@@ -176,9 +176,11 @@ function DashboardFilters({
             <div className="space-y-3">
               <button
                 type="button"
-                onClick={() => update("neighborhood", "")}
+                onClick={() => update("neighborhoods", [])}
                 className={
-                  !filters.neighborhood ? "filter-chip-active" : "filter-chip-inactive"
+                  filters.neighborhoods.length === 0
+                    ? "filter-chip-active"
+                    : "filter-chip-inactive"
                 }
               >
                 הכל
@@ -193,11 +195,17 @@ function DashboardFilters({
                       <button
                         key={n}
                         type="button"
-                        onClick={() =>
-                          update("neighborhood", filters.neighborhood === n ? "" : n)
-                        }
+                        onClick={() => {
+                          const selected = filters.neighborhoods.includes(n);
+                          update(
+                            "neighborhoods",
+                            selected
+                              ? filters.neighborhoods.filter((x) => x !== n)
+                              : [...filters.neighborhoods, n]
+                          );
+                        }}
                         className={
-                          filters.neighborhood === n
+                          filters.neighborhoods.includes(n)
                             ? "filter-chip-active"
                             : "filter-chip-inactive"
                         }
@@ -386,7 +394,7 @@ function HeroFilters({
   const update = useCallback(
     <K extends keyof PropertyFilters>(key: K, value: PropertyFilters[K]) => {
       const next = { ...filters, [key]: value };
-      if (key === "city") next.neighborhood = "";
+      if (key === "city") next.neighborhoods = [];
       onFiltersChange(next);
     },
     [filters, onFiltersChange]
@@ -452,15 +460,14 @@ function HeroFilters({
             placeholder="כל הערים"
             options={CITIES.map((c) => ({ value: c.value, label: c.label }))}
           />
-          <HeroSelect
+          <NeighborhoodMultiSelect
             label={getNeighborhoodFieldLabel(filters.city)}
-            value={filters.neighborhood}
-            onChange={(v) => update("neighborhood", v)}
-            disabled={!filters.city}
-            placeholder={
-              filters.city ? "כל השכונות" : "בחרו עיר תחילה"
-            }
+            selected={filters.neighborhoods}
+            onChange={(neighborhoods) => update("neighborhoods", neighborhoods)}
             zones={neighborhoodZones}
+            disabled={!filters.city}
+            cityKey={filters.city}
+            emptyLabel={filters.city ? "כל השכונות" : "בחרו עיר תחילה"}
           />
           <HeroSelect
             label="חדרים"
@@ -560,13 +567,138 @@ function HeroFilters({
   );
 }
 
+function getNeighborhoodTriggerLabel(
+  selected: string[],
+  emptyLabel: string
+): string {
+  if (selected.length === 0) return emptyLabel;
+  if (selected.length === 1) return selected[0];
+  return `${selected.length} שכונות נבחרו`;
+}
+
+function NeighborhoodMultiSelect({
+  label,
+  selected,
+  onChange,
+  zones,
+  disabled,
+  cityKey,
+  emptyLabel,
+}: {
+  label: string;
+  selected: string[];
+  onChange: (neighborhoods: string[]) => void;
+  zones: readonly { zoneLabel: string; neighborhoods: readonly string[] }[];
+  disabled?: boolean;
+  cityKey?: string;
+  emptyLabel: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [cityKey, disabled]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
+
+  const toggle = (name: string) => {
+    onChange(
+      selected.includes(name)
+        ? selected.filter((n) => n !== name)
+        : [...selected, name]
+    );
+  };
+
+  const triggerLabel = getNeighborhoodTriggerLabel(selected, emptyLabel);
+
+  return (
+    <div ref={containerRef} className="relative flex-1">
+      <label className="mb-1.5 block text-xs font-medium text-white/60">{label}</label>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen((v) => !v)}
+        className="luxury-input flex w-full items-center justify-between gap-2 text-start disabled:opacity-40"
+      >
+        <span className={`truncate ${selected.length === 0 ? "text-white/40" : ""}`}>
+          {triggerLabel}
+        </span>
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {open && zones.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-50 mt-1 max-h-72 w-full overflow-y-auto rounded-xl border border-white/10 bg-navy-900/95 shadow-2xl shadow-black/40 backdrop-blur-xl"
+          >
+            <div className="sticky top-0 border-b border-white/10 bg-navy-900/95 px-3 py-2 backdrop-blur-xl">
+              <button
+                type="button"
+                onClick={() => onChange([])}
+                className="text-xs text-gold-400 transition-colors hover:text-gold-300"
+              >
+                {selected.length > 0 ? "נקה הכל" : "כל השכונות"}
+              </button>
+            </div>
+
+            {zones.map((zone) => (
+              <div key={zone.zoneLabel} className="border-b border-white/5 last:border-0">
+                <p className="px-3 py-2 text-[10px] font-semibold tracking-wide text-white/35 uppercase">
+                  {zone.zoneLabel}
+                </p>
+                {zone.neighborhoods.map((n) => {
+                  const isChecked = selected.includes(n);
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => toggle(n)}
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/5"
+                    >
+                      <span
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
+                          isChecked
+                            ? "border-gold-500 bg-gold-500/20 text-gold-400"
+                            : "border-white/25 bg-white/5"
+                        }`}
+                      >
+                        {isChecked && <Check className="h-3 w-3" strokeWidth={3} />}
+                      </span>
+                      <span className="truncate text-start">{n}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function HeroSelect({
   label,
   value,
   onChange,
   placeholder,
   options,
-  zones,
   disabled,
 }: {
   label: string;
@@ -574,7 +706,6 @@ function HeroSelect({
   onChange: (v: string) => void;
   placeholder: string;
   options?: { value: string; label: string }[];
-  zones?: readonly { zoneLabel: string; neighborhoods: readonly string[] }[];
   disabled?: boolean;
 }) {
   return (
@@ -589,21 +720,11 @@ function HeroSelect({
         <option value="" className="bg-navy-900">
           {placeholder}
         </option>
-        {zones
-          ? zones.map((zone) => (
-              <optgroup key={zone.zoneLabel} label={zone.zoneLabel}>
-                {zone.neighborhoods.map((n) => (
-                  <option key={n} value={n} className="bg-navy-900">
-                    {n}
-                  </option>
-                ))}
-              </optgroup>
-            ))
-          : options?.map((o) => (
-              <option key={o.value} value={o.value} className="bg-navy-900">
-                {o.label}
-              </option>
-            ))}
+        {options?.map((o) => (
+          <option key={o.value} value={o.value} className="bg-navy-900">
+            {o.label}
+          </option>
+        ))}
       </select>
     </div>
   );

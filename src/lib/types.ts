@@ -5,7 +5,7 @@ export type City = "ashdod" | "ashkelon" | "yavne" | "gan-yavne";
 export interface PropertyFilters {
   listingType: ListingType;
   city: City | "";
-  neighborhood: string;
+  neighborhoods: string[];
   priceMin: number | "";
   priceMax: number | "";
   rooms: number | "";

@@ -20,7 +20,11 @@ export default function PropertiesPage() {
   const filterSummary = [
     filters.listingType === "buy" ? "מכירה" : "השכרה",
     filters.city ? getCityLabel(filters.city) : null,
-    filters.neighborhood || null,
+    filters.neighborhoods.length === 1
+      ? filters.neighborhoods[0]
+      : filters.neighborhoods.length > 1
+        ? `${filters.neighborhoods.length} שכונות`
+        : null,
     filters.rooms !== "" ? `${filters.rooms} חדרים` : null,
   ]
     .filter(Boolean)

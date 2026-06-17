@@ -41,7 +41,7 @@ export function usePropertyFilters() {
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (filters.city) count++;
-    if (filters.neighborhood) count++;
+    if (filters.neighborhoods.length > 0) count++;
     if (filters.priceMin !== "") count++;
     if (filters.priceMax !== "") count++;
     if (filters.rooms !== "") count++;

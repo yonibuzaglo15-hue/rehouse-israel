@@ -15,7 +15,7 @@ export default function PropertySearchSection() {
     const params = new URLSearchParams();
     params.set("type", filters.listingType);
     if (filters.city) params.set("city", filters.city);
-    if (filters.neighborhood) params.set("neighborhood", filters.neighborhood);
+    filters.neighborhoods.forEach((n) => params.append("neighborhoods", n));
     if (filters.rooms !== "") params.set("rooms", String(filters.rooms));
     if (filters.priceMin !== "") params.set("priceMin", String(filters.priceMin));
     if (filters.priceMax !== "") params.set("priceMax", String(filters.priceMax));

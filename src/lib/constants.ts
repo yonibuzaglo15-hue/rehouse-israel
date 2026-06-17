@@ -31,7 +31,7 @@ export const ROOM_OPTIONS = [1, 2, 3, 4, 5, 6];
 export const DEFAULT_FILTERS: PropertyFilters = {
   listingType: "buy",
   city: "",
-  neighborhood: "",
+  neighborhoods: [],
   priceMin: "",
   priceMax: "",
   rooms: "",
@@ -62,7 +62,11 @@ export function filterProperties(
   return properties.filter((p) => {
     if (filters.listingType && p.listingType !== filters.listingType) return false;
     if (filters.city && p.city !== filters.city) return false;
-    if (filters.neighborhood && p.neighborhood !== filters.neighborhood) return false;
+    if (
+      filters.neighborhoods.length > 0 &&
+      !filters.neighborhoods.includes(p.neighborhood)
+    )
+      return false;
     if (filters.priceMin !== "" && p.price < filters.priceMin) return false;
     if (filters.priceMax !== "" && p.price > filters.priceMax) return false;
     if (filters.rooms !== "" && p.rooms !== filters.rooms) return false;
@@ -80,10 +84,15 @@ export function filtersFromSearchParams(
   const city = params.get("city");
   const validCities: City[] = ["ashdod", "ashkelon", "yavne", "gan-yavne"];
 
+  const fromMulti = params.getAll("neighborhoods");
+  const legacySingle = params.get("neighborhood");
+  const neighborhoods =
+    fromMulti.length > 0 ? fromMulti : legacySingle ? [legacySingle] : [];
+
   return {
     listingType: type === "rent" ? "rent" : "buy",
     city: validCities.includes(city as City) ? (city as City) : "",
-    neighborhood: params.get("neighborhood") ?? "",
+    neighborhoods,
     priceMin: params.get("priceMin") ? Number(params.get("priceMin")) : "",
     priceMax: params.get("priceMax") ? Number(params.get("priceMax")) : "",
     rooms: params.get("rooms") ? Number(params.get("rooms")) : "",
@@ -97,7 +106,7 @@ export function filtersToSearchParams(filters: PropertyFilters): string {
   const params = new URLSearchParams();
   params.set("type", filters.listingType);
   if (filters.city) params.set("city", filters.city);
-  if (filters.neighborhood) params.set("neighborhood", filters.neighborhood);
+  filters.neighborhoods.forEach((n) => params.append("neighborhoods", n));
   if (filters.rooms !== "") params.set("rooms", String(filters.rooms));
   if (filters.priceMin !== "") params.set("priceMin", String(filters.priceMin));
   if (filters.priceMax !== "") params.set("priceMax", String(filters.priceMax));
@@ -110,7 +119,7 @@ export function filtersToSearchParams(filters: PropertyFilters): string {
 export function countActiveFilters(filters: PropertyFilters): number {
   let count = 0;
   if (filters.city) count++;
-  if (filters.neighborhood) count++;
+  if (filters.neighborhoods.length > 0) count++;
   if (filters.priceMin !== "") count++;
   if (filters.priceMax !== "") count++;
   if (filters.rooms !== "") count++;
