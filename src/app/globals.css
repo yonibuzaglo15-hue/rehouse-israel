@@ -1,0 +1,223 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    background-color: #0a1929;
+    color: #ffffff;
+  }
+
+  body {
+    @apply antialiased;
+  }
+
+  ::selection {
+    background-color: rgba(201, 149, 46, 0.35);
+    color: #ffffff;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply border border-white/10 bg-white/[0.04] backdrop-blur-xl;
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition:
+      border-color 0.35s ease,
+      background-color 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+
+  .glass-panel:hover {
+    @apply border-white/15 bg-white/[0.06];
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  .gold-gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      270deg,
+      #f2d9a8 0%,
+      #c9952e 45%,
+      #dfa84d 100%
+    );
+  }
+
+  .luxury-input {
+    @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white
+      placeholder:text-white/40 transition-all duration-300
+      focus:border-[#c9952e]/50 focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-[#c9952e]/30;
+  }
+
+  .luxury-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3 font-display font-medium;
+    color: #0a1929;
+    background-image: linear-gradient(270deg, #a87824 0%, #c9952e 50%, #dfa84d 100%);
+    box-shadow:
+      0 4px 20px rgba(201, 149, 46, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition:
+      transform 0.3s ease,
+      box-shadow 0.3s ease,
+      filter 0.3s ease;
+  }
+
+  .luxury-btn-primary:hover {
+    filter: brightness(1.08);
+    box-shadow:
+      0 8px 28px rgba(201, 149, 46, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+  }
+
+  .luxury-btn-primary:active {
+    transform: translateY(0);
+    box-shadow:
+      0 2px 12px rgba(201, 149, 46, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .luxury-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border px-6 py-3 font-display font-medium text-white;
+    border-color: rgba(255, 255, 255, 0.18);
+    background-color: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition:
+      border-color 0.3s ease,
+      background-color 0.3s ease,
+      color 0.3s ease,
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .luxury-btn-ghost:hover {
+    border-color: rgba(201, 149, 46, 0.45);
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #dfa84d;
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: translateY(-1px);
+  }
+
+  /* Concierge Dashboard / Bloomberg-terminal aesthetic */
+  .dashboard-panel {
+    @apply border border-white/15 bg-navy-950/95 backdrop-blur-sm;
+  }
+
+  .terminal-label {
+    @apply text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-500/90;
+  }
+
+  .terminal-value {
+    @apply font-mono text-sm font-medium tabular-nums text-white;
+  }
+
+  .filter-chip {
+    @apply inline-flex items-center justify-center rounded border px-2.5 py-1.5
+      text-xs font-medium transition-colors duration-150;
+  }
+
+  .filter-chip-inactive {
+    @apply filter-chip border-white/15 bg-navy-900 text-white/55 hover:border-gold-500/40 hover:text-white;
+  }
+
+  .filter-chip-active {
+    @apply filter-chip border-gold-500 bg-gold-500/20 text-gold-300;
+  }
+
+  .spec-chip {
+    @apply inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide;
+  }
+
+  .spec-chip-on {
+    @apply spec-chip border-emerald-500/50 bg-emerald-500/15 text-emerald-300;
+  }
+
+  .spec-chip-off {
+    @apply spec-chip border-white/10 bg-white/[0.03] text-white/25;
+  }
+
+  .dashboard-input {
+    @apply w-full rounded border border-white/15 bg-navy-900 px-2.5 py-1.5 font-mono text-xs text-white
+      placeholder:text-white/30 focus:border-gold-500/60 focus:outline-none focus:ring-1 focus:ring-gold-500/30;
+  }
+
+  /* GSAP scroll-video scrollytelling — sticky pin, no GSAP pin spacing */
+  .video-scroll-container {
+    position: relative;
+    width: 100%;
+    height: 400vh;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .video-wrapper {
+    position: sticky;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+
+  .hero-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    background-color: #0a1929;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: 6.5rem;
+    padding-bottom: 5rem;
+    padding-inline: 1rem;
+    text-align: center;
+    direction: rtl;
+  }
+
+  @media (min-width: 640px) {
+    .hero-content {
+      padding-inline: 1.5rem;
+    }
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a1929;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334e68;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #c9952e;
+}

@@ -1,0 +1,582 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, X, Shield, Car, Sun, RotateCcw } from "lucide-react";
+import type { City, PropertyFilters } from "@/lib/types";
+import {
+  CITIES,
+  NEIGHBORHOODS,
+  ROOM_OPTIONS,
+  DEFAULT_FILTERS,
+  countActiveFilters,
+} from "@/lib/constants";
+
+interface PropertySearchProps {
+  filters: PropertyFilters;
+  onFiltersChange: (filters: PropertyFilters) => void;
+  onSearch?: () => void;
+  variant?: "hero" | "catalog" | "dashboard";
+  className?: string;
+  resultCount?: number;
+  onReset?: () => void;
+}
+
+const RENT_PRICE_PRESETS = [
+  { label: "עד 5K", min: "" as const, max: 5000 },
+  { label: "5–8K", min: 5000, max: 8000 },
+  { label: "8K+", min: 8000, max: "" as const },
+];
+
+const BUY_PRICE_PRESETS = [
+  { label: "עד 2M", min: "" as const, max: 2_000_000 },
+  { label: "2–4M", min: 2_000_000, max: 4_000_000 },
+  { label: "4M+", min: 4_000_000, max: "" as const },
+];
+
+export default function PropertySearch({
+  filters,
+  onFiltersChange,
+  onSearch,
+  variant = "hero",
+  className = "",
+  resultCount,
+  onReset,
+}: PropertySearchProps) {
+  if (variant === "dashboard") {
+    return (
+      <DashboardFilters
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+        resultCount={resultCount}
+        onReset={onReset}
+        className={className}
+      />
+    );
+  }
+
+  return (
+    <HeroFilters
+      filters={filters}
+      onFiltersChange={onFiltersChange}
+      onSearch={onSearch}
+      variant={variant}
+      className={className}
+      resultCount={resultCount}
+    />
+  );
+}
+
+function DashboardFilters({
+  filters,
+  onFiltersChange,
+  resultCount,
+  onReset,
+  className,
+}: {
+  filters: PropertyFilters;
+  onFiltersChange: (filters: PropertyFilters) => void;
+  resultCount?: number;
+  onReset?: () => void;
+  className?: string;
+}) {
+  const activeCount = countActiveFilters(filters);
+  const neighborhoods = filters.city ? NEIGHBORHOODS[filters.city] : [];
+  const pricePresets =
+    filters.listingType === "rent" ? RENT_PRICE_PRESETS : BUY_PRICE_PRESETS;
+
+  const update = useCallback(
+    <K extends keyof PropertyFilters>(key: K, value: PropertyFilters[K]) => {
+      const next = { ...filters, [key]: value };
+      if (key === "city") next.neighborhood = "";
+      onFiltersChange(next);
+    },
+    [filters, onFiltersChange]
+  );
+
+  const toggleCity = (city: City) => {
+    update("city", filters.city === city ? "" : city);
+  };
+
+  const toggleRooms = (rooms: number | "") => {
+    update("rooms", filters.rooms === rooms ? "" : rooms);
+  };
+
+  const applyPricePreset = (min: number | "", max: number | "") => {
+    onFiltersChange({ ...filters, priceMin: min, priceMax: max });
+  };
+
+  const isPresetActive = (min: number | "", max: number | "") =>
+    filters.priceMin === min && filters.priceMax === max;
+
+  const handleReset = () => {
+    if (onReset) onReset();
+    else onFiltersChange(DEFAULT_FILTERS);
+  };
+
+  return (
+    <aside className={`dashboard-panel flex h-full flex-col ${className ?? ""}`}>
+      <div className="border-b border-gold-500/30 bg-navy-900/80 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <span className="terminal-label">סינון נכסים</span>
+          {activeCount > 0 && (
+            <span className="rounded bg-gold-500 px-1.5 py-0.5 font-mono text-[10px] font-bold text-navy-950">
+              {activeCount}
+            </span>
+          )}
+        </div>
+        {resultCount !== undefined && (
+          <p className="mt-1.5 font-mono text-lg font-bold tabular-nums text-white">
+            {resultCount}
+            <span className="ms-1.5 text-xs font-normal text-white/45">תוצאות</span>
+          </p>
+        )}
+      </div>
+
+      <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4">
+        <FilterSection label="סוג עסקה">
+          <div className="grid grid-cols-2 gap-1.5">
+            {(["buy", "rent"] as const).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => update("listingType", type)}
+                className={
+                  filters.listingType === type
+                    ? "filter-chip-active py-2"
+                    : "filter-chip-inactive py-2"
+                }
+              >
+                {type === "buy" ? "מכירה" : "השכרה"}
+              </button>
+            ))}
+          </div>
+        </FilterSection>
+
+        <FilterSection label="עיר">
+          <div className="flex flex-wrap gap-1.5">
+            {CITIES.map((city) => (
+              <button
+                key={city.value}
+                type="button"
+                onClick={() => toggleCity(city.value)}
+                className={
+                  filters.city === city.value ? "filter-chip-active" : "filter-chip-inactive"
+                }
+              >
+                {city.label}
+              </button>
+            ))}
+          </div>
+        </FilterSection>
+
+        {neighborhoods.length > 0 && (
+          <FilterSection label="שכונה">
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                onClick={() => update("neighborhood", "")}
+                className={
+                  !filters.neighborhood ? "filter-chip-active" : "filter-chip-inactive"
+                }
+              >
+                הכל
+              </button>
+              {neighborhoods.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() =>
+                    update("neighborhood", filters.neighborhood === n ? "" : n)
+                  }
+                  className={
+                    filters.neighborhood === n ? "filter-chip-active" : "filter-chip-inactive"
+                  }
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </FilterSection>
+        )}
+
+        <FilterSection label="חדרים">
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={() => toggleRooms("")}
+              className={filters.rooms === "" ? "filter-chip-active" : "filter-chip-inactive"}
+            >
+              הכל
+            </button>
+            {ROOM_OPTIONS.map((r) => (
+              <button
+                key={r}
+                type="button"
+                onClick={() => toggleRooms(r)}
+                className={
+                  filters.rooms === r ? "filter-chip-active" : "filter-chip-inactive"
+                }
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+        </FilterSection>
+
+        <FilterSection label="טווח מחיר">
+          <div className="flex flex-wrap gap-1.5">
+            {pricePresets.map((p) => (
+              <button
+                key={p.label}
+                type="button"
+                onClick={() => applyPricePreset(p.min, p.max)}
+                className={
+                  isPresetActive(p.min, p.max) ? "filter-chip-active" : "filter-chip-inactive"
+                }
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <div>
+              <span className="terminal-label">מינ׳</span>
+              <input
+                type="number"
+                value={filters.priceMin}
+                onChange={(e) =>
+                  update("priceMin", e.target.value === "" ? "" : Number(e.target.value))
+                }
+                placeholder="0"
+                className="dashboard-input mt-1"
+              />
+            </div>
+            <div>
+              <span className="terminal-label">מקס׳</span>
+              <input
+                type="number"
+                value={filters.priceMax}
+                onChange={(e) =>
+                  update("priceMax", e.target.value === "" ? "" : Number(e.target.value))
+                }
+                placeholder="∞"
+                className="dashboard-input mt-1"
+              />
+            </div>
+          </div>
+        </FilterSection>
+
+        <FilterSection label="מאפיינים">
+          <div className="space-y-1.5">
+            <ToggleChip
+              active={filters.mamad}
+              onClick={() => update("mamad", !filters.mamad)}
+              icon={<Shield className="h-3.5 w-3.5" />}
+              label="ממ״ד"
+            />
+            <ToggleChip
+              active={filters.balcony}
+              onClick={() => update("balcony", !filters.balcony)}
+              icon={<Sun className="h-3.5 w-3.5" />}
+              label="מרפסת"
+            />
+            <ToggleChip
+              active={filters.parking}
+              onClick={() => update("parking", !filters.parking)}
+              icon={<Car className="h-3.5 w-3.5" />}
+              label="חניה"
+            />
+          </div>
+        </FilterSection>
+      </div>
+
+      {activeCount > 0 && (
+        <div className="border-t border-white/10 p-3">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="flex w-full items-center justify-center gap-2 rounded border border-white/15 py-2 text-xs font-medium text-white/60 transition-colors hover:border-gold-500/40 hover:text-gold-400"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            איפוס סינון
+          </button>
+        </div>
+      )}
+    </aside>
+  );
+}
+
+function FilterSection({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <div className="terminal-label mb-2">{label}</div>
+      {children}
+    </div>
+  );
+}
+
+function ToggleChip({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex w-full items-center gap-2 rounded border px-3 py-2 text-xs font-medium transition-colors ${
+        active
+          ? "border-gold-500/60 bg-gold-500/15 text-gold-300"
+          : "border-white/10 bg-navy-900 text-white/45 hover:border-white/25 hover:text-white/70"
+      }`}
+    >
+      <span className={active ? "text-gold-400" : "text-white/30"}>{icon}</span>
+      {label}
+      <span className="ms-auto font-mono text-[10px]">{active ? "ON" : "—"}</span>
+    </button>
+  );
+}
+
+function HeroFilters({
+  filters,
+  onFiltersChange,
+  onSearch,
+  variant,
+  className,
+  resultCount,
+}: {
+  filters: PropertyFilters;
+  onFiltersChange: (filters: PropertyFilters) => void;
+  onSearch?: () => void;
+  variant: "hero" | "catalog";
+  className?: string;
+  resultCount?: number;
+}) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const activeCount = countActiveFilters(filters);
+  const neighborhoods = filters.city ? NEIGHBORHOODS[filters.city] : [];
+  const isHero = variant === "hero";
+  const isCatalog = variant === "catalog";
+
+  const update = useCallback(
+    <K extends keyof PropertyFilters>(key: K, value: PropertyFilters[K]) => {
+      const next = { ...filters, [key]: value };
+      if (key === "city") next.neighborhood = "";
+      onFiltersChange(next);
+    },
+    [filters, onFiltersChange]
+  );
+
+  const resetFilters = () => {
+    onFiltersChange({ ...DEFAULT_FILTERS, listingType: filters.listingType });
+    setShowAdvanced(false);
+  };
+
+  const handleSearchClick = () => {
+    if (onSearch) onSearch();
+    else if (isCatalog)
+      document.getElementById("property-results")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.7, delay: isHero ? 0.4 : 0 }}
+      className={`${isHero ? "w-full max-w-5xl" : "w-full"} ${className ?? ""}`}
+    >
+      <div
+        className={`glass-panel overflow-hidden rounded-2xl ${
+          isHero ? "shadow-2xl shadow-black/40" : "shadow-lg shadow-black/20"
+        }`}
+      >
+        <div className="flex border-b border-white/10">
+          {(["buy", "rent"] as const).map((type) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => update("listingType", type)}
+              className={`relative flex-1 py-4 text-sm font-medium transition-colors sm:text-base ${
+                filters.listingType === type ? "text-gold-400" : "text-white/50 hover:text-white/80"
+              }`}
+            >
+              {filters.listingType === type && (
+                <motion.div
+                  layoutId={isCatalog ? "catalogListingType" : "listingTypeIndicator"}
+                  className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-l from-gold-600 to-gold-400"
+                />
+              )}
+              {type === "buy" ? "לקנייה" : "להשכרה"}
+            </button>
+          ))}
+        </div>
+
+        {isCatalog && resultCount !== undefined && (
+          <div className="border-b border-white/5 bg-white/[0.02] px-4 py-2 text-center text-xs text-white/40">
+            {resultCount > 0
+              ? `${resultCount} נכסים מתאימים — עדכון בזמן אמת`
+              : "לא נמצאו נכסים"}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-3 p-4 sm:flex-row sm:items-end sm:gap-4 sm:p-6">
+          <HeroSelect
+            label="עיר"
+            value={filters.city}
+            onChange={(v) => update("city", v as PropertyFilters["city"])}
+            options={[
+              { value: "", label: "כל הערים" },
+              ...CITIES.map((c) => ({ value: c.value, label: c.label })),
+            ]}
+          />
+          <HeroSelect
+            label="שכונה / אזור"
+            value={filters.neighborhood}
+            onChange={(v) => update("neighborhood", v)}
+            disabled={!filters.city}
+            options={[
+              { value: "", label: filters.city ? "כל השכונות" : "בחרו עיר תחילה" },
+              ...neighborhoods.map((n) => ({ value: n, label: n })),
+            ]}
+          />
+          <HeroSelect
+            label="חדרים"
+            value={String(filters.rooms)}
+            onChange={(v) => update("rooms", v === "" ? "" : Number(v))}
+            options={[
+              { value: "", label: "הכל" },
+              ...ROOM_OPTIONS.map((r) => ({ value: String(r), label: `${r} חדרים` })),
+            ]}
+          />
+          <div className="flex gap-2 sm:flex-col">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className={`luxury-btn-ghost relative px-4 py-3 ${showAdvanced ? "border-gold-500/40 bg-white/10" : ""}`}
+            >
+              <span className="hidden sm:inline">סינון</span>
+              {activeCount > 0 && (
+                <span className="absolute -top-1.5 -end-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-gold-500 text-xs font-bold text-navy-950">
+                  {activeCount}
+                </span>
+              )}
+            </button>
+            <button type="button" onClick={handleSearchClick} className="luxury-btn-primary flex-1 px-6 py-3">
+              <Search className="h-4 w-4" />
+              <span>{isCatalog ? "לתוצאות" : "חיפוש"}</span>
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {showAdvanced && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden border-t border-white/10 p-4 sm:p-6"
+            >
+              <div className="mb-4 flex justify-between">
+                <h3 className="text-sm text-white/80">סינון מתקדם</h3>
+                {activeCount > 0 && (
+                  <button type="button" onClick={resetFilters} className="text-xs text-gold-400">
+                    <X className="inline h-3 w-3" /> נקה
+                  </button>
+                )}
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1.5 block text-xs text-white/60">מחיר מינימום</label>
+                  <input
+                    type="number"
+                    value={filters.priceMin}
+                    onChange={(e) =>
+                      update("priceMin", e.target.value === "" ? "" : Number(e.target.value))
+                    }
+                    className="luxury-input"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-xs text-white/60">מחיר מקסימום</label>
+                  <input
+                    type="number"
+                    value={filters.priceMax}
+                    onChange={(e) =>
+                      update("priceMax", e.target.value === "" ? "" : Number(e.target.value))
+                    }
+                    className="luxury-input"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <ToggleChip
+                  active={filters.mamad}
+                  onClick={() => update("mamad", !filters.mamad)}
+                  icon={<Shield className="h-3.5 w-3.5" />}
+                  label="ממ״ד"
+                />
+                <ToggleChip
+                  active={filters.balcony}
+                  onClick={() => update("balcony", !filters.balcony)}
+                  icon={<Sun className="h-3.5 w-3.5" />}
+                  label="מרפסת"
+                />
+                <ToggleChip
+                  active={filters.parking}
+                  onClick={() => update("parking", !filters.parking)}
+                  icon={<Car className="h-3.5 w-3.5" />}
+                  label="חניה"
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
+function HeroSelect({
+  label,
+  value,
+  onChange,
+  options,
+  disabled,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  options: { value: string; label: string }[];
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex-1">
+      <label className="mb-1.5 block text-xs font-medium text-white/60">{label}</label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        className="luxury-input appearance-none disabled:opacity-40"
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value} className="bg-navy-900">
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
