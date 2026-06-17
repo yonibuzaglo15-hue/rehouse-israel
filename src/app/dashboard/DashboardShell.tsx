@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Building2, LogOut, PlusCircle } from "lucide-react";
+import { Building2, LogOut } from "lucide-react";
 import type { SystemRole } from "@/lib/auth/types";
 
 const ROLE_BADGE_STYLES: Record<SystemRole, string> = {
@@ -79,27 +79,5 @@ export default function DashboardHeader({
         </div>
       )}
     </header>
-  );
-}
-
-export function PropertyIntakePlaceholder() {
-  return (
-    <section className="glass-panel rounded-2xl p-8 sm:p-10">
-      <div className="flex flex-col items-center text-center">
-        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-gold-500/25 bg-gold-500/10">
-          <PlusCircle className="h-7 w-7 text-gold-300" />
-        </div>
-        <h2 className="font-display text-2xl font-bold text-white">
-          גיוס והוספת נכס חדש
-        </h2>
-        <p className="mt-3 max-w-lg text-sm leading-relaxed text-white/55">
-          בשלב הבא נוסיף כאן טופס מלא לגיוס נכס — פרטי נכס, תמונות, מחיר, רובע
-          ושיוך לסוכן המגייס.
-        </p>
-        <div className="mt-8 w-full rounded-xl border border-dashed border-white/15 bg-white/[0.02] px-6 py-10 text-white/30">
-          אזור טופס גיוס נכס — בקרוב
-        </div>
-      </div>
-    </section>
   );
 }

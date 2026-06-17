@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth/session";
 import { ROLE_LABELS } from "@/lib/auth/permissions";
-import DashboardHeader, { PropertyIntakePlaceholder } from "./DashboardShell";
+import DashboardHeader from "./DashboardShell";
+import DashboardPropertiesPanel from "@/components/dashboard/DashboardPropertiesPanel";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -32,7 +33,7 @@ export default async function DashboardPage() {
           </p>
         </div>
 
-        <PropertyIntakePlaceholder />
+        <DashboardPropertiesPanel role={session.role} />
       </main>
     </>
   );
