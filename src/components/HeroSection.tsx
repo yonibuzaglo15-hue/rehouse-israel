@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -12,9 +12,9 @@ gsap.registerPlugin(ScrollTrigger);
 const SCRUB_SMOOTHING = 1.5;
 
 const HERO_STATS = [
-  { value: "500+", label: "נכסים פעילים" },
-  { value: "15+", label: "שנות ניסיון" },
-  { value: "98%", label: "שביעות רצון" },
+  { end: 500, suffix: "+", label: "נכסים פעילים" },
+  { end: 15, suffix: "+", label: "שנות ניסיון" },
+  { end: 98, suffix: "%", label: "שביעות רצון" },
 ] as const;
 
 const cascadeContainer = {
@@ -22,27 +22,106 @@ const cascadeContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.14,
-      delayChildren: 0.12,
+      staggerChildren: 0.16,
+      delayChildren: 0.15,
     },
   },
 };
 
 const cascadeItem = {
-  hidden: { opacity: 0, y: 32 },
+  hidden: { opacity: 0, y: 30 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.9,
+      duration: 0.85,
       ease: [0.22, 1, 0.36, 1],
     },
   },
 };
 
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function useCountUp(target: number, active: boolean, duration = 1800): number {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!active) return;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (prefersReducedMotion) {
+      setCount(target);
+      return;
+    }
+
+    let startTime: number | null = null;
+    let rafId = 0;
+
+    const tick = (timestamp: number) => {
+      if (startTime === null) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      setCount(Math.round(easeOutCubic(progress) * target));
+      if (progress < 1) {
+        rafId = requestAnimationFrame(tick);
+      }
+    };
+
+    setCount(0);
+    rafId = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(rafId);
+  }, [active, target, duration]);
+
+  return count;
+}
+
+function HeroStatCard({
+  end,
+  suffix,
+  label,
+  delayOffset = 0,
+}: {
+  end: number;
+  suffix: string;
+  label: string;
+  delayOffset?: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.45 });
+  const count = useCountUp(end, isInView, 1800 + delayOffset);
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={cascadeItem}
+      className="hero-stat-card text-center"
+    >
+      <div className="min-h-[2rem] font-display text-2xl font-semibold tabular-nums text-[#f2d9a8] sm:min-h-[2.25rem] sm:text-3xl">
+        {count}
+        {suffix}
+      </div>
+      <div className="mt-1.5 font-display text-[0.7rem] font-medium tracking-wide text-white/70 sm:text-sm">
+        {label}
+      </div>
+    </motion.div>
+  );
+}
+
 export default function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  const scrollToProperties = () => {
+    document.getElementById("properties")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
 
   useEffect(() => {
     const container = containerRef.current;
@@ -204,20 +283,36 @@ export default function HeroSection() {
             ושירות ברמה בינלאומית
           </motion.p>
 
+          <motion.div variants={cascadeItem} className="mt-7 w-full sm:mt-8">
+            <button
+              type="button"
+              onClick={scrollToProperties}
+              className="hero-cta-btn"
+            >
+              <span className="hero-cta-btn-label">לצפייה בנכסי האקסקלוסיב</span>
+            </button>
+          </motion.div>
+
           <motion.div
             variants={cascadeItem}
-            className="hero-stats-grid mt-8 sm:mt-12"
+            className="w-full max-w-[52rem]"
           >
-            {HERO_STATS.map((stat) => (
-              <div key={stat.label} className="hero-stat-card text-center">
-                <div className="font-display text-2xl font-semibold tabular-nums text-[#f2d9a8] sm:text-3xl">
-                  {stat.value}
-                </div>
-                <div className="mt-1.5 font-display text-[0.7rem] font-medium tracking-wide text-white/70 sm:text-sm">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
+            <motion.div
+              variants={cascadeContainer}
+              initial="hidden"
+              animate="visible"
+              className="hero-stats-grid mt-8 sm:mt-10"
+            >
+              {HERO_STATS.map((stat, index) => (
+                <HeroStatCard
+                  key={stat.label}
+                  end={stat.end}
+                  suffix={stat.suffix}
+                  label={stat.label}
+                  delayOffset={index * 120}
+                />
+              ))}
+            </motion.div>
           </motion.div>
 
           <motion.div

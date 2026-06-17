@@ -82,6 +82,50 @@
     );
   }
 
+  .hero-cta-btn {
+    @apply relative inline-flex items-center justify-center overflow-hidden rounded-full border border-[#c9952e]/55 bg-black/20 px-7 py-3 font-display text-sm font-medium tracking-wide text-[#f2d9a8] backdrop-blur-sm sm:px-9 sm:py-3.5 sm:text-base;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 4px 24px rgba(0, 0, 0, 0.25);
+    transition:
+      border-color 0.4s ease,
+      box-shadow 0.4s ease,
+      transform 0.35s ease,
+      color 0.4s ease;
+  }
+
+  .hero-cta-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(270deg, #a87824 0%, #c9952e 48%, #dfa84d 100%);
+    transform: translateY(100%);
+    transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .hero-cta-btn:hover {
+    border-color: #dfa84d;
+    color: #0a1929;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 10px 36px rgba(201, 149, 46, 0.38);
+    transform: translateY(-2px);
+  }
+
+  .hero-cta-btn:hover::before {
+    transform: translateY(0);
+  }
+
+  .hero-cta-btn:active {
+    transform: translateY(0);
+  }
+
+  .hero-cta-btn-label {
+    position: relative;
+    z-index: 1;
+  }
+
   .luxury-input {
     @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white
       placeholder:text-white/40 transition-all duration-300

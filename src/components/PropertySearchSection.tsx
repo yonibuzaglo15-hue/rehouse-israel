@@ -26,7 +26,7 @@ export default function PropertySearchSection() {
   };
 
   return (
-    <section className="relative border-t border-white/5 py-24">
+    <section id="properties" className="relative border-t border-white/5 py-24 scroll-mt-24">
       <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-900/60 to-navy-950" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(201,149,46,0.06),transparent_55%)]" />
 
