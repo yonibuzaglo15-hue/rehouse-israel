@@ -28,6 +28,9 @@ yarn-error.log*
 # env files
 .env*.local
 
+# initial login credentials (plaintext — distribute securely)
+/data/initial-user-credentials.json
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
