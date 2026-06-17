@@ -150,17 +150,21 @@ export default function HeroSection() {
           <source src={IMAGES.hero.video} type="video/mp4" />
         </video>
 
-        {/* Cinematic overlays */}
+        {/* Cinematic overlays — layered for headline readability over moving video */}
         <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a1929]/60 via-transparent to-[#0a1929]/60"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a1929]/75 via-[#0a1929]/20 to-[#0a1929]/75"
           aria-hidden
         />
         <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a1929]/70 via-[#0a1929]/25 to-[#0a1929]/80"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#0a1929]/80 via-[#0a1929]/45 to-[#0a1929]/85"
           aria-hidden
         />
         <div
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(10,25,41,0.35)_100%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_45%,rgba(10,25,41,0.55)_0%,transparent_70%)]"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(10,25,41,0.4)_100%)]"
           aria-hidden
         />
 
@@ -177,24 +181,24 @@ export default function HeroSection() {
         >
           <motion.span
             variants={cascadeItem}
-            className="mb-6 inline-block rounded-full border border-[#c9952e]/30 bg-[#c9952e]/10 px-5 py-1.5 font-display text-xs font-medium tracking-[0.2em] text-[#dfa84d] uppercase"
+            className="mb-5 inline-block rounded-full border border-[#c9952e]/35 bg-black/25 px-4 py-1.5 font-display text-[0.65rem] font-medium tracking-[0.2em] text-[#f2d9a8] uppercase backdrop-blur-sm sm:mb-6 sm:px-5 sm:text-xs"
           >
             נדל״ן יוקרה בדרום
           </motion.span>
 
           <motion.h1
             variants={cascadeItem}
-            className="max-w-4xl font-display text-4xl font-bold leading-[1.1] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
+            className="hero-title-shadow max-w-4xl font-display text-[1.85rem] font-bold leading-[1.15] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl"
           >
             <span className="text-white">מצאו את </span>
             <span className="gold-gradient-text">הבית שלכם</span>
             <br />
-            <span className="text-white/90">באשדוד, אשקלון ויבנה</span>
+            <span className="text-white">באשדוד, אשקלון ויבנה</span>
           </motion.h1>
 
           <motion.p
             variants={cascadeItem}
-            className="mt-6 max-w-2xl font-display text-base font-light leading-relaxed text-white/75 sm:text-lg"
+            className="hero-subtitle-shadow mt-4 max-w-2xl px-1 font-display text-sm font-light leading-relaxed text-white/90 sm:mt-6 sm:text-base md:text-lg"
           >
             Rehouse Israel — חוויית נדל״ן פרימיום עם ליווי אישי, נכסים נבחרים
             ושירות ברמה בינלאומית
@@ -202,14 +206,14 @@ export default function HeroSection() {
 
           <motion.div
             variants={cascadeItem}
-            className="mt-12 flex flex-wrap items-center justify-center gap-8 sm:gap-16"
+            className="hero-stats-grid mt-8 sm:mt-12"
           >
             {HERO_STATS.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="font-display text-2xl font-semibold text-[#c9952e] sm:text-3xl">
+              <div key={stat.label} className="hero-stat-card text-center">
+                <div className="font-display text-2xl font-semibold tabular-nums text-[#f2d9a8] sm:text-3xl">
                   {stat.value}
                 </div>
-                <div className="mt-1 font-display text-xs tracking-wide text-white/50 sm:text-sm">
+                <div className="mt-1.5 font-display text-[0.7rem] font-medium tracking-wide text-white/70 sm:text-sm">
                   {stat.label}
                 </div>
               </div>
