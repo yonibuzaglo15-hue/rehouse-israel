@@ -34,7 +34,8 @@ export function addManagedProperty(
 ): ManagedProperty {
   const property: ManagedProperty = {
     id: `mp_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    district: input.district,
+    city: input.city,
+    neighborhood: input.neighborhood,
     street: input.street.trim(),
     houseNumber: input.houseNumber.trim(),
     rooms: input.rooms,

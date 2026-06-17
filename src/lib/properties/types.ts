@@ -1,5 +1,7 @@
 export type PropertyStatus = "active" | "exclusive" | "frozen" | "sold";
 
+import type { City } from "@/lib/types";
+
 export interface ManagedPropertyMedia {
   imageNames: string[];
   videoUrl: string;
@@ -8,7 +10,8 @@ export interface ManagedPropertyMedia {
 
 export interface ManagedProperty {
   id: string;
-  district: string;
+  city: City;
+  neighborhood: string;
   street: string;
   houseNumber: string;
   rooms: number;
@@ -27,7 +30,8 @@ export interface ManagedProperty {
 }
 
 export interface PropertyIntakeInput {
-  district: string;
+  city: City;
+  neighborhood: string;
   street: string;
   houseNumber: string;
   rooms: number;

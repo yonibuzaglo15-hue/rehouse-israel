@@ -1,7 +1,15 @@
 import type { City, Property, PropertyFilters } from "./types";
+import { getFlatNeighborhoods } from "./neighborhoods";
 
 export { MOCK_AGENTS, getAgentById } from "./mock-data/agents";
 export { MOCK_PROPERTIES, getPropertyById } from "./mock-data/properties";
+export {
+  CITY_NEIGHBORHOOD_ZONES,
+  getFlatNeighborhoods,
+  getNeighborhoodFieldLabel,
+  getNeighborhoodZones,
+  isValidNeighborhood,
+} from "./neighborhoods";
 
 export const CITIES: { value: City; label: string }[] = [
   { value: "ashdod", label: "אשדוד" },
@@ -10,31 +18,12 @@ export const CITIES: { value: City; label: string }[] = [
   { value: "gan-yavne", label: "גן יבנה" },
 ];
 
+/** Flat neighborhood list per city — derived from zoned data (Yad2-style source of truth) */
 export const NEIGHBORHOODS: Record<City, string[]> = {
-  ashdod: [
-    "רובע א׳",
-    "רובע ב׳",
-    "רובע ג׳",
-    "רובע ד׳",
-    "רובע ה׳",
-    "רובע ו׳",
-    "רובע ז׳",
-    "רובע ח׳",
-    "רובע ט׳",
-    "רובע י׳",
-    "רובע י״ג",
-    "רובע ט״ו",
-    "רובע ט״ז",
-    "רובע י״ז",
-    "רובע סיטי הקרייה",
-    "מע״ר דרום",
-    "מרינה",
-    "אזה״ת צפוני",
-    "אזה״ת דרומי - עד הלום",
-  ],
-  ashkelon: ["מרינה", "ברנע", "אפרידר", "רמב\"ם", "גבעת וינגייט"],
-  yavne: ["מרכז", "נאות שקד", "נאות הדר", "נאות שז\"ר"],
-  "gan-yavne": ["מרכז", "נאות הדר", "נאות שקד", "שכונת הגבעה"],
+  ashdod: getFlatNeighborhoods("ashdod"),
+  ashkelon: getFlatNeighborhoods("ashkelon"),
+  yavne: getFlatNeighborhoods("yavne"),
+  "gan-yavne": getFlatNeighborhoods("gan-yavne"),
 };
 
 export const ROOM_OPTIONS = [1, 2, 3, 4, 5, 6];

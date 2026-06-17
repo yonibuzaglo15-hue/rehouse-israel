@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Building2, Loader2, MapPin, User } from "lucide-react";
 import type { SystemRole } from "@/lib/auth/types";
+import { getCityLabel } from "@/lib/constants";
 import {
   PROPERTY_STATUS_LABELS,
   PROPERTY_STATUS_STYLES,
@@ -145,10 +146,13 @@ export default function PropertyList({
                 <div className="flex items-center gap-2 text-white">
                   <MapPin className="h-4 w-4 shrink-0 text-gold-400" />
                   <h3 className="font-display text-lg font-semibold">
-                    {property.street} {property.houseNumber}, {property.district}
+                    {property.street} {property.houseNumber}
                   </h3>
                 </div>
-                <p className="mt-2 text-sm text-white/50">
+                <p className="mt-1 text-sm text-white/50">
+                  {getCityLabel(property.city)} · {property.neighborhood}
+                </p>
+                <p className="mt-1 text-sm text-white/50">
                   {property.rooms} חדרים · קומה {property.floor}/{property.totalFloors}
                 </p>
               </div>

@@ -3,7 +3,8 @@ import type { ManagedProperty } from "./types";
 export const INITIAL_MANAGED_PROPERTIES: ManagedProperty[] = [
   {
     id: "mp_001",
-    district: "מרינה",
+    city: "ashdod",
+    neighborhood: "מרינה",
     street: "הרצל",
     houseNumber: "12",
     rooms: 5,
@@ -26,7 +27,8 @@ export const INITIAL_MANAGED_PROPERTIES: ManagedProperty[] = [
   },
   {
     id: "mp_002",
-    district: "רובע י׳",
+    city: "ashdod",
+    neighborhood: "רובע י׳",
     street: "בן גוריון",
     houseNumber: "45",
     rooms: 3,
@@ -49,7 +51,8 @@ export const INITIAL_MANAGED_PROPERTIES: ManagedProperty[] = [
   },
   {
     id: "mp_003",
-    district: "רובע סיטי הקרייה",
+    city: "ashdod",
+    neighborhood: "רובע סיטי הקרייה",
     street: "העצמאות",
     houseNumber: "8",
     rooms: 4,
@@ -72,7 +75,8 @@ export const INITIAL_MANAGED_PROPERTIES: ManagedProperty[] = [
   },
   {
     id: "mp_004",
-    district: "מע״ר דרום",
+    city: "ashdod",
+    neighborhood: "מע״ר דרום",
     street: "שדרות מנחם בגין",
     houseNumber: "102",
     rooms: 2,

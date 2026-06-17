@@ -1,3 +1,5 @@
+import type { City } from "@/lib/types";
+import { isCity, isValidNeighborhood } from "./neighborhoods";
 import type { PropertyIntakeInput, PropertyStatus } from "./types";
 
 const VALID_STATUSES: PropertyStatus[] = ["active", "exclusive", "frozen", "sold"];
@@ -11,7 +13,8 @@ export function validatePropertyIntake(
 
   const raw = body as Record<string, unknown>;
 
-  const district = String(raw.district ?? "").trim();
+  const cityRaw = String(raw.city ?? "").trim();
+  const neighborhood = String(raw.neighborhood ?? "").trim();
   const street = String(raw.street ?? "").trim();
   const houseNumber = String(raw.houseNumber ?? "").trim();
   const rooms = Number(raw.rooms);
@@ -20,7 +23,18 @@ export function validatePropertyIntake(
   const askingPrice = Number(raw.askingPrice);
   const status = String(raw.status ?? "active") as PropertyStatus;
 
-  if (!district) return { success: false, error: "נא לבחור רובע" };
+  if (!isCity(cityRaw)) return { success: false, error: "נא לבחור עיר" };
+  const city = cityRaw as City;
+
+  if (!neighborhood) {
+    return {
+      success: false,
+      error: city === "ashdod" ? "נא לבחור רובע" : "נא לבחור שכונה / אזור",
+    };
+  }
+  if (!isValidNeighborhood(city, neighborhood)) {
+    return { success: false, error: "השכונה שנבחרה אינה תקינה עבור העיר" };
+  }
   if (!street) return { success: false, error: "נא למלא שם רחוב" };
   if (!houseNumber) return { success: false, error: "נא למלא מספר בית" };
   if (!Number.isFinite(rooms) || rooms < 1 || rooms > 20) {
@@ -45,7 +59,8 @@ export function validatePropertyIntake(
   return {
     success: true,
     data: {
-      district,
+      city,
+      neighborhood,
       street,
       houseNumber,
       rooms,

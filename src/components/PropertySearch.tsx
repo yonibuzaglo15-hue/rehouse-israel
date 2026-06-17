@@ -6,10 +6,11 @@ import { Search, X, Shield, Car, Sun, RotateCcw } from "lucide-react";
 import type { City, PropertyFilters } from "@/lib/types";
 import {
   CITIES,
-  NEIGHBORHOODS,
   ROOM_OPTIONS,
   DEFAULT_FILTERS,
   countActiveFilters,
+  getNeighborhoodFieldLabel,
+  getNeighborhoodZones,
 } from "@/lib/constants";
 
 interface PropertySearchProps {
@@ -81,7 +82,7 @@ function DashboardFilters({
   className?: string;
 }) {
   const activeCount = countActiveFilters(filters);
-  const neighborhoods = filters.city ? NEIGHBORHOODS[filters.city] : [];
+  const neighborhoodZones = filters.city ? getNeighborhoodZones(filters.city) : [];
   const pricePresets =
     filters.listingType === "rent" ? RENT_PRICE_PRESETS : BUY_PRICE_PRESETS;
 
@@ -170,9 +171,9 @@ function DashboardFilters({
           </div>
         </FilterSection>
 
-        {neighborhoods.length > 0 && (
-          <FilterSection label="שכונה">
-            <div className="flex flex-wrap gap-1.5">
+        {neighborhoodZones.length > 0 && (
+          <FilterSection label={getNeighborhoodFieldLabel(filters.city)}>
+            <div className="space-y-3">
               <button
                 type="button"
                 onClick={() => update("neighborhood", "")}
@@ -182,19 +183,30 @@ function DashboardFilters({
               >
                 הכל
               </button>
-              {neighborhoods.map((n) => (
-                <button
-                  key={n}
-                  type="button"
-                  onClick={() =>
-                    update("neighborhood", filters.neighborhood === n ? "" : n)
-                  }
-                  className={
-                    filters.neighborhood === n ? "filter-chip-active" : "filter-chip-inactive"
-                  }
-                >
-                  {n}
-                </button>
+              {neighborhoodZones.map((zone) => (
+                <div key={zone.zoneLabel}>
+                  <p className="mb-1.5 text-[10px] font-medium text-white/40">
+                    {zone.zoneLabel}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {zone.neighborhoods.map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() =>
+                          update("neighborhood", filters.neighborhood === n ? "" : n)
+                        }
+                        className={
+                          filters.neighborhood === n
+                            ? "filter-chip-active"
+                            : "filter-chip-inactive"
+                        }
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </FilterSection>
@@ -367,7 +379,7 @@ function HeroFilters({
 }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const activeCount = countActiveFilters(filters);
-  const neighborhoods = filters.city ? NEIGHBORHOODS[filters.city] : [];
+  const neighborhoodZones = filters.city ? getNeighborhoodZones(filters.city) : [];
   const isHero = variant === "hero";
   const isCatalog = variant === "catalog";
 
@@ -437,29 +449,28 @@ function HeroFilters({
             label="עיר"
             value={filters.city}
             onChange={(v) => update("city", v as PropertyFilters["city"])}
-            options={[
-              { value: "", label: "כל הערים" },
-              ...CITIES.map((c) => ({ value: c.value, label: c.label })),
-            ]}
+            placeholder="כל הערים"
+            options={CITIES.map((c) => ({ value: c.value, label: c.label }))}
           />
           <HeroSelect
-            label="שכונה / אזור"
+            label={getNeighborhoodFieldLabel(filters.city)}
             value={filters.neighborhood}
             onChange={(v) => update("neighborhood", v)}
             disabled={!filters.city}
-            options={[
-              { value: "", label: filters.city ? "כל השכונות" : "בחרו עיר תחילה" },
-              ...neighborhoods.map((n) => ({ value: n, label: n })),
-            ]}
+            placeholder={
+              filters.city ? "כל השכונות" : "בחרו עיר תחילה"
+            }
+            zones={neighborhoodZones}
           />
           <HeroSelect
             label="חדרים"
             value={String(filters.rooms)}
             onChange={(v) => update("rooms", v === "" ? "" : Number(v))}
-            options={[
-              { value: "", label: "הכל" },
-              ...ROOM_OPTIONS.map((r) => ({ value: String(r), label: `${r} חדרים` })),
-            ]}
+            placeholder="הכל"
+            options={ROOM_OPTIONS.map((r) => ({
+              value: String(r),
+              label: `${r} חדרים`,
+            }))}
           />
           <div className="flex gap-2 sm:flex-col">
             <button
@@ -553,13 +564,17 @@ function HeroSelect({
   label,
   value,
   onChange,
+  placeholder,
   options,
+  zones,
   disabled,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
-  options: { value: string; label: string }[];
+  placeholder: string;
+  options?: { value: string; label: string }[];
+  zones?: readonly { zoneLabel: string; neighborhoods: readonly string[] }[];
   disabled?: boolean;
 }) {
   return (
@@ -571,11 +586,24 @@ function HeroSelect({
         disabled={disabled}
         className="luxury-input appearance-none disabled:opacity-40"
       >
-        {options.map((o) => (
-          <option key={o.value} value={o.value} className="bg-navy-900">
-            {o.label}
-          </option>
-        ))}
+        <option value="" className="bg-navy-900">
+          {placeholder}
+        </option>
+        {zones
+          ? zones.map((zone) => (
+              <optgroup key={zone.zoneLabel} label={zone.zoneLabel}>
+                {zone.neighborhoods.map((n) => (
+                  <option key={n} value={n} className="bg-navy-900">
+                    {n}
+                  </option>
+                ))}
+              </optgroup>
+            ))
+          : options?.map((o) => (
+              <option key={o.value} value={o.value} className="bg-navy-900">
+                {o.label}
+              </option>
+            ))}
       </select>
     </div>
   );

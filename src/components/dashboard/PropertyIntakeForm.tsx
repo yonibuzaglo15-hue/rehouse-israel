@@ -10,20 +10,20 @@ import {
   Shield,
   Video,
 } from "lucide-react";
-import { NEIGHBORHOODS } from "@/lib/constants";
+import { CITIES, getNeighborhoodFieldLabel, getNeighborhoodZones } from "@/lib/constants";
+import type { City } from "@/lib/types";
 import {
   PROPERTY_STATUS_LABELS,
   type PropertyStatus,
 } from "@/lib/properties";
-
-const ASHDOD_DISTRICTS = NEIGHBORHOODS.ashdod;
 
 interface PropertyIntakeFormProps {
   onSuccess: () => void;
 }
 
 interface FormState {
-  district: string;
+  city: City | "";
+  neighborhood: string;
   street: string;
   houseNumber: string;
   rooms: string;
@@ -39,7 +39,8 @@ interface FormState {
 }
 
 const INITIAL_FORM: FormState = {
-  district: "",
+  city: "",
+  neighborhood: "",
   street: "",
   houseNumber: "",
   rooms: "",
@@ -105,8 +106,14 @@ export default function PropertyIntakeForm({ onSuccess }: PropertyIntakeFormProp
   const [loading, setLoading] = useState(false);
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setForm((prev) => ({ ...prev, [key]: value }));
+    setForm((prev) => {
+      const next = { ...prev, [key]: value };
+      if (key === "city") next.neighborhood = "";
+      return next;
+    });
   }
+
+  const neighborhoodZones = form.city ? getNeighborhoodZones(form.city) : [];
 
   function handleFilesSelected(files: FileList | null) {
     if (!files) return;
@@ -171,19 +178,45 @@ export default function PropertyIntakeForm({ onSuccess }: PropertyIntakeFormProp
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label className="mb-2 block text-sm text-white/70">רובע *</label>
+          <div>
+            <label className="mb-2 block text-sm text-white/70">עיר *</label>
             <select
               required
-              value={form.district}
-              onChange={(e) => updateField("district", e.target.value)}
+              value={form.city}
+              onChange={(e) => updateField("city", e.target.value as City | "")}
               className="luxury-input"
             >
-              <option value="">בחרו רובע באשדוד</option>
-              {ASHDOD_DISTRICTS.map((district) => (
-                <option key={district} value={district}>
-                  {district}
+              <option value="">בחרו עיר</option>
+              {CITIES.map((city) => (
+                <option key={city.value} value={city.value}>
+                  {city.label}
                 </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm text-white/70">
+              {getNeighborhoodFieldLabel(form.city)} *
+            </label>
+            <select
+              required
+              value={form.neighborhood}
+              onChange={(e) => updateField("neighborhood", e.target.value)}
+              disabled={!form.city}
+              className="luxury-input disabled:opacity-40"
+            >
+              <option value="">
+                {form.city ? "בחרו שכונה / אזור" : "בחרו עיר תחילה"}
+              </option>
+              {neighborhoodZones.map((zone) => (
+                <optgroup key={zone.zoneLabel} label={zone.zoneLabel}>
+                  {zone.neighborhoods.map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </div>
