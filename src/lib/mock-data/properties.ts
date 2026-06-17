@@ -78,12 +78,12 @@ export const MOCK_PROPERTIES: Property[] = [
   },
   {
     id: "5",
-    title: "דירת 3 חדרים ברובע י\"א",
+    title: "דירת 3 חדרים ברובע י׳",
     description:
       "דירה משופצת, קרובה לים ולמרכזי קניות. מטבח חדש, ריצוף פרקט וממ״ד.",
     listingType: "rent",
     city: "ashdod",
-    neighborhood: "רובע י\"א",
+    neighborhood: "רובע י׳",
     price: 5800,
     rooms: 3,
     area: 78,
