@@ -15,21 +15,21 @@ import {
 } from "lucide-react";
 import InquiryForm from "@/components/InquiryForm";
 import PropertyCard from "@/components/PropertyCard";
+import EditPropertyButton from "@/components/admin/EditPropertyButton";
 import type { Property } from "@/lib/types";
-import {
-  formatPrice,
-  getCityLabel,
-  MOCK_PROPERTIES,
-} from "@/lib/constants";
+import { formatPrice, getCityLabel } from "@/lib/constants";
 
 interface PropertyDetailPageProps {
   property: Property;
+  related?: Property[];
+  canEdit?: boolean;
 }
 
-export default function PropertyDetailPage({ property }: PropertyDetailPageProps) {
-  const related = MOCK_PROPERTIES.filter(
-    (p) => p.id !== property.id && p.city === property.city
-  ).slice(0, 3);
+export default function PropertyDetailPage({
+  property,
+  related = [],
+  canEdit = false,
+}: PropertyDetailPageProps) {
 
   return (
     <>
@@ -42,6 +42,12 @@ export default function PropertyDetailPage({ property }: PropertyDetailPageProps
             <ArrowRight className="h-4 w-4" />
             חזרה לקטלוג
           </Link>
+
+          {canEdit && (
+            <div className="mb-6">
+              <EditPropertyButton propertyId={property.id} />
+            </div>
+          )}
 
           <div className="grid gap-8 lg:grid-cols-3">
             {/* Gallery + details */}

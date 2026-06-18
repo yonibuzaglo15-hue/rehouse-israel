@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { listPublicAgents } from "@/lib/agents/server";
 import AgentsPage from "./AgentsPage";
 
 export const metadata: Metadata = {
@@ -11,6 +12,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Page() {
-  return <AgentsPage />;
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const agents = await listPublicAgents();
+  return <AgentsPage initialAgents={agents} />;
 }

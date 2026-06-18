@@ -20,6 +20,8 @@ export const CITY_NEIGHBORHOOD_ZONES: Record<City, readonly NeighborhoodZone[]> 
         "רובע ח׳",
         "רובע ט׳",
         "רובע י׳",
+        "רובע י״א",
+        "רובע י״ב",
         "רובע י״ג",
         "רובע ט״ו",
         "רובע ט״ז",
@@ -36,8 +38,8 @@ export const CITY_NEIGHBORHOOD_ZONES: Record<City, readonly NeighborhoodZone[]> 
     {
       zoneLabel: "צפון העיר",
       neighborhoods: [
-        "עיר ימים (עיר היין)",
-        "אגמים",
+        "עיר ימים",
+        "עיר היין",
         "ברנע",
         "כוכב הצפון",
       ],
@@ -54,6 +56,7 @@ export const CITY_NEIGHBORHOOD_ZONES: Record<City, readonly NeighborhoodZone[]> 
     {
       zoneLabel: "דרום העיר",
       neighborhoods: [
+        "אגמים",
         "שמשון",
         "בן גוריון",
         "נאות אשקלון",

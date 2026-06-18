@@ -1,0 +1,20 @@
+[
+  {
+    "folderId": "1ERe2XMwaniVKNlJXTL3XWrN4n6x4Xsgc",
+    "title": "שבט לוי 1 - יאן שינדלמן",
+    "city": "ashdod",
+    "addressKeys": ["שבט לוי 1", "שבט לוי"],
+    "agentKeys": ["יאן", "שינדלמן"],
+    "source": "seed"
+  },
+  {
+    "folderId": "1IDNOAdEnbmNogFHRR6rHkTfRCB2YO4BS",
+    "title": "אריה בן אליעזר 14 - יונתן בוזגלו",
+    "city": "ashdod",
+    "addressKeys": [
+      "אריה בן אליעזר 14"
+    ],
+    "agentKeys": ["יונתן", "בוזגלו"],
+    "source": "seed"
+  }
+]

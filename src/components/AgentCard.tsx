@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Phone, Mail, Instagram, Calendar, Award } from "lucide-react";
 import type { Agent } from "@/lib/types";
@@ -82,9 +83,11 @@ export default function AgentCard({ agent, index = 0, onScheduleMeeting }: Agent
 
         {/* Info */}
         <div className="p-5">
-          <h3 className="font-display text-xl font-bold text-white transition-colors group-hover:text-gold-300">
-            {agent.name}
-          </h3>
+          <Link href={`/agents/${agent.id}`}>
+            <h3 className="font-display text-xl font-bold text-white transition-colors group-hover:text-gold-300">
+              {agent.name}
+            </h3>
+          </Link>
           <p className="mt-1 text-sm text-white/50">{agent.title}</p>
 
           {/* Quick contact */}
@@ -112,11 +115,17 @@ export default function AgentCard({ agent, index = 0, onScheduleMeeting }: Agent
           <button
             type="button"
             onClick={() => onScheduleMeeting(agent)}
-            className="luxury-btn-primary mt-5 w-full text-sm"
+            className="luxury-btn-primary mt-3 w-full text-sm"
           >
             <Calendar className="h-4 w-4" />
             קבעו פגישה
           </button>
+          <Link
+            href={`/agents/${agent.id}`}
+            className="luxury-btn-ghost mt-2 block w-full py-2.5 text-center text-sm"
+          >
+            לפרופיל הסוכן
+          </Link>
         </div>
       </div>
     </motion.article>

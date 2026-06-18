@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { getSession } from "@/lib/auth/session";
+import { canEditCatalogProperty } from "@/lib/properties/access";
+import { catalogToPublicProperty } from "@/lib/properties/catalog-schema";
+import { listPublishedCatalogProperties } from "@/lib/properties/server";
 import PropertiesPage from "./PropertiesPage";
 
 export const metadata: Metadata = {
@@ -12,6 +16,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = "force-dynamic";
+
 function PropertiesLoading() {
   return (
     <div className="flex min-h-[60vh] items-center justify-center pt-28">
@@ -20,10 +26,20 @@ function PropertiesLoading() {
   );
 }
 
-export default function Page() {
+export default async function Page() {
+  const [properties, session] = await Promise.all([
+    listPublishedCatalogProperties(),
+    getSession(),
+  ]);
+
+  const canEdit = session ? canEditCatalogProperty(session) : false;
+
   return (
     <Suspense fallback={<PropertiesLoading />}>
-      <PropertiesPage />
+      <PropertiesPage
+        initialProperties={properties.map(catalogToPublicProperty)}
+        canEdit={canEdit}
+      />
     </Suspense>
   );
 }

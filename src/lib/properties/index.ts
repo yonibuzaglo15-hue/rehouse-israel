@@ -22,9 +22,6 @@ export {
   isCity,
   isValidNeighborhood,
 } from "./neighborhoods";
-export {
-  addManagedProperty,
-  getManagedPropertyById,
-  listManagedProperties,
-  updateManagedProperty,
-} from "./store";
+export { canEditCatalogProperty } from "./access";
+export type { CatalogProperty, CatalogPropertyUpdateInput } from "./catalog-schema";
+export { CORE_FIELD_ALIASES } from "./import-mapping";

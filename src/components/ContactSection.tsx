@@ -14,8 +14,8 @@ const CONTACT_INFO = [
 
 export default function ContactSection() {
   return (
-    <section className="relative overflow-hidden border-t border-white/5 py-24">
-      <div className="absolute inset-0 bg-gradient-to-b from-navy-950 via-navy-900/80 to-navy-950" />
+    <section className="home-contact-section relative overflow-hidden pb-24">
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a1929] via-navy-900/80 to-navy-950" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(201,149,46,0.08),transparent_60%)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

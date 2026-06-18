@@ -44,10 +44,12 @@ export function usePropertyFilters() {
     if (filters.neighborhoods.length > 0) count++;
     if (filters.priceMin !== "") count++;
     if (filters.priceMax !== "") count++;
-    if (filters.rooms !== "") count++;
+    if (filters.minRooms !== "" || filters.maxRooms !== "") count++;
     if (filters.mamad) count++;
     if (filters.balcony) count++;
     if (filters.parking) count++;
+    if (filters.storage) count++;
+    if (filters.elevator) count++;
     return count;
   }, [filters]);
 

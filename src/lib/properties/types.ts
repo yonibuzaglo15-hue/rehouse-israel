@@ -51,3 +51,5 @@ export interface PropertyUpdateInput {
   status?: PropertyStatus;
   askingPrice?: number;
 }
+
+export type { CatalogProperty, CatalogPropertyUpdateInput } from "./catalog-schema";

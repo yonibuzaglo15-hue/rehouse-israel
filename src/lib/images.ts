@@ -9,7 +9,8 @@ export const IMAGES = {
   hero: {
     poster: `${UNSPLASH}/photo-1600596542815-ffad4c1539a9?w=1920&q=80`,
     posterLow: `${UNSPLASH}/photo-1600596542815-ffad4c1539a9?w=640&q=60`,
-    video: "/videos/rehouse-hero.mp4",
+    video: "/videos/rehouse-hero-new.mp4",
+    logoOverlay: "/videos/rehouse-logo-overlay-v2.mp4",
     fallback: `${UNSPLASH}/photo-1613490493576-7fde63acd811?w=1920&q=80`,
   },
   logo: "/images/logo.png",
@@ -33,8 +34,10 @@ export const IMAGES = {
   },
 } as const;
 
-export function agentImage(slug: keyof typeof IMAGES.agents): string {
-  return IMAGES.agents[slug];
+export function agentImage(slug: string): string {
+  const key = slug as keyof typeof IMAGES.agents;
+  if (key in IMAGES.agents) return IMAGES.agents[key];
+  return `/images/agents/${slug}.png`;
 }
 
 export function propertyImage(index: number): string {

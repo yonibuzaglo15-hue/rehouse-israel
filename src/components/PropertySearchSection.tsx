@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import PropertySearch from "@/components/PropertySearch";
-import { DEFAULT_FILTERS } from "@/lib/constants";
+import { DEFAULT_FILTERS, filtersToSearchParams } from "@/lib/constants";
 import type { PropertyFilters } from "@/lib/types";
 
 export default function PropertySearchSection() {
@@ -12,17 +12,8 @@ export default function PropertySearchSection() {
   const [filters, setFilters] = useState<PropertyFilters>(DEFAULT_FILTERS);
 
   const handleSearch = () => {
-    const params = new URLSearchParams();
-    params.set("type", filters.listingType);
-    if (filters.city) params.set("city", filters.city);
-    filters.neighborhoods.forEach((n) => params.append("neighborhoods", n));
-    if (filters.rooms !== "") params.set("rooms", String(filters.rooms));
-    if (filters.priceMin !== "") params.set("priceMin", String(filters.priceMin));
-    if (filters.priceMax !== "") params.set("priceMax", String(filters.priceMax));
-    if (filters.mamad) params.set("mamad", "1");
-    if (filters.balcony) params.set("balcony", "1");
-    if (filters.parking) params.set("parking", "1");
-    router.push(`/properties?${params.toString()}`);
+    const qs = filtersToSearchParams(filters);
+    router.push(`/properties${qs ? `?${qs}` : ""}`);
   };
 
   return (

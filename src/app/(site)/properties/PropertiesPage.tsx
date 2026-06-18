@@ -5,16 +5,26 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Building2, Activity } from "lucide-react";
 import PropertySearch from "@/components/PropertySearch";
 import PropertyCard from "@/components/PropertyCard";
+import EditPropertyButton from "@/components/admin/EditPropertyButton";
 import { usePropertyFilters } from "@/lib/hooks/usePropertyFilters";
-import { MOCK_PROPERTIES, filterProperties, getCityLabel } from "@/lib/constants";
+import { filterProperties, getCityLabel } from "@/lib/constants";
+import type { Property } from "@/lib/types";
 
-export default function PropertiesPage() {
+interface PropertiesPageProps {
+  initialProperties: Property[];
+  canEdit?: boolean;
+}
+
+export default function PropertiesPage({
+  initialProperties,
+  canEdit = false,
+}: PropertiesPageProps) {
   const { filters, updateFilters, resetFilters, activeFilterCount } =
     usePropertyFilters();
 
   const results = useMemo(
-    () => filterProperties(MOCK_PROPERTIES, filters),
-    [filters]
+    () => filterProperties(initialProperties, filters),
+    [initialProperties, filters]
   );
 
   const filterSummary = [
@@ -25,7 +35,13 @@ export default function PropertiesPage() {
       : filters.neighborhoods.length > 1
         ? `${filters.neighborhoods.length} שכונות`
         : null,
-    filters.rooms !== "" ? `${filters.rooms} חדרים` : null,
+    filters.minRooms !== "" || filters.maxRooms !== ""
+      ? filters.minRooms !== "" && filters.maxRooms !== ""
+        ? `${filters.minRooms}-${filters.maxRooms} חדרים`
+        : filters.minRooms !== ""
+          ? `${filters.minRooms}+ חדרים`
+          : `עד ${filters.maxRooms} חדרים`
+      : null,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -95,13 +111,13 @@ export default function PropertiesPage() {
               )}
             </div>
 
-            <ResultsFeed results={results} resetFilters={resetFilters} />
+            <ResultsFeed results={results} resetFilters={resetFilters} canEdit={canEdit} />
           </main>
         </div>
 
         {/* Mobile results */}
         <main className="p-4 lg:hidden" dir="rtl">
-          <ResultsFeed results={results} resetFilters={resetFilters} />
+          <ResultsFeed results={results} resetFilters={resetFilters} canEdit={canEdit} />
         </main>
       </div>
     </div>
@@ -111,15 +127,17 @@ export default function PropertiesPage() {
 function ResultsFeed({
   results,
   resetFilters,
+  canEdit,
 }: {
-  results: ReturnType<typeof filterProperties>;
+  results: Property[];
   resetFilters: () => void;
+  canEdit?: boolean;
 }) {
   return (
     <AnimatePresence mode="popLayout">
       {results.length > 0 ? (
         <motion.div
-          key={results.map((p) => p.id).join(",")}
+          key={results.length > 0 ? results.map((p) => p.id).join(",") : "empty-results"}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -127,12 +145,14 @@ function ResultsFeed({
           className="space-y-2"
         >
           {results.map((property, i) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              index={i}
-              variant="dashboard"
-            />
+            <div key={property.id} className="relative">
+              {canEdit && (
+                <div className="absolute start-3 top-3 z-10">
+                  <EditPropertyButton propertyId={property.id} variant="compact" />
+                </div>
+              )}
+              <PropertyCard property={property} index={i} variant="dashboard" />
+            </div>
           ))}
         </motion.div>
       ) : (

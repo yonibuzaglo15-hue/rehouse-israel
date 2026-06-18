@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import {
   addManagedProperty,
-  filterPropertiesForSession,
   listManagedProperties,
-} from "@/lib/properties";
+} from "@/lib/properties/server";
+import { filterPropertiesForSession } from "@/lib/properties";
 import { validatePropertyIntake } from "@/lib/properties/validation";
 
 export async function GET() {
@@ -14,7 +14,7 @@ export async function GET() {
   }
 
   const properties = filterPropertiesForSession(
-    listManagedProperties(),
+    await listManagedProperties(),
     session
   );
 
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
-  const property = addManagedProperty(validation.data, {
+  const property = await addManagedProperty(validation.data, {
     id: session.id,
     email: session.email,
     fullName: session.fullName,

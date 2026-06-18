@@ -3,9 +3,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MapPin, Bed, Maximize, Shield, Car, Sun, Building2 } from "lucide-react";
+import {
+  MapPin,
+  Bed,
+  Maximize,
+  Shield,
+  Car,
+  Sun,
+  Building2,
+  ImageIcon,
+  Play,
+} from "lucide-react";
 import type { Property } from "@/lib/types";
 import { formatPrice, getCityLabel } from "@/lib/constants";
+import {
+  hasPropertyVirtualTour,
+  resolvePropertyCardImage,
+} from "@/lib/properties/property-images";
 
 interface PropertyCardProps {
   property: Property;
@@ -25,6 +39,54 @@ export default function PropertyCard({
   return <LuxuryPropertyCard property={property} index={index} />;
 }
 
+function PropertyCardMedia({
+  property,
+  className = "",
+  sizes,
+  priority = false,
+}: {
+  property: Property;
+  className?: string;
+  sizes: string;
+  priority?: boolean;
+}) {
+  const imageSrc = resolvePropertyCardImage(property);
+  const hasTour = hasPropertyVirtualTour(property);
+
+  return (
+    <div className={`relative overflow-hidden bg-navy-900/80 ${className}`}>
+      {imageSrc ? (
+        <Image
+          src={imageSrc}
+          alt={property.title}
+          fill
+          priority={priority}
+          className="object-cover"
+          sizes={sizes}
+          unoptimized={
+            imageSrc.startsWith("/images/") ||
+            imageSrc.includes("drive.google.com") ||
+            imageSrc.includes("googleusercontent.com") ||
+            imageSrc.includes("matterport.com")
+          }
+        />
+      ) : (
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950 text-white/35">
+          <ImageIcon className="h-8 w-8" />
+          <span className="text-xs tracking-wide">תמונות בקרוב</span>
+        </div>
+      )}
+
+      {hasTour && (
+        <div className="absolute end-3 top-3 flex items-center gap-1 rounded-full border border-gold-500/40 bg-navy-950/75 px-2.5 py-1 text-[11px] font-medium text-gold-300 backdrop-blur-sm">
+          <Play className="h-3 w-3 fill-current" />
+          סיור
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Dashboard: dense, high-contrast, specs always visible ─── */
 
 function DashboardPropertyCard({ property, index }: { property: Property; index: number }) {
@@ -36,26 +98,13 @@ function DashboardPropertyCard({ property, index }: { property: Property; index:
     >
       <Link href={`/properties/${property.id}`} className="group block">
         <div className="dashboard-panel flex overflow-hidden transition-colors hover:border-gold-500/40">
-          {/* Thumbnail */}
-          <div className="relative w-36 shrink-0 sm:w-44">
-            <Image
-              src={property.image}
-              alt={property.title}
-              fill
-              className="object-cover"
-              sizes="176px"
-            />
-            <div className="absolute inset-0 bg-navy-950/20" />
-            {property.featured && (
-              <span className="absolute start-0 top-0 bg-gold-500 px-1.5 py-0.5 font-mono text-[9px] font-bold text-navy-950">
-                TOP
-              </span>
-            )}
-          </div>
+          <PropertyCardMedia
+            property={property}
+            className="h-full min-h-[9rem] w-36 shrink-0 self-stretch sm:min-h-[10rem] sm:w-44"
+            sizes="176px"
+          />
 
-          {/* Data panel */}
           <div className="flex min-w-0 flex-1 flex-col border-s border-white/10">
-            {/* Row 1: price + type */}
             <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-navy-900/60 px-3 py-2">
               <span className="font-mono text-base font-bold tabular-nums text-gold-400">
                 {formatPrice(property.price, property.listingType)}
@@ -65,7 +114,6 @@ function DashboardPropertyCard({ property, index }: { property: Property; index:
               </span>
             </div>
 
-            {/* Row 2: title + location */}
             <div className="flex-1 px-3 py-2">
               <h3 className="truncate text-sm font-semibold text-white group-hover:text-gold-300">
                 {property.title}
@@ -77,7 +125,6 @@ function DashboardPropertyCard({ property, index }: { property: Property; index:
                 </span>
               </div>
 
-              {/* Core metrics */}
               <div className="mt-2 flex gap-3 font-mono text-xs text-white/70">
                 <span className="flex items-center gap-1">
                   <Bed className="h-3 w-3 text-white/40" />
@@ -94,7 +141,6 @@ function DashboardPropertyCard({ property, index }: { property: Property; index:
               </div>
             </div>
 
-            {/* Row 3: Quick Specs — always visible */}
             <div className="flex gap-1 border-t border-white/10 bg-navy-950/80 px-3 py-2">
               <QuickSpec active={property.mamad} icon={<Shield className="h-3 w-3" />} label="ממ״ד" />
               <QuickSpec active={property.balcony} icon={<Sun className="h-3 w-3" />} label="מרפסת" />
@@ -137,15 +183,13 @@ function LuxuryPropertyCard({ property, index }: { property: Property; index: nu
     >
       <Link href={`/properties/${property.id}`} className="block">
         <div className="glass-panel overflow-hidden rounded-2xl transition-all duration-500 group-hover:border-gold-500/30 group-hover:shadow-xl group-hover:shadow-gold-500/5">
-          <div className="relative aspect-[4/3] overflow-hidden">
-            <Image
-              src={property.image}
-              alt={property.title}
-              fill
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
+          <div className="relative">
+            <PropertyCardMedia
+              property={property}
+              className="aspect-[4/3]"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-navy-950/80 via-transparent to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/80 via-transparent to-transparent" />
             <div className="absolute start-4 top-4 flex gap-2">
               {property.featured && (
                 <span className="rounded-full bg-gold-500/90 px-3 py-1 text-xs font-medium text-navy-950">

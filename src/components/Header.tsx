@@ -3,9 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Home } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
-import Logo from "@/components/Logo";
 
 const NAV_LINKS = [
   { href: "/properties", label: "נכסים" },
@@ -46,11 +45,11 @@ export default function Header() {
   return (
     <header
       className={[
-        "top-0 left-0 z-50 w-full transition-all duration-500 ease-out",
-        isHome ? "absolute" : "fixed",
+        "site-header top-0 left-0 z-50 w-full transition-all duration-500 ease-out",
+        isHome ? "site-header--home absolute" : "fixed",
         showAcrylic
           ? "border-b border-white/10 bg-[#0a1929]/70 shadow-[0_8px_32px_rgba(0,0,0,0.24)] backdrop-blur-md"
-          : "bg-gradient-to-b from-black/70 via-black/35 to-transparent",
+          : "bg-transparent",
       ].join(" ")}
     >
       <nav
@@ -58,13 +57,29 @@ export default function Header() {
         style={{ direction: "rtl" }}
         aria-label="ניווט ראשי"
       >
-        {/* Logo — inline-start (right in RTL) */}
-        <div className="shrink-0">
-          <Logo size="sm" />
-        </div>
+        <Link
+          href="/"
+          className="shrink-0 rounded-lg p-2.5 text-[#c9952e] transition-colors duration-300 hover:bg-white/10 hover:text-[#dfa84d]"
+          aria-label="חזרה לדף הבית"
+        >
+          <Home className="h-5 w-5 sm:h-6 sm:w-6" />
+        </Link>
 
         {/* Desktop navigation — inline-end (left in RTL) */}
-        <div className="hidden shrink-0 flex-nowrap items-center md:flex">
+        <div className="hidden min-w-0 flex-1 flex-nowrap items-center justify-end gap-1 md:flex lg:gap-2">
+          {isHome && (
+            <span className="site-header__tagline hidden shrink-0 md:inline">
+              נדל״ן יוקרה בדרום
+            </span>
+          )}
+
+          {isHome && (
+            <span
+              className="mx-2 hidden h-5 w-px shrink-0 bg-white/15 md:block"
+              aria-hidden
+            />
+          )}
+
           <ul className="flex flex-nowrap items-center gap-0.5 lg:gap-1">
             {NAV_LINKS.map((link) => {
               const isActive = pathname === link.href;
@@ -128,6 +143,11 @@ export default function Header() {
             style={{ direction: "rtl" }}
           >
             <ul className="flex flex-col gap-1 p-4 ps-6 pe-6">
+              {isHome && (
+                <li className="mb-1 px-4">
+                  <span className="site-header__tagline">נדל״ן יוקרה בדרום</span>
+                </li>
+              )}
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link

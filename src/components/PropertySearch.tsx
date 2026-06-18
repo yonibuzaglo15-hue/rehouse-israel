@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Shield, Car, Sun, RotateCcw, ChevronDown, Check } from "lucide-react";
+import { Search, X, Shield, Car, Sun, RotateCcw, ChevronDown, Check, Warehouse, ArrowUpFromDot } from "lucide-react";
 import type { City, PropertyFilters } from "@/lib/types";
 import {
   CITIES,
@@ -97,10 +97,6 @@ function DashboardFilters({
 
   const toggleCity = (city: City) => {
     update("city", filters.city === city ? "" : city);
-  };
-
-  const toggleRooms = (rooms: number | "") => {
-    update("rooms", filters.rooms === rooms ? "" : rooms);
   };
 
   const applyPricePreset = (min: number | "", max: number | "") => {
@@ -220,27 +216,42 @@ function DashboardFilters({
           </FilterSection>
         )}
 
-        <FilterSection label="חדרים">
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              type="button"
-              onClick={() => toggleRooms("")}
-              className={filters.rooms === "" ? "filter-chip-active" : "filter-chip-inactive"}
-            >
-              הכל
-            </button>
-            {ROOM_OPTIONS.map((r) => (
-              <button
-                key={r}
-                type="button"
-                onClick={() => toggleRooms(r)}
-                className={
-                  filters.rooms === r ? "filter-chip-active" : "filter-chip-inactive"
+        <FilterSection label="טווח חדרים">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <span className="terminal-label">מ-</span>
+              <select
+                value={String(filters.minRooms)}
+                onChange={(e) =>
+                  update("minRooms", e.target.value === "" ? "" : Number(e.target.value))
                 }
+                className="dashboard-input mt-1"
               >
-                {r}
-              </button>
-            ))}
+                <option value="">הכל</option>
+                {ROOM_OPTIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <span className="terminal-label">עד</span>
+              <select
+                value={String(filters.maxRooms)}
+                onChange={(e) =>
+                  update("maxRooms", e.target.value === "" ? "" : Number(e.target.value))
+                }
+                className="dashboard-input mt-1"
+              >
+                <option value="">הכל</option>
+                {ROOM_OPTIONS.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </FilterSection>
 
@@ -306,6 +317,18 @@ function DashboardFilters({
               onClick={() => update("parking", !filters.parking)}
               icon={<Car className="h-3.5 w-3.5" />}
               label="חניה"
+            />
+            <ToggleChip
+              active={filters.storage}
+              onClick={() => update("storage", !filters.storage)}
+              icon={<Warehouse className="h-3.5 w-3.5" />}
+              label="מחסן"
+            />
+            <ToggleChip
+              active={filters.elevator}
+              onClick={() => update("elevator", !filters.elevator)}
+              icon={<ArrowUpFromDot className="h-3.5 w-3.5" />}
+              label="מעלית"
             />
           </div>
         </FilterSection>
@@ -470,13 +493,23 @@ function HeroFilters({
             emptyLabel={filters.city ? "כל השכונות" : "בחרו עיר תחילה"}
           />
           <HeroSelect
-            label="חדרים"
-            value={String(filters.rooms)}
-            onChange={(v) => update("rooms", v === "" ? "" : Number(v))}
+            label="מ-חדרים"
+            value={String(filters.minRooms)}
+            onChange={(v) => update("minRooms", v === "" ? "" : Number(v))}
             placeholder="הכל"
             options={ROOM_OPTIONS.map((r) => ({
               value: String(r),
-              label: `${r} חדרים`,
+              label: `${r}`,
+            }))}
+          />
+          <HeroSelect
+            label="עד חדרים"
+            value={String(filters.maxRooms)}
+            onChange={(v) => update("maxRooms", v === "" ? "" : Number(v))}
+            placeholder="הכל"
+            options={ROOM_OPTIONS.map((r) => ({
+              value: String(r),
+              label: `${r}`,
             }))}
           />
           <div className="flex gap-2 sm:flex-col">
@@ -557,6 +590,18 @@ function HeroFilters({
                   onClick={() => update("parking", !filters.parking)}
                   icon={<Car className="h-3.5 w-3.5" />}
                   label="חניה"
+                />
+                <ToggleChip
+                  active={filters.storage}
+                  onClick={() => update("storage", !filters.storage)}
+                  icon={<Warehouse className="h-3.5 w-3.5" />}
+                  label="מחסן"
+                />
+                <ToggleChip
+                  active={filters.elevator}
+                  onClick={() => update("elevator", !filters.elevator)}
+                  icon={<ArrowUpFromDot className="h-3.5 w-3.5" />}
+                  label="מעלית"
                 />
               </div>
             </motion.div>

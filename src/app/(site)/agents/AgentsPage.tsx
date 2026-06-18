@@ -16,8 +16,13 @@ const TRUST_SIGNALS = [
   { icon: Star, label: "98% שביעות רצון", desc: "לקוחות ממליצים" },
 ];
 
-export default function AgentsPage() {
+interface AgentsPageProps {
+  initialAgents?: Agent[];
+}
+
+export default function AgentsPage({ initialAgents }: AgentsPageProps) {
   const [meetingAgent, setMeetingAgent] = useState<Agent | null>(null);
+  const agents = initialAgents?.length ? initialAgents : MOCK_AGENTS;
 
   return (
     <>
@@ -53,7 +58,7 @@ export default function AgentsPage() {
       <section className="pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {MOCK_AGENTS.map((agent, i) => (
+            {agents.map((agent, i) => (
               <AgentCard
                 key={agent.id}
                 agent={agent}
