@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { listPublicAgents } from "@/lib/agents/server";
+import { listCompanyOwners, listPublicAgents, listSeniorConsultants } from "@/lib/agents/server";
 import AgentsPage from "./AgentsPage";
 
 export const metadata: Metadata = {
@@ -15,6 +15,16 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
-  const agents = await listPublicAgents();
-  return <AgentsPage initialAgents={agents} />;
+  const [agents, owners, seniorConsultants] = await Promise.all([
+    listPublicAgents(),
+    listCompanyOwners(),
+    listSeniorConsultants(),
+  ]);
+  return (
+    <AgentsPage
+      initialAgents={agents}
+      companyOwners={owners}
+      seniorConsultants={seniorConsultants}
+    />
+  );
 }

@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Phone, Mail, Instagram, Calendar, Award } from "lucide-react";
 import type { Agent } from "@/lib/types";
+import { AGENT_PLACEHOLDER } from "@/lib/images";
 import { WhatsAppIcon, TelegramIcon } from "@/components/icons/SocialIcons";
 
 interface AgentCardProps {
@@ -52,6 +54,8 @@ const CONTACT_LINKS = [
 ] as const;
 
 export default function AgentCard({ agent, index = 0, onScheduleMeeting }: AgentCardProps) {
+  const [imageSrc, setImageSrc] = useState(agent.image);
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 24 }}
@@ -64,11 +68,16 @@ export default function AgentCard({ agent, index = 0, onScheduleMeeting }: Agent
         {/* Portrait */}
         <div className="relative aspect-[3/4] overflow-hidden sm:aspect-[4/5]">
           <Image
-            src={agent.image}
+            src={imageSrc}
             alt={agent.name}
             fill
             className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            onError={() => {
+              if (imageSrc !== AGENT_PLACEHOLDER) {
+                setImageSrc(AGENT_PLACEHOLDER);
+              }
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/20 to-transparent" />
 

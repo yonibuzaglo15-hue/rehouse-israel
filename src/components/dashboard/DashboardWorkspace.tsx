@@ -9,10 +9,12 @@ type DashboardTab = "properties" | "team";
 
 interface DashboardWorkspaceProps {
   role: SystemRole;
+  /** When true, hide team management even for admin/dev (agent dashboard route) */
+  agentOnly?: boolean;
 }
 
-export default function DashboardWorkspace({ role }: DashboardWorkspaceProps) {
-  const canManageTeam = role === "admin" || role === "dev";
+export default function DashboardWorkspace({ role, agentOnly = false }: DashboardWorkspaceProps) {
+  const canManageTeam = !agentOnly && (role === "admin" || role === "dev");
   const [tab, setTab] = useState<DashboardTab>("properties");
 
   return (

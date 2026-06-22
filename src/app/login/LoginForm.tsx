@@ -6,16 +6,28 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Lock, Mail } from "lucide-react";
 import { LOGO_SRC } from "@/components/Logo";
+import {
+  canAccessPath,
+  getDashboardPathForRole,
+} from "@/lib/auth/routes";
+import type { SystemRole } from "@/lib/auth/types";
 
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") ?? "/dashboard";
+  const nextPath = searchParams.get("next");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  function resolveRedirectPath(role: SystemRole): string {
+    const roleHome = getDashboardPathForRole(role);
+    if (!nextPath) return roleHome;
+    if (canAccessPath(role, nextPath)) return nextPath;
+    return roleHome;
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,14 +44,15 @@ export default function LoginForm() {
       const data = (await response.json()) as {
         success?: boolean;
         error?: string;
+        user?: { role: SystemRole };
       };
 
-      if (!response.ok || !data.success) {
+      if (!response.ok || !data.success || !data.user?.role) {
         setError(data.error ?? "פרטי התחברות שגויים");
         return;
       }
 
-      router.push(nextPath);
+      router.push(resolveRedirectPath(data.user.role));
       router.refresh();
     } catch {
       setError("שגיאת רשת. נסו שוב.");
@@ -146,8 +159,10 @@ export default function LoginForm() {
           </button>
         </form>
 
-        <p className="mt-8 text-center text-xs text-white/35">
-          גישה מורשית לצוות Rehouse Israel בלבד
+        <p className="mt-8 text-center text-xs leading-relaxed text-white/35">
+          גישה מורשית לצוות Rehouse Israel בלבד.
+          <br />
+          לפתיחת חשבון חדש — פנו למנהל המערכת.
         </p>
       </div>
     </div>

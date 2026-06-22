@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Heebo, Rubik } from "next/font/google";
 import "./globals.css";
 import { LOGO_SRC } from "@/components/Logo";
+import { IMAGES } from "@/lib/images";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -60,6 +61,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl">
+      <head>
+        <link
+          rel="preload"
+          as="video"
+          href={IMAGES.hero.video}
+          type="video/mp4"
+        />
+        <link
+          rel="preload"
+          as="video"
+          href={IMAGES.hero.logoOverlay}
+          type="video/mp4"
+        />
+      </head>
       <body className={`${heebo.variable} ${rubik.variable} font-body overflow-x-hidden`}>
         {children}
       </body>

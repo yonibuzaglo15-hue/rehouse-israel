@@ -5,11 +5,14 @@
 
 const UNSPLASH = "https://images.unsplash.com";
 
+/** Premium portrait placeholder when a local agent asset is not committed yet */
+export const AGENT_PLACEHOLDER = `${UNSPLASH}/photo-1560250097-0b93528c311a?w=800&q=80`;
+
 export const IMAGES = {
   hero: {
     poster: `${UNSPLASH}/photo-1600596542815-ffad4c1539a9?w=1920&q=80`,
     posterLow: `${UNSPLASH}/photo-1600596542815-ffad4c1539a9?w=640&q=60`,
-    video: "/videos/rehouse-hero-new.mp4",
+    video: "/videos/rehouse-hero-gemini.mp4",
     logoOverlay: "/videos/rehouse-logo-overlay-v2.mp4",
     fallback: `${UNSPLASH}/photo-1613490493576-7fde63acd811?w=1920&q=80`,
   },
@@ -27,6 +30,9 @@ export const IMAGES = {
   ],
   agents: {
     elin: "/images/agents/elin-smirnov.png",
+    "igor-hanin": "/images/agents/igor-hanin.png",
+    "alon-hanin": "/images/agents/alon-hanin.png",
+    "yonatan-buzaglo": "/images/agents/yonatan-buzaglo.png",
     danny: `${UNSPLASH}/photo-1560250097-0b93528c311a?w=600&q=80`,
     michal: `${UNSPLASH}/photo-1573496359142-b8d87734a5a2?w=600&q=80`,
     yossi: `${UNSPLASH}/photo-1472099645785-5658abf4ff4e?w=600&q=80`,
@@ -37,7 +43,7 @@ export const IMAGES = {
 export function agentImage(slug: string): string {
   const key = slug as keyof typeof IMAGES.agents;
   if (key in IMAGES.agents) return IMAGES.agents[key];
-  return `/images/agents/${slug}.png`;
+  return AGENT_PLACEHOLDER;
 }
 
 export function propertyImage(index: number): string {

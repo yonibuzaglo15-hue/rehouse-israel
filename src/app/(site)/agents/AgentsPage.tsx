@@ -6,7 +6,7 @@ import { Users, Shield, Clock, Star } from "lucide-react";
 import AgentCard from "@/components/AgentCard";
 import MeetingModal from "@/components/MeetingModal";
 import PageHero from "@/components/PageHero";
-import { MOCK_AGENTS } from "@/lib/constants";
+import { MOCK_AGENTS, LEADERSHIP_AGENTS } from "@/lib/constants";
 import type { Agent } from "@/lib/types";
 
 const TRUST_SIGNALS = [
@@ -18,11 +18,25 @@ const TRUST_SIGNALS = [
 
 interface AgentsPageProps {
   initialAgents?: Agent[];
+  companyOwners?: Agent[];
+  seniorConsultants?: Agent[];
 }
 
-export default function AgentsPage({ initialAgents }: AgentsPageProps) {
+export default function AgentsPage({
+  initialAgents,
+  companyOwners = [],
+  seniorConsultants = [],
+}: AgentsPageProps) {
   const [meetingAgent, setMeetingAgent] = useState<Agent | null>(null);
   const agents = initialAgents?.length ? initialAgents : MOCK_AGENTS;
+  const owners = companyOwners.length
+    ? companyOwners
+    : LEADERSHIP_AGENTS.filter((agent) =>
+        ["usr_igor_hanin", "usr_alon_hanin"].includes(agent.id)
+      );
+  const consultants = seniorConsultants.length
+    ? seniorConsultants
+    : LEADERSHIP_AGENTS.filter((agent) => agent.id === "usr_yonatan_buzaglo");
 
   return (
     <>
@@ -55,8 +69,68 @@ export default function AgentsPage({ initialAgents }: AgentsPageProps) {
         </div>
       </section>
 
+      {owners.length > 0 && (
+        <section className="pb-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 text-center sm:text-start">
+              <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
+                בעלי <span className="gold-gradient-text">החברה</span>
+              </h2>
+              <p className="mt-2 text-sm text-white/50">
+                ההנהלה שמובילה את Rehouse Israel עם ניסיון, מקצועיות ומחויבות אישית
+              </p>
+            </div>
+            <div className="mx-auto grid max-w-md gap-6 sm:max-w-none sm:grid-cols-2 lg:max-w-3xl">
+              {owners.map((owner, i) => (
+                <AgentCard
+                  key={owner.id}
+                  agent={owner}
+                  index={i}
+                  onScheduleMeeting={setMeetingAgent}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {consultants.length > 0 && (
+        <section className="pb-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="mb-8 text-center sm:text-start">
+              <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
+                יועצים <span className="gold-gradient-text">בכירים</span>
+              </h2>
+              <p className="mt-2 text-sm text-white/50">
+                ליווי מקצועי ואישי מצד מומחי נדל״ן מנוסים
+              </p>
+            </div>
+            <div className="mx-auto grid max-w-md gap-6 sm:max-w-none sm:grid-cols-2 lg:max-w-xl">
+              {consultants.map((consultant, i) => (
+                <AgentCard
+                  key={consultant.id}
+                  agent={consultant}
+                  index={i}
+                  onScheduleMeeting={setMeetingAgent}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {(owners.length > 0 || consultants.length > 0) && (
+            <div className="mb-8 text-center sm:text-start">
+              <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
+                צוות <span className="gold-gradient-text">הסוכנים</span>
+              </h2>
+              <p className="mt-2 text-sm text-white/50">
+                מומחי נדל״ן שילוו אתכם בכל שלב בדרך לבית החדש
+              </p>
+            </div>
+          )}
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {agents.map((agent, i) => (
               <AgentCard

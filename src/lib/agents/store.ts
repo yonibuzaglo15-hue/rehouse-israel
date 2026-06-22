@@ -4,6 +4,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { SYSTEM_USERS } from "@/lib/auth/users";
 import { agentImage } from "@/lib/images";
+import { emailToAgentSlug, resolveAgentImageUrl } from "./resolve-image";
 import type { AgentProfile, AgentProfileUpdate } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -16,7 +17,7 @@ function defaultProfileFromUser(user: (typeof SYSTEM_USERS)[number]): AgentProfi
     id: user.id,
     role: user.role,
     name: user.fullName,
-    title: user.role === "agent" ? "סוכן נדל״ן" : user.role === "admin" ? "מנהל" : "מפתח",
+    title: user.role === "agent" ? "סוכן נדל״ן" : user.role === "admin" ? "בעלים" : "מפתח",
     specialization: "אשדוד · אשקלון · יבנה · גן יבנה",
     description: `${user.fullName} — נדל״ן יוקרה עם Rehouse Israel.`,
     image: agentImage(slug),
@@ -27,6 +28,14 @@ function defaultProfileFromUser(user: (typeof SYSTEM_USERS)[number]): AgentProfi
     instagram: slug,
     facebook: slug,
     updatedAt: new Date().toISOString(),
+  };
+}
+
+function withResolvedImage(profile: AgentProfile): AgentProfile {
+  const slug = emailToAgentSlug(profile.email);
+  return {
+    ...profile,
+    image: resolveAgentImageUrl(slug, profile.image),
   };
 }
 
@@ -52,12 +61,27 @@ export async function listAgentProfiles(): Promise<AgentProfile[]> {
 
 export async function listPublicAgents(): Promise<AgentProfile[]> {
   const profiles = await ensureProfiles();
-  return profiles.filter((p) => p.role === "agent");
+  return profiles.filter((p) => p.role === "agent").map(withResolvedImage);
+}
+
+export async function listCompanyOwners(): Promise<AgentProfile[]> {
+  const profiles = await ensureProfiles();
+  return profiles.filter((p) => p.role === "admin").map(withResolvedImage);
+}
+
+const SENIOR_CONSULTANT_IDS = new Set(["usr_yonatan_buzaglo"]);
+
+export async function listSeniorConsultants(): Promise<AgentProfile[]> {
+  const profiles = await ensureProfiles();
+  return profiles
+    .filter((p) => SENIOR_CONSULTANT_IDS.has(p.id))
+    .map(withResolvedImage);
 }
 
 export async function getAgentProfileById(id: string): Promise<AgentProfile | null> {
   const profiles = await ensureProfiles();
-  return profiles.find((p) => p.id === id || p.userId === id) ?? null;
+  const profile = profiles.find((p) => p.id === id || p.userId === id) ?? null;
+  return profile ? withResolvedImage(profile) : null;
 }
 
 export async function updateAgentProfile(

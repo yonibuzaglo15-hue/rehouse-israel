@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Home } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
+import HeaderUserMenu, { MobileHeaderAuth } from "@/components/auth/HeaderUserMenu";
 
 const NAV_LINKS = [
   { href: "/properties", label: "נכסים" },
@@ -118,6 +119,8 @@ export default function Header() {
           >
             מצאו נכס
           </Link>
+
+          <HeaderUserMenu />
         </div>
 
         {/* Mobile menu toggle — inline-end alongside nav cluster */}
@@ -167,6 +170,9 @@ export default function Header() {
                 >
                   מצאו נכס
                 </Link>
+              </li>
+              <li className="pt-2">
+                <MobileHeaderAuth onNavigate={() => setMobileOpen(false)} />
               </li>
             </ul>
           </motion.div>

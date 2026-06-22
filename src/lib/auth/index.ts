@@ -25,3 +25,10 @@ export {
 } from "./session";
 export type { SessionPayload } from "./session";
 export { mustChangePasswordOnLogin } from "./user-flags";
+export {
+  ROLE_DASHBOARD_PATHS,
+  getDashboardPathForRole,
+  canAccessPath,
+  isProtectedPath,
+  PROTECTED_ROUTE_PREFIXES,
+} from "./routes";

@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowRight, MapPin, Facebook, Instagram, MessageCircle } from "lucide-react";
 import PropertyMediaHero, { PropertyMatterportEmbed } from "@/components/PropertyMediaHero";
+import { AGENT_PLACEHOLDER } from "@/lib/images";
 import type { Agent } from "@/lib/types";
 import type { Property } from "@/lib/types";
 import { formatPrice, getCityLabel } from "@/lib/constants";
@@ -15,6 +17,8 @@ interface AgentProfilePageProps {
 }
 
 export default function AgentProfilePage({ agent, properties }: AgentProfilePageProps) {
+  const [imageSrc, setImageSrc] = useState(agent.image);
+
   return (
     <>
       <section className="pt-24 pb-12 sm:pt-28">
@@ -34,7 +38,17 @@ export default function AgentProfilePage({ agent, properties }: AgentProfilePage
               className="glass-panel rounded-2xl p-6 text-center lg:sticky lg:top-24 lg:self-start"
             >
               <div className="relative mx-auto h-40 w-40 overflow-hidden rounded-full border-2 border-gold-500/40">
-                <Image src={agent.image} alt={agent.name} fill className="object-cover" />
+                <Image
+                  src={imageSrc}
+                  alt={agent.name}
+                  fill
+                  className="object-cover"
+                  onError={() => {
+                    if (imageSrc !== AGENT_PLACEHOLDER) {
+                      setImageSrc(AGENT_PLACEHOLDER);
+                    }
+                  }}
+                />
               </div>
               <h1 className="mt-5 font-display text-2xl font-bold text-white">{agent.name}</h1>
               <p className="mt-1 text-sm text-gold-400">{agent.title}</p>
