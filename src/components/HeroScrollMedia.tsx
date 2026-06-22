@@ -18,9 +18,12 @@ import HeroScrollHint from "@/components/HeroScrollHint";
 const SCRUB_SMOOTHING = 0.35;
 const HERO_VIDEO_DURATION = 10;
 const PIN_SCROLL_DISTANCE = "+=300%";
-const LOGO_PHASE_RATIO = 0.5;
 const CONTENT_FADE_START = 0.82;
-const LOGO_FADE_START = 0.4;
+
+/** Phases 1–2: background video only (0% → 67%) */
+const PHASE_3_START = 0.67;
+/** Phase 3: golden globe + REHOUSE brand reveal (67% → 100%) */
+const PHASE_3_DURATION = 1 - PHASE_3_START;
 
 interface HeroScrollMediaProps {
   contentRef: RefObject<HTMLDivElement | null>;
@@ -32,7 +35,7 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const heroVideoRef = useRef<HTMLVideoElement>(null);
   const logoVideoRef = useRef<HTMLVideoElement>(null);
-  const logoLayerRef = useRef<HTMLDivElement>(null);
+  const brandRevealRef = useRef<HTMLDivElement>(null);
   const logoCanvasRef = useRef<HeroEvaporatingLogoHandle>(null);
 
   useEffect(() => {
@@ -80,7 +83,7 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
           videoWrapper: videoWrapperRef.current,
           heroVideo: heroVideoRef.current,
           logoVideo: logoVideoRef.current,
-          logoLayer: logoLayerRef.current,
+          brandReveal: brandRevealRef.current,
         }),
         (value) =>
           Boolean(
@@ -88,17 +91,18 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
               value.videoWrapper &&
               value.heroVideo &&
               value.logoVideo &&
-              value.logoLayer
+              value.brandReveal
           )
       );
 
       if (!isActive) return;
 
-      const { videoWrapper, heroVideo, logoVideo, logoLayer } = refs;
+      const { videoWrapper, heroVideo, logoVideo, brandReveal } = refs;
 
       heroDebug("refs:ready", {
         hero: describeVideo(heroVideo!, "hero"),
         logo: describeVideo(logoVideo!, "logo"),
+        phase3Start: PHASE_3_START,
       });
 
       const [{ default: gsap }, { ScrollTrigger }] = await Promise.all([
@@ -122,8 +126,7 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
         logoVideo!.pause();
         heroVideo!.currentTime = 0;
         logoVideo!.currentTime = 0;
-        logoLayer!.style.opacity = "0";
-        logoLayer!.style.visibility = "hidden";
+        gsap.set(brandReveal, { autoAlpha: 0 });
         if (contentRef.current) {
           contentRef.current.style.opacity = "1";
           contentRef.current.style.visibility = "visible";
@@ -143,13 +146,11 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
       heroVideo!.currentTime = 0;
       logoVideo!.currentTime = 0;
 
-      gsap.set(logoLayer, {
-        opacity: 1,
-        scale: 1,
-        visibility: "visible",
+      gsap.set(brandReveal, {
+        autoAlpha: 0,
+        scale: 0.96,
         force3D: true,
       });
-      logoLayer!.style.pointerEvents = "none";
 
       timeline?.scrollTrigger?.kill();
       timeline?.kill();
@@ -178,34 +179,35 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
           invalidateOnRefresh: true,
           onUpdate: (self) => {
             updateContentVisibility(self.progress);
-            logoCanvasRef.current?.scheduleRedraw();
+            if (self.progress >= PHASE_3_START - 0.01) {
+              logoCanvasRef.current?.scheduleRedraw();
+            }
           },
         },
       });
 
       timeline.to(
         heroVideo,
-        { currentTime: agentDuration, ease: "none", duration: 1 },
+        { currentTime: agentDuration, ease: "none", duration: PHASE_3_START },
         0
       );
 
       timeline.to(
         logoVideo,
-        { currentTime: logoDuration, ease: "none", duration: LOGO_PHASE_RATIO },
-        0
+        { currentTime: logoDuration, ease: "none", duration: PHASE_3_DURATION },
+        PHASE_3_START
       );
 
-      timeline.fromTo(
-        logoLayer,
-        { opacity: 1, scale: 1, force3D: true },
+      timeline.to(
+        brandReveal,
         {
-          opacity: 0,
-          scale: 1.04,
-          ease: "power3.out",
-          duration: LOGO_PHASE_RATIO - LOGO_FADE_START,
+          autoAlpha: 1,
+          scale: 1,
+          ease: "power2.out",
+          duration: PHASE_3_DURATION,
           force3D: true,
         },
-        LOGO_FADE_START
+        PHASE_3_START
       );
 
       if (timeline.scrollTrigger) {
@@ -214,9 +216,9 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
           start: timeline.scrollTrigger.start,
           end: timeline.scrollTrigger.end,
           isActive: timeline.scrollTrigger.isActive,
+          brandRevealHidden: timeline.scrollTrigger.progress < PHASE_3_START,
         });
         updateContentVisibility(timeline.scrollTrigger.progress);
-        logoCanvasRef.current?.scheduleRedraw();
       } else {
         heroDebug("ScrollTrigger:missing-after-timeline");
       }
@@ -263,7 +265,7 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
         <HeroEvaporatingLogo
           ref={logoCanvasRef}
           logoVideoRef={logoVideoRef}
-          logoLayerRef={logoLayerRef}
+          logoLayerRef={brandRevealRef}
         />
 
         <div

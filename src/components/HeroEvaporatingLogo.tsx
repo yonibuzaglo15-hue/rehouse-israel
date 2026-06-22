@@ -207,19 +207,12 @@ const HeroEvaporatingLogo = forwardRef<HeroEvaporatingLogoHandle, HeroEvaporatin
       video.addEventListener("seeked", onVideoFrame);
       video.addEventListener("loadeddata", onVideoFrame);
 
-      if (video.readyState >= 2) {
-        scheduleRedraw();
-      } else {
-        video.addEventListener("canplay", onVideoFrame, { once: true });
-      }
-
       return () => {
         active = false;
         drawFrameRef.current = null;
         window.removeEventListener("resize", onResize);
         video.removeEventListener("seeked", onVideoFrame);
         video.removeEventListener("loadeddata", onVideoFrame);
-        video.removeEventListener("canplay", onVideoFrame);
         if (rafRef.current) {
           cancelAnimationFrame(rafRef.current);
           rafRef.current = 0;
@@ -228,7 +221,12 @@ const HeroEvaporatingLogo = forwardRef<HeroEvaporatingLogoHandle, HeroEvaporatin
     }, [logoVideoRef, logoLayerRef]);
 
     return (
-      <div ref={logoLayerRef} className="hero-evaporating-logo" aria-hidden="true">
+      <div
+        ref={logoLayerRef}
+        id="brand-reveal-overlay"
+        className="brand-reveal-overlay hero-evaporating-logo"
+        aria-hidden="true"
+      >
         <canvas ref={canvasRef} className="hero-evaporating-logo__canvas" />
         <video
           ref={logoVideoRef}

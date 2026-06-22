@@ -17,6 +17,7 @@ export default function HeroSection() {
 
   return (
     <div className="video-scroll-container video-scroll-container--home">
+      {/* Phase 1–2: hero video walk. Phase 3: #brand-reveal-overlay (globe + REHOUSE) */}
       <HeroScrollMedia contentRef={contentRef} />
       <HeroContent contentRef={contentRef} onBrowseProperties={scrollToProperties} />
     </div>
