@@ -2,7 +2,19 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, X, Shield, Car, Sun, RotateCcw, ChevronDown, Check, Warehouse, ArrowUpFromDot } from "lucide-react";
+import {
+  Search,
+  X,
+  Shield,
+  Car,
+  Sun,
+  RotateCcw,
+  ChevronDown,
+  Check,
+  Warehouse,
+  ArrowUpFromDot,
+} from "lucide-react";
+import PriceRangeSlider from "@/components/PriceRangeSlider";
 import type { City, PropertyFilters } from "@/lib/types";
 import {
   CITIES,
@@ -270,31 +282,15 @@ function DashboardFilters({
               </button>
             ))}
           </div>
-          <div className="mt-2 grid grid-cols-2 gap-2">
-            <div>
-              <span className="terminal-label">מינ׳</span>
-              <input
-                type="number"
-                value={filters.priceMin}
-                onChange={(e) =>
-                  update("priceMin", e.target.value === "" ? "" : Number(e.target.value))
-                }
-                placeholder="0"
-                className="dashboard-input mt-1"
-              />
-            </div>
-            <div>
-              <span className="terminal-label">מקס׳</span>
-              <input
-                type="number"
-                value={filters.priceMax}
-                onChange={(e) =>
-                  update("priceMax", e.target.value === "" ? "" : Number(e.target.value))
-                }
-                placeholder="∞"
-                className="dashboard-input mt-1"
-              />
-            </div>
+          <div className="mt-3">
+            <PriceRangeSlider
+              listingType={filters.listingType}
+              priceMin={filters.priceMin}
+              priceMax={filters.priceMax}
+              onChange={(priceMin, priceMax) =>
+                onFiltersChange({ ...filters, priceMin, priceMax })
+              }
+            />
           </div>
         </FilterSection>
 
@@ -571,30 +567,15 @@ function HeroFilters({
                   </button>
                 )}
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1.5 block text-xs text-navy-600 dark:text-white/60">מחיר מינימום</label>
-                  <input
-                    type="number"
-                    value={filters.priceMin}
-                    onChange={(e) =>
-                      update("priceMin", e.target.value === "" ? "" : Number(e.target.value))
-                    }
-                    className="luxury-input"
-                  />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs text-navy-600 dark:text-white/60">מחיר מקסימום</label>
-                  <input
-                    type="number"
-                    value={filters.priceMax}
-                    onChange={(e) =>
-                      update("priceMax", e.target.value === "" ? "" : Number(e.target.value))
-                    }
-                    className="luxury-input"
-                  />
-                </div>
-              </div>
+              <PriceRangeSlider
+                listingType={filters.listingType}
+                priceMin={filters.priceMin}
+                priceMax={filters.priceMax}
+                onChange={(priceMin, priceMax) =>
+                  onFiltersChange({ ...filters, priceMin, priceMax })
+                }
+                className="sm:col-span-2"
+              />
               <div className="mt-4 flex flex-wrap gap-2">
                 <ToggleChip
                   active={filters.mamad}

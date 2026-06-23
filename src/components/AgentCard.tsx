@@ -6,7 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { Phone, Mail, Instagram, Calendar, Award } from "lucide-react";
 import type { Agent } from "@/lib/types";
-import { AGENT_PLACEHOLDER } from "@/lib/images";
+import { AGENT_PLACEHOLDER, agentImageCandidates } from "@/lib/images";
 import { WhatsAppIcon, TelegramIcon } from "@/components/icons/SocialIcons";
 
 interface AgentCardProps {
@@ -54,7 +54,17 @@ const CONTACT_LINKS = [
 ] as const;
 
 export default function AgentCard({ agent, index = 0, onScheduleMeeting }: AgentCardProps) {
-  const [imageSrc, setImageSrc] = useState(agent.image);
+  const slug = agent.id.replace(/^usr_/, "").replace(/_/g, "-");
+  const candidates = agentImageCandidates(slug);
+  const [candidateIndex, setCandidateIndex] = useState(0);
+  const imageSrc = candidates[candidateIndex] ?? AGENT_PLACEHOLDER;
+
+  const handleImageError = () => {
+    setCandidateIndex((current) => {
+      if (current < candidates.length - 1) return current + 1;
+      return candidates.length;
+    });
+  };
 
   return (
     <motion.article
@@ -73,11 +83,7 @@ export default function AgentCard({ agent, index = 0, onScheduleMeeting }: Agent
             fill
             className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            onError={() => {
-              if (imageSrc !== AGENT_PLACEHOLDER) {
-                setImageSrc(AGENT_PLACEHOLDER);
-              }
-            }}
+            onError={handleImageError}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/20 to-transparent" />
 

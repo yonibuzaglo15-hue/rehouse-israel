@@ -1,8 +1,23 @@
 import type { Agent } from "@/lib/types";
 import { agentImage } from "@/lib/images";
 
-/** Leadership / core team — used as fallback when server profiles are unavailable */
+/** Core leadership team — canonical profiles with local image assets */
 export const LEADERSHIP_AGENTS: Agent[] = [
+  {
+    id: "usr_yonatan_buzaglo",
+    name: "יונתן בוזגלו",
+    title: "מנכ״ל | יועץ נדל״ן בכיר",
+    specialization: "מומחה נדל״ן · אשדוד והסביבה",
+    description:
+      "יונתן בוזגלו, מנכ״ל ויועץ נדל״ן בכיר ב-Rehouse Israel — ליווי אישי ומקצועי ללקוחות נדל״ן יוקרה.",
+    image: agentImage("yonatan"),
+    phone: "0500000000",
+    email: "yonatan.buzaglo@rehouse.co.il",
+    whatsapp: "972500000000",
+    telegram: "yonatan-buzaglo",
+    instagram: "yonatan-buzaglo",
+    calendarUrl: "https://calendly.com",
+  },
   {
     id: "usr_igor_hanin",
     name: "איגור חנין",
@@ -10,7 +25,7 @@ export const LEADERSHIP_AGENTS: Agent[] = [
     specialization: "מומחה נדל״ן · אשדוד והסביבה",
     description:
       "איגור חנין, בעלים ומייסד Rehouse Israel — מלווה לקוחות בנדל״ן יוקרה באשדוד, אשקלון, יבנה וגן יבנה.",
-    image: agentImage("igor-hanin"),
+    image: agentImage("igor"),
     phone: "0500000000",
     email: "igor.hanin@rehouse.co.il",
     whatsapp: "972500000000",
@@ -21,31 +36,16 @@ export const LEADERSHIP_AGENTS: Agent[] = [
   {
     id: "usr_alon_hanin",
     name: "אלון חנין",
-    title: "מנכ״ל | Rehouse Israel",
+    title: "מנהל תפעול | Rehouse Israel",
     specialization: "מומחה נדל״ן · אשדוד והסביבה",
     description:
-      "אלון חנין, מנכ״ל Rehouse Israel — מוביל את צוות הסוכנים ומלווה לקוחות בנדל״ן יוקרה.",
-    image: agentImage("alon-hanin"),
+      "אלון חנין, מנהל תפעול ב-Rehouse Israel — מוביל את צוות הסוכנים ומלווה לקוחות בנדל״ן יוקרה.",
+    image: agentImage("alon"),
     phone: "0500000000",
     email: "alon.hanin@rehouse.co.il",
     whatsapp: "972500000000",
     telegram: "alon-hanin",
     instagram: "alon-hanin",
-    calendarUrl: "https://calendly.com",
-  },
-  {
-    id: "usr_yonatan_buzaglo",
-    name: "יונתן בוזגלו",
-    title: "יועץ נדל״ן בכיר | Rehouse Israel",
-    specialization: "מומחה נדל״ן · אשדוד והסביבה",
-    description:
-      "יונתן בוזגלו, יועץ נדל״ן בכיר ב-Rehouse Israel — ליווי אישי ומקצועי ללקוחות נדל״ן יוקרה.",
-    image: agentImage("yonatan-buzaglo"),
-    phone: "0500000000",
-    email: "yonatan.buzaglo@rehouse.co.il",
-    whatsapp: "972500000000",
-    telegram: "yonatan-buzaglo",
-    instagram: "yonatan-buzaglo",
     calendarUrl: "https://calendly.com",
   },
 ];

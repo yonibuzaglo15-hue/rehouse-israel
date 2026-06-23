@@ -25,18 +25,12 @@ interface AgentsPageProps {
 export default function AgentsPage({
   initialAgents,
   companyOwners = [],
-  seniorConsultants = [],
 }: AgentsPageProps) {
   const [meetingAgent, setMeetingAgent] = useState<Agent | null>(null);
   const agents = initialAgents?.length ? initialAgents : MOCK_AGENTS;
   const owners = companyOwners.length
     ? companyOwners
-    : LEADERSHIP_AGENTS.filter((agent) =>
-        ["usr_igor_hanin", "usr_alon_hanin"].includes(agent.id)
-      );
-  const consultants = seniorConsultants.length
-    ? seniorConsultants
-    : LEADERSHIP_AGENTS.filter((agent) => agent.id === "usr_yonatan_buzaglo");
+    : LEADERSHIP_AGENTS;
 
   return (
     <>
@@ -74,13 +68,13 @@ export default function AgentsPage({
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-8 text-center sm:text-start">
               <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
-                בעלי <span className="gold-gradient-text">החברה</span>
+                הנהלת <span className="gold-gradient-text">החברה</span>
               </h2>
               <p className="mt-2 text-sm text-white/50">
-                ההנהלה שמובילה את Rehouse Israel עם ניסיון, מקצועיות ומחויבות אישית
+                יונתן בוזגלו, איגור חנין ואלון חנין — מובילים את Rehouse Israel
               </p>
             </div>
-            <div className="mx-auto grid max-w-md gap-6 sm:max-w-none sm:grid-cols-2 lg:max-w-3xl">
+            <div className="mx-auto grid max-w-md gap-6 sm:max-w-none sm:grid-cols-2 lg:max-w-5xl lg:grid-cols-3">
               {owners.map((owner, i) => (
                 <AgentCard
                   key={owner.id}
@@ -94,34 +88,9 @@ export default function AgentsPage({
         </section>
       )}
 
-      {consultants.length > 0 && (
-        <section className="pb-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 text-center sm:text-start">
-              <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
-                יועצים <span className="gold-gradient-text">בכירים</span>
-              </h2>
-              <p className="mt-2 text-sm text-white/50">
-                ליווי מקצועי ואישי מצד מומחי נדל״ן מנוסים
-              </p>
-            </div>
-            <div className="mx-auto grid max-w-md gap-6 sm:max-w-none sm:grid-cols-2 lg:max-w-xl">
-              {consultants.map((consultant, i) => (
-                <AgentCard
-                  key={consultant.id}
-                  agent={consultant}
-                  index={i}
-                  onScheduleMeeting={setMeetingAgent}
-                />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       <section className="pb-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {(owners.length > 0 || consultants.length > 0) && (
+          {(owners.length > 0) && (
             <div className="mb-8 text-center sm:text-start">
               <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
                 צוות <span className="gold-gradient-text">הסוכנים</span>

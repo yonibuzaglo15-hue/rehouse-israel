@@ -9,6 +9,8 @@ export interface HeroProps {
   children?: React.ReactNode;
   /** `screen` = full viewport; `tall` = min 600px with 85vh cap */
   height?: HeroHeight;
+  /** Centered hero logo — off on homepage (header already shows brand) */
+  showLogo?: boolean;
   className?: string;
 }
 
@@ -20,6 +22,7 @@ const HEIGHT_CLASS: Record<HeroHeight, string> = {
 export default function Hero({
   children,
   height = "screen",
+  showLogo = true,
   className = "",
 }: HeroProps) {
   return (
@@ -35,24 +38,25 @@ export default function Hero({
     >
       <HeroBackground />
 
-      {/* Layer 10 — transparent gold logo centered over hero */}
-      <div className="hero-layered__logo absolute z-10">
-        <Link
-          href="/"
-          className="hero-layered__logo-link group inline-block"
-          aria-label={`${BRAND.nameEn} — ${BRAND.nameHe}`}
-        >
-          <Image
-            src={BRAND.heroLogoSrc}
-            alt={`${BRAND.nameEn} — ${BRAND.nameHe}`}
-            width={HERO_LOGO_DIMENSIONS.width}
-            height={HERO_LOGO_DIMENSIONS.height}
-            className="hero-layered__logo-img h-auto w-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
-            sizes="(max-width: 640px) 280px, (max-width: 1024px) 400px, 520px"
-            priority
-          />
-        </Link>
-      </div>
+      {showLogo ? (
+        <div className="hero-layered__logo absolute z-10">
+          <Link
+            href="/"
+            className="hero-layered__logo-link group inline-block"
+            aria-label={`${BRAND.nameEn} — ${BRAND.nameHe}`}
+          >
+            <Image
+              src={BRAND.heroLogoSrc}
+              alt={`${BRAND.nameEn} — ${BRAND.nameHe}`}
+              width={HERO_LOGO_DIMENSIONS.width}
+              height={HERO_LOGO_DIMENSIONS.height}
+              className="hero-layered__logo-img h-auto w-full object-contain"
+              sizes="(max-width: 640px) 280px, (max-width: 1024px) 400px, 520px"
+              priority
+            />
+          </Link>
+        </div>
+      ) : null}
 
       {/* Layer 20 — hero content slot */}
       {children && (

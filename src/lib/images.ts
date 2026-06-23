@@ -1,12 +1,26 @@
 /**
  * Central image config — swap to local paths when real assets are provided.
- * Example: agentImage("danny") → "/images/agents/danny.jpg"
  */
 
 const UNSPLASH = "https://images.unsplash.com";
 
 /** Premium portrait placeholder when a local agent asset is not committed yet */
 export const AGENT_PLACEHOLDER = `${UNSPLASH}/photo-1560250097-0b93528c311a?w=800&q=80`;
+
+/** Preferred public paths; committed files may use .png variants */
+const AGENT_IMAGE_PATHS: Record<string, readonly string[]> = {
+  yonatan: [
+    "/images/agents/yonatan.jpg",
+    "/images/agents/yonatan-buzaglo.png",
+  ],
+  igor: ["/images/agents/igor.jpg", "/images/agents/igor-hanin.png"],
+  alon: ["/images/agents/alon.jpg", "/images/agents/alon-hanin.png"],
+  "yonatan-buzaglo": ["/images/agents/yonatan-buzaglo.png"],
+  "igor-hanin": ["/images/agents/igor-hanin.png"],
+  "alon-hanin": ["/images/agents/alon-hanin.png"],
+  elin: ["/images/agents/elin-smirnov.png"],
+  "elin-smirnov": ["/images/agents/elin-smirnov.png"],
+};
 
 export const IMAGES = {
   hero: {
@@ -29,10 +43,13 @@ export const IMAGES = {
     `${UNSPLASH}/photo-1600585154526-990dced4db0d?w=800&q=80`,
   ],
   agents: {
-    elin: "/images/agents/elin-smirnov.png",
+    yonatan: "/images/agents/yonatan-buzaglo.png",
+    igor: "/images/agents/igor-hanin.png",
+    alon: "/images/agents/alon-hanin.png",
+    "yonatan-buzaglo": "/images/agents/yonatan-buzaglo.png",
     "igor-hanin": "/images/agents/igor-hanin.png",
     "alon-hanin": "/images/agents/alon-hanin.png",
-    "yonatan-buzaglo": "/images/agents/yonatan-buzaglo.png",
+    elin: "/images/agents/elin-smirnov.png",
     danny: `${UNSPLASH}/photo-1560250097-0b93528c311a?w=600&q=80`,
     michal: `${UNSPLASH}/photo-1573496359142-b8d87734a5a2?w=600&q=80`,
     yossi: `${UNSPLASH}/photo-1472099645785-5658abf4ff4e?w=600&q=80`,
@@ -43,7 +60,33 @@ export const IMAGES = {
 export function agentImage(slug: string): string {
   const key = slug as keyof typeof IMAGES.agents;
   if (key in IMAGES.agents) return IMAGES.agents[key];
+  const paths = AGENT_IMAGE_PATHS[slug];
+  if (paths?.length) return paths[0];
   return AGENT_PLACEHOLDER;
+}
+
+export function agentImageCandidates(slug: string): string[] {
+  const normalized = slug.replace(/^usr_/, "").replace(/_/g, "-");
+
+  const alias =
+    normalized.startsWith("yonatan")
+      ? "yonatan"
+      : normalized.startsWith("igor")
+        ? "igor"
+        : normalized.startsWith("alon")
+          ? "alon"
+          : normalized;
+
+  const paths = AGENT_IMAGE_PATHS[alias] ?? AGENT_IMAGE_PATHS[normalized];
+  if (paths?.length) return [...paths];
+
+  const key = alias as keyof typeof IMAGES.agents;
+  if (key in IMAGES.agents) return [IMAGES.agents[key]];
+
+  const fallbackKey = normalized as keyof typeof IMAGES.agents;
+  if (fallbackKey in IMAGES.agents) return [IMAGES.agents[fallbackKey]];
+
+  return [AGENT_PLACEHOLDER];
 }
 
 export function propertyImage(index: number): string {

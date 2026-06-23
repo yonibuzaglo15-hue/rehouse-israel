@@ -27,7 +27,7 @@ export default function HeroBackground() {
         priority
         sizes="100vw"
         className={[
-          "absolute inset-0 object-cover object-center transition-opacity duration-700 ease-in-out",
+          "absolute inset-0 object-cover object-center",
           isLight ? "opacity-0" : "opacity-100",
         ].join(" ")}
         aria-hidden
@@ -40,7 +40,7 @@ export default function HeroBackground() {
         priority
         sizes="100vw"
         className={[
-          "absolute inset-0 object-cover object-center transition-opacity duration-700 ease-in-out",
+          "absolute inset-0 object-cover object-center",
           isLight ? "opacity-100" : "opacity-0",
         ].join(" ")}
         aria-hidden
@@ -48,7 +48,7 @@ export default function HeroBackground() {
 
       <div
         className={[
-          "pointer-events-none absolute inset-0 z-[1] transition-opacity duration-700",
+          "pointer-events-none absolute inset-0 z-[1]",
           "bg-gradient-to-b from-[#0a1929]/45 via-[#0a1929]/15 to-[#0a1929]/75",
           isLight ? "opacity-0" : "opacity-100",
         ].join(" ")}
@@ -56,7 +56,7 @@ export default function HeroBackground() {
       />
       <div
         className={[
-          "pointer-events-none absolute inset-0 z-[1] transition-opacity duration-700",
+          "pointer-events-none absolute inset-0 z-[1]",
           "bg-gradient-to-l from-[#0a1929]/35 via-transparent to-transparent",
           isLight ? "opacity-0" : "opacity-100",
         ].join(" ")}
@@ -65,7 +65,7 @@ export default function HeroBackground() {
 
       <div
         className={[
-          "pointer-events-none absolute inset-0 z-[1] transition-opacity duration-700",
+          "pointer-events-none absolute inset-0 z-[1]",
           "bg-gradient-to-b from-white/25 via-white/10 to-white/35",
           isLight ? "opacity-100" : "opacity-0",
         ].join(" ")}
@@ -73,7 +73,7 @@ export default function HeroBackground() {
       />
       <div
         className={[
-          "pointer-events-none absolute inset-0 z-[1] transition-opacity duration-700",
+          "pointer-events-none absolute inset-0 z-[1]",
           "bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.15),transparent_65%)]",
           isLight ? "opacity-100" : "opacity-0",
         ].join(" ")}

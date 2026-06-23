@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
@@ -23,10 +22,7 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const { data: session, status } = useSession();
   const isHome = pathname === "/";
-  const isLoggedIn = status === "authenticated" && Boolean(session);
-  const showTagline = isHome && !isLoggedIn;
 
   useEffect(() => {
     setMobileOpen(false);
@@ -66,23 +62,11 @@ export default function Header() {
       >
         {/* Brand — far right in RTL */}
         <div className="flex shrink-0 items-center gap-2.5 sm:gap-3">
-          <Logo variant="header" showTagline linked />
+          <Logo variant="header" linked />
         </div>
 
         {/* Desktop navigation — structural classes must stay on this wrapper */}
         <div className="site-header__desktop-nav hidden min-w-0 flex-1 flex-row flex-nowrap items-center justify-end gap-4 md:flex lg:gap-6">
-          {showTagline ? (
-            <>
-              <span className="site-header__tagline hidden shrink-0 md:inline">
-                נדל״ן יוקרה בדרום
-              </span>
-              <span
-                className="hidden h-5 w-px shrink-0 bg-navy-200 dark:bg-white/15 md:block"
-                aria-hidden
-              />
-            </>
-          ) : null}
-
           <ul className="site-header__nav-list m-0 flex list-none flex-row flex-nowrap items-center gap-4 p-0 lg:gap-6">
             {NAV_LINKS.map((link) => {
               const isActive =
@@ -153,11 +137,6 @@ export default function Header() {
             style={{ direction: "rtl" }}
           >
             <ul className="m-0 flex list-none flex-col gap-1 p-4 ps-6 pe-6">
-              {showTagline ? (
-                <li className="mb-1 list-none px-4">
-                  <span className="site-header__tagline">נדל״ן יוקרה בדרום</span>
-                </li>
-              ) : null}
               {NAV_LINKS.map((link) => (
                 <li key={link.href} className="list-none">
                   <Link

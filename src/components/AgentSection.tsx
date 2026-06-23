@@ -6,12 +6,12 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import AgentCard from "@/components/AgentCard";
 import MeetingModal from "@/components/MeetingModal";
-import { MOCK_AGENTS } from "@/lib/constants";
+import { LEADERSHIP_AGENTS } from "@/lib/constants";
 import type { Agent } from "@/lib/types";
 
 export default function AgentSection() {
   const [meetingAgent, setMeetingAgent] = useState<Agent | null>(null);
-  const featuredAgents = MOCK_AGENTS.slice(0, 4);
+  const featuredAgents = LEADERSHIP_AGENTS;
 
   return (
     <section className="relative border-t border-white/5 py-24">
@@ -45,7 +45,7 @@ export default function AgentSection() {
           </Link>
         </motion.div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {featuredAgents.map((agent, i) => (
             <AgentCard
               key={agent.id}

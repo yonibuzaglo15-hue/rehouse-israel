@@ -1,7 +1,10 @@
-import { agentImage } from "@/lib/images";
+import { agentImage, agentImageCandidates } from "@/lib/images";
 
 /** Slugs with committed files under public/images/agents/ */
 export const LOCAL_AGENT_IMAGE_SLUGS = new Set([
+  "yonatan",
+  "igor",
+  "alon",
   "igor-hanin",
   "alon-hanin",
   "yonatan-buzaglo",
@@ -22,5 +25,11 @@ export function resolveAgentImageUrl(slug: string, storedPath?: string): string 
     return storedPath;
   }
 
+  if (storedPath?.startsWith("/images/agents/")) {
+    return storedPath;
+  }
+
   return agentImage(slug);
 }
+
+export { agentImageCandidates };
