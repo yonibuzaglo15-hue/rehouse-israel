@@ -18,6 +18,7 @@ import PropertyCard from "@/components/PropertyCard";
 import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
 import type { Property } from "@/lib/types";
 import { formatPrice, getCityLabel } from "@/lib/constants";
+import { normalizePropertyId } from "@/lib/properties/ids";
 
 interface PropertyDetailPageProps {
   property: Property;
@@ -30,6 +31,7 @@ export default function PropertyDetailPage({
   related = [],
   canEdit = false,
 }: PropertyDetailPageProps) {
+  const propertyId = normalizePropertyId(property.id);
 
   return (
     <>
@@ -43,11 +45,11 @@ export default function PropertyDetailPage({
             חזרה לקטלוג
           </Link>
 
-          {canEdit && (
+          {canEdit && propertyId ? (
             <div className="mb-6">
-              <PropertyActionMenu propertyId={property.id} />
+              <PropertyActionMenu propertyId={propertyId} />
             </div>
-          )}
+          ) : null}
 
           <div className="grid gap-8 lg:grid-cols-3">
             {/* Gallery + details */}

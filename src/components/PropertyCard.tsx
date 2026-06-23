@@ -24,6 +24,7 @@ import {
 } from "@/lib/properties/property-images";
 import { isNextAuthAdminRole } from "@/lib/auth/nextauth";
 import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
+import { normalizePropertyId, propertyDetailHref } from "@/lib/properties/ids";
 
 interface PropertyCardProps {
   property: Property;
@@ -104,6 +105,9 @@ function DashboardPropertyCard({
   index: number;
   canEdit: boolean;
 }) {
+  const propertyId = normalizePropertyId(property.id);
+  const detailHref = propertyDetailHref(propertyId);
+
   return (
     <motion.article
       initial={{ opacity: 0 }}
@@ -111,30 +115,34 @@ function DashboardPropertyCard({
       transition={{ duration: 0.2, delay: index * 0.03 }}
       className="relative"
     >
-      {canEdit ? (
-        <div className="absolute end-3 top-3 z-20">
-          <PropertyActionMenu propertyId={property.id} />
-        </div>
-      ) : null}
-
-      <Link href={`/properties/${property.id}`} className="group block">
-        <div className="dashboard-panel flex overflow-hidden transition-colors hover:border-gold-500/40">
+      <div className="dashboard-panel flex overflow-hidden transition-colors hover:border-gold-500/40">
+        <Link href={detailHref} className="group block shrink-0">
           <PropertyCardMedia
             property={property}
             className="h-full min-h-[9rem] w-36 shrink-0 self-stretch sm:min-h-[10rem] sm:w-44"
             sizes="176px"
           />
+        </Link>
 
-          <div className="flex min-w-0 flex-1 flex-col border-s border-navy-200/70 dark:border-white/10">
-            <div className="flex items-center justify-between gap-2 border-b border-navy-200/70 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-navy-900/60">
-              <span className="font-mono text-base font-bold tabular-nums text-gold-600 dark:text-gold-400">
-                {formatPrice(property.price, property.listingType)}
-              </span>
+        <div className="flex min-w-0 flex-1 flex-col border-s border-navy-200/70 dark:border-white/10">
+          <div className="flex items-center justify-between gap-2 border-b border-navy-200/70 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-navy-900/60">
+            <Link
+              href={detailHref}
+              className="min-w-0 font-mono text-base font-bold tabular-nums text-gold-600 hover:text-gold-500 dark:text-gold-400 dark:hover:text-gold-300"
+            >
+              {formatPrice(property.price, property.listingType)}
+            </Link>
+            <div className="flex shrink-0 items-center gap-3">
               <span className="rounded border border-navy-200/80 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-slate-600 dark:border-white/20 dark:text-white/70">
                 {property.listingType === "buy" ? "SALE" : "RENT"}
               </span>
+              {canEdit && propertyId ? (
+                <PropertyActionMenu propertyId={propertyId} />
+              ) : null}
             </div>
+          </div>
 
+          <Link href={detailHref} className="group block flex-1">
             <div className="flex-1 px-3 py-2">
               <h3 className="truncate text-sm font-semibold text-slate-900 group-hover:text-gold-600 dark:text-white dark:group-hover:text-gold-300">
                 {property.title}
@@ -167,9 +175,9 @@ function DashboardPropertyCard({
               <QuickSpec active={property.balcony} icon={<Sun className="h-3 w-3" />} label="מרפסת" />
               <QuickSpec active={property.parking} icon={<Car className="h-3 w-3" />} label="חניה" />
             </div>
-          </div>
+          </Link>
         </div>
-      </Link>
+      </div>
     </motion.article>
   );
 }
@@ -196,6 +204,8 @@ function QuickSpec({
 function LuxuryPropertyCard({ property, index }: { property: Property; index: number }) {
   const { data: session } = useSession();
   const isAdmin = isNextAuthAdminRole(session?.user?.role);
+  const propertyId = normalizePropertyId(property.id);
+  const detailHref = propertyDetailHref(propertyId);
 
   return (
     <motion.article
@@ -206,7 +216,7 @@ function LuxuryPropertyCard({ property, index }: { property: Property; index: nu
       className="group"
     >
       <div className="relative">
-        <Link href={`/properties/${property.id}`} className="block">
+        <Link href={detailHref} className="block">
           <div className="glass-panel overflow-hidden rounded-2xl transition-all duration-500 group-hover:border-gold-500/30 group-hover:shadow-xl group-hover:shadow-gold-500/5">
             <div className="relative">
               <PropertyCardMedia
@@ -262,7 +272,7 @@ function LuxuryPropertyCard({ property, index }: { property: Property; index: nu
         </Link>
         {isAdmin && (
           <Link
-            href={`/admin/property/${property.id}/edit`}
+            href={propertyId ? `/admin/property/${encodeURIComponent(propertyId)}/edit` : "/admin"}
             className="absolute end-4 top-[calc(75%-2.5rem)] z-10 inline-flex items-center gap-1.5 rounded-full border border-gold-500/50 bg-navy-950/85 px-3 py-1.5 text-xs font-medium text-gold-300 backdrop-blur-sm transition-colors hover:border-gold-400 hover:bg-navy-950"
           >
             <Pencil className="h-3.5 w-3.5" />

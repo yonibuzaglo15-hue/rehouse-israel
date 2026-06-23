@@ -9,6 +9,7 @@ import { CITIES, getNeighborhoodFieldLabel, getNeighborhoodZones } from "@/lib/c
 import { PROPERTY_STATUS_LABELS } from "@/lib/properties/labels";
 import type { City, ListingType } from "@/lib/types";
 import type { PropertyStatus } from "@/lib/properties/types";
+import { catalogPropertyApiPath, normalizePropertyId } from "@/lib/properties/ids";
 
 interface PropertyEditModalProps {
   propertyId: string;
@@ -26,6 +27,7 @@ export default function PropertyEditModal({
   initialRaw = null,
 }: PropertyEditModalProps) {
   const router = useRouter();
+  const safePropertyId = normalizePropertyId(propertyId);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [resolvingImages, setResolvingImages] = useState(false);
@@ -33,10 +35,13 @@ export default function PropertyEditModal({
   const [form, setForm] = useState<CatalogProperty | null>(null);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !safePropertyId) return;
 
-    if (initialRaw && initialRaw.id === propertyId) {
-      setForm(initialRaw);
+    if (
+      initialRaw &&
+      normalizePropertyId(initialRaw.id) === safePropertyId
+    ) {
+      setForm({ ...initialRaw, id: safePropertyId });
       setLoading(false);
       setError("");
       return;
@@ -46,8 +51,14 @@ export default function PropertyEditModal({
     setError("");
     setForm(null);
 
-    const encodedId = encodeURIComponent(propertyId);
-    fetch(`/api/catalog/properties/${encodedId}`, { credentials: "include" })
+    const apiPath = catalogPropertyApiPath(safePropertyId);
+    if (!apiPath) {
+      setError("מזהה נכס לא תקין");
+      setLoading(false);
+      return;
+    }
+
+    fetch(apiPath, { credentials: "include" })
       .then(async (res) => {
         const data = await res.json();
         if (!res.ok) {
@@ -62,7 +73,7 @@ export default function PropertyEditModal({
         setError(err instanceof Error ? err.message : "לא ניתן לטעון את פרטי הנכס"),
       )
       .finally(() => setLoading(false));
-  }, [open, propertyId, initialRaw]);
+  }, [open, safePropertyId, initialRaw]);
 
   const neighborhoodZones = form?.city ? getNeighborhoodZones(form.city) : [];
 

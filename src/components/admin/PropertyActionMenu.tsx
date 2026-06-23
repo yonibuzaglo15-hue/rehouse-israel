@@ -5,6 +5,11 @@ import { useRouter } from "next/navigation";
 import { Copy, MoreVertical, Pencil, Trash2 } from "lucide-react";
 import PropertyEditModal from "@/components/admin/PropertyEditModal";
 import type { CatalogProperty } from "@/lib/properties/catalog-schema";
+import {
+  catalogPropertyApiPath,
+  normalizePropertyId,
+  propertyApiPath,
+} from "@/lib/properties/ids";
 
 interface PropertyActionMenuProps {
   propertyId: string;
@@ -15,6 +20,7 @@ export default function PropertyActionMenu({
   propertyId,
   className = "",
 }: PropertyActionMenuProps) {
+  const safePropertyId = normalizePropertyId(propertyId);
   const router = useRouter();
   const menuRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -47,8 +53,12 @@ export default function PropertyActionMenu({
   }, [open]);
 
   const fetchRawProperty = async (): Promise<CatalogProperty> => {
-    const encodedId = encodeURIComponent(propertyId);
-    const res = await fetch(`/api/catalog/properties/${encodedId}`, {
+    const apiPath = catalogPropertyApiPath(safePropertyId);
+    if (!apiPath) {
+      throw new Error("מזהה נכס לא תקין");
+    }
+
+    const res = await fetch(apiPath, {
       credentials: "include",
     });
     const data = await res.json();
@@ -71,7 +81,7 @@ export default function PropertyActionMenu({
 
     try {
       const raw = await fetchRawProperty();
-      setInitialRaw(raw);
+      setInitialRaw({ ...raw, id: normalizePropertyId(raw.id) });
       setEditOpen(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "לא ניתן לטעון את פרטי הנכס");
@@ -115,8 +125,12 @@ export default function PropertyActionMenu({
     setLoadingAction("delete");
 
     try {
-      const encodedId = encodeURIComponent(propertyId);
-      const res = await fetch(`/api/properties/${encodedId}`, {
+      const deletePath = propertyApiPath(safePropertyId);
+      if (!deletePath) {
+        throw new Error("מזהה נכס לא תקין");
+      }
+
+      const res = await fetch(deletePath, {
         method: "DELETE",
         credentials: "include",
       });
@@ -133,6 +147,8 @@ export default function PropertyActionMenu({
       setLoadingAction(null);
     }
   };
+
+  if (!safePropertyId) return null;
 
   return (
     <div ref={menuRef} className={`relative ${className}`}>
@@ -190,7 +206,7 @@ export default function PropertyActionMenu({
       ) : null}
 
       <PropertyEditModal
-        propertyId={propertyId}
+        propertyId={safePropertyId}
         initialRaw={initialRaw}
         open={editOpen}
         onClose={() => {
