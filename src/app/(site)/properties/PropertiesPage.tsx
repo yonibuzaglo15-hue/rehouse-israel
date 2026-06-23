@@ -8,7 +8,7 @@ import PropertyCard from "@/components/PropertyCard";
 import { usePropertyFilters } from "@/lib/hooks/usePropertyFilters";
 import { filterProperties, getCityLabel } from "@/lib/constants";
 import type { Property } from "@/lib/types";
-import { normalizePropertyId, resolvePropertyRecordId } from "@/lib/properties/ids";
+import { resolvePropertyRecordId } from "@/lib/properties/ids";
 
 interface PropertiesPageProps {
   initialProperties: Property[];
