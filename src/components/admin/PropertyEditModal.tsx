@@ -9,7 +9,7 @@ import { CITIES, getNeighborhoodFieldLabel, getNeighborhoodZones } from "@/lib/c
 import { PROPERTY_STATUS_LABELS } from "@/lib/properties/labels";
 import type { City, ListingType } from "@/lib/types";
 import type { PropertyStatus } from "@/lib/properties/types";
-import { catalogPropertyApiPath, isValidCatalogPropertyId, normalizePropertyId, propertyApiPath } from "@/lib/properties/ids";
+import { normalizePropertyId, propertyApiPath } from "@/lib/properties/ids";
 
 interface PropertyEditModalProps {
   propertyId: string;
@@ -51,21 +51,7 @@ export default function PropertyEditModal({
     setError("");
     setForm(null);
 
-    const apiPath = catalogPropertyApiPath(safePropertyId);
-    if (!apiPath || !isValidCatalogPropertyId(safePropertyId)) {
-      setError("מזהה נכס לא תקין");
-      setLoading(false);
-      return;
-    }
-
-    let fetchUrl: string;
-    try {
-      fetchUrl = new URL(apiPath, window.location.origin).toString();
-    } catch {
-      setError("מזהה נכס לא תקין");
-      setLoading(false);
-      return;
-    }
+    const fetchUrl = `/api/catalog/properties/${encodeURIComponent(safePropertyId)}`;
 
     fetch(fetchUrl, { credentials: "include" })
       .then(async (res) => {
@@ -79,16 +65,13 @@ export default function PropertyEditModal({
         setForm({ ...(data.raw as CatalogProperty), id: safePropertyId });
       })
       .catch((err) => {
-        if (err instanceof TypeError && /pattern/i.test(err.message)) {
-          setError("מזהה נכס לא תקין");
-          return;
-        }
         setError(err instanceof Error ? err.message : "לא ניתן לטעון את פרטי הנכס");
       })
       .finally(() => setLoading(false));
   }, [open, safePropertyId, initialRaw]);
 
-  const neighborhoodZones = form?.city ? getNeighborhoodZones(form.city) : [];
+  const propertyData = form;
+  const neighborhoodZones = propertyData?.city ? getNeighborhoodZones(propertyData.city) : [];
 
   const resolveImages = async () => {
     if (!form) return;
@@ -177,6 +160,284 @@ export default function PropertyEditModal({
 
   if (!open || !safePropertyId) return null;
 
+  if (
+    !propertyId ||
+    typeof propertyId !== "string" ||
+    propertyId.includes("[object Object]")
+  ) {
+    return (
+      <div className="p-4 bg-red-100 text-red-700">
+        Critical Error: Invalid Property ID provided to Modal.
+      </div>
+    );
+  }
+
+  const renderFormBody = () => {
+    if (loading || !propertyData) {
+      return <div className="p-8 text-center text-slate-600 dark:text-white/70">טוען נתונים...</div>;
+    }
+
+    return (
+      <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="כותרת" className="sm:col-span-2">
+                  <input
+                    value={propertyData.title ?? ""}
+                    onChange={(e) => updateField("title", e.target.value)}
+                    className="luxury-input"
+                  />
+                </Field>
+
+                <Field label="תיאור" className="sm:col-span-2">
+                  <textarea
+                    value={propertyData.description ?? ""}
+                    onChange={(e) => updateField("description", e.target.value)}
+                    rows={4}
+                    className="luxury-input resize-y"
+                  />
+                </Field>
+
+                <Field label="סוג עסקה">
+                  <select
+                    value={propertyData.listingType ?? "buy"}
+                    onChange={(e) => updateField("listingType", e.target.value as ListingType)}
+                    className="luxury-input"
+                  >
+                    <option value="buy">מכירה</option>
+                    <option value="rent">השכרה</option>
+                  </select>
+                </Field>
+
+                <Field label="מחיר">
+                  <input
+                    type="number"
+                    value={propertyData.price}
+                    onChange={(e) => updateField("price", Number(e.target.value))}
+                    className="luxury-input"
+                  />
+                </Field>
+
+                <Field label="עיר">
+                  <select
+                    value={propertyData.city}
+                    onChange={(e) => updateField("city", e.target.value as City)}
+                    className="luxury-input"
+                  >
+                    {CITIES.map((city) => (
+                      <option key={city.value} value={city.value}>
+                        {city.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label={getNeighborhoodFieldLabel(propertyData.city)}>
+                  <select
+                    value={propertyData.neighborhood}
+                    onChange={(e) => updateField("neighborhood", e.target.value)}
+                    className="luxury-input"
+                  >
+                    <option value="">בחרו שכונה / אזור</option>
+                    {neighborhoodZones.map((zone) => (
+                      <optgroup key={zone.zoneLabel} label={zone.zoneLabel}>
+                        {zone.neighborhoods.map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label="חדרים">
+                  <input
+                    type="number"
+                    value={propertyData.rooms}
+                    onChange={(e) => updateField("rooms", Number(e.target.value))}
+                    className="luxury-input"
+                  />
+                </Field>
+
+                <Field label={'שטח (מ"ר)'}>
+                  <input
+                    type="number"
+                    value={propertyData.area}
+                    onChange={(e) => updateField("area", Number(e.target.value))}
+                    className="luxury-input"
+                  />
+                </Field>
+
+                <Field label="קומה">
+                  <input
+                    type="number"
+                    value={propertyData.floor}
+                    onChange={(e) => updateField("floor", Number(e.target.value))}
+                    className="luxury-input"
+                  />
+                </Field>
+
+                <Field label="קומות בבניין">
+                  <input
+                    type="number"
+                    value={propertyData.totalFloors}
+                    onChange={(e) => updateField("totalFloors", Number(e.target.value))}
+                    className="luxury-input"
+                  />
+                </Field>
+
+                <Field label="רחוב">
+                  <input
+                    value={propertyData.street}
+                    onChange={(e) => updateField("street", e.target.value)}
+                    className="luxury-input"
+                  />
+                </Field>
+
+                <Field label="מספר בית">
+                  <input
+                    value={propertyData.houseNumber}
+                    onChange={(e) => updateField("houseNumber", e.target.value)}
+                    className="luxury-input"
+                  />
+                </Field>
+
+                <Field label="סטטוס">
+                  <select
+                    value={propertyData.status}
+                    onChange={(e) => updateField("status", e.target.value as PropertyStatus)}
+                    className="luxury-input"
+                  >
+                    {STATUS_OPTIONS.map((status) => (
+                      <option key={status} value={status}>
+                        {PROPERTY_STATUS_LABELS[status]}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label="פרסום באתר">
+                  <select
+                    value={propertyData.published ? "1" : "0"}
+                    onChange={(e) => updateField("published", e.target.value === "1")}
+                    className="luxury-input"
+                  >
+                    <option value="1">מפורסם</option>
+                    <option value="0">לא מפורסם</option>
+                  </select>
+                </Field>
+
+                <div className="sm:col-span-2 flex flex-wrap gap-4">
+                  <Toggle label="ממ״ד" checked={propertyData.mamad} onChange={(v) => updateField("mamad", v)} />
+                  <Toggle label="מרפסת" checked={propertyData.balcony} onChange={(v) => updateField("balcony", v)} />
+                  <Toggle label="חניה" checked={propertyData.parking} onChange={(v) => updateField("parking", v)} />
+                  <Toggle label="מעלית" checked={propertyData.elevator} onChange={(v) => updateField("elevator", v)} />
+                  <Toggle label="מחסן" checked={propertyData.storage} onChange={(v) => updateField("storage", v)} />
+                  <Toggle label="מומלץ" checked={propertyData.featured} onChange={(v) => updateField("featured", v)} />
+                </div>
+
+                <Field label="ניתוב תמונות מתיקייה" className="sm:col-span-2">
+                  <div className="space-y-3 rounded-xl border border-gold-500/20 bg-gold-500/5 p-4">
+                    <p className="text-xs text-white/50">
+                      הזינו נתיב בסיס לתיקיית צילום. המערכת תשלוף 1.jpg כקאבר, 2.jpg, 3.jpg…
+                    </p>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <select
+                        value={propertyData.city}
+                        onChange={(e) => updateField("city", e.target.value as City)}
+                        className="luxury-input"
+                      >
+                        {CITIES.map((city) => (
+                          <option key={city.value} value={city.value}>
+                            {city.label}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={propertyData.neighborhood}
+                        onChange={(e) => updateField("neighborhood", e.target.value)}
+                        className="luxury-input"
+                      >
+                        <option value="">בחרו שכונה / רובע</option>
+                        {neighborhoodZones.map((zone) => (
+                          <optgroup key={zone.zoneLabel} label={zone.zoneLabel}>
+                            {zone.neighborhoods.map((n) => (
+                              <option key={n} value={n}>
+                                {n}
+                              </option>
+                            ))}
+                          </optgroup>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      value={propertyData.media.imageFolderUrl ?? ""}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          media: { ...propertyData.media, imageFolderUrl: e.target.value },
+                        })
+                      }
+                      placeholder="https://drive.../folder או /images/properties/ashdod/marina"
+                      className="luxury-input"
+                    />
+                    <input
+                      value={propertyData.media.matterportUrl ?? ""}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          media: { ...propertyData.media, matterportUrl: e.target.value },
+                        })
+                      }
+                      placeholder="קישור Matterport / סיור וירטואלי"
+                      className="luxury-input"
+                    />
+                    <input
+                      value={propertyData.media.matterportThumbnailUrl ?? ""}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          media: { ...propertyData.media, matterportThumbnailUrl: e.target.value },
+                        })
+                      }
+                      placeholder="Thumbnail לסיור (אופציונלי)"
+                      className="luxury-input"
+                    />
+                    <button
+                      type="button"
+                      onClick={resolveImages}
+                      disabled={resolvingImages}
+                      className="luxury-btn-ghost text-sm disabled:opacity-50"
+                    >
+                      {resolvingImages ? "שולף תמונות…" : "שלוף תמונות מהתיקייה"}
+                    </button>
+                  </div>
+                </Field>
+
+                {Object.keys(propertyData.attributes).length > 0 && (
+                  <Field label="קריטריונים דינמיים (Google Sheets)" className="sm:col-span-2">
+                    <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                      {Object.entries(propertyData.attributes).map(([key, value]) => (
+                        <div key={key} className="grid gap-2 sm:grid-cols-[1fr_2fr]">
+                          <span className="text-xs text-white/45">{key}</span>
+                          <input
+                            value={Array.isArray(value) ? value.join(", ") : String(value ?? "")}
+                            onChange={(e) =>
+                              setForm({
+                                ...form,
+                                attributes: { ...propertyData.attributes, [key]: e.target.value },
+                              })
+                            }
+                            className="luxury-input py-2 text-sm"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </Field>
+                )}
+              </div>
+    );
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -212,271 +473,7 @@ export default function PropertyEditModal({
           </div>
 
           <div className="max-h-[calc(90vh-140px)] overflow-y-auto px-5 py-5">
-            {loading && (
-              <div className="flex items-center justify-center py-16 text-slate-500 dark:text-white/50">
-                <Loader2 className="h-6 w-6 animate-spin" />
-              </div>
-            )}
-
-            {!loading && form && (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="כותרת" className="sm:col-span-2">
-                  <input
-                    value={form.title}
-                    onChange={(e) => updateField("title", e.target.value)}
-                    className="luxury-input"
-                  />
-                </Field>
-
-                <Field label="תיאור" className="sm:col-span-2">
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => updateField("description", e.target.value)}
-                    rows={4}
-                    className="luxury-input resize-y"
-                  />
-                </Field>
-
-                <Field label="סוג עסקה">
-                  <select
-                    value={form.listingType}
-                    onChange={(e) => updateField("listingType", e.target.value as ListingType)}
-                    className="luxury-input"
-                  >
-                    <option value="buy">מכירה</option>
-                    <option value="rent">השכרה</option>
-                  </select>
-                </Field>
-
-                <Field label="מחיר">
-                  <input
-                    type="number"
-                    value={form.price}
-                    onChange={(e) => updateField("price", Number(e.target.value))}
-                    className="luxury-input"
-                  />
-                </Field>
-
-                <Field label="עיר">
-                  <select
-                    value={form.city}
-                    onChange={(e) => updateField("city", e.target.value as City)}
-                    className="luxury-input"
-                  >
-                    {CITIES.map((city) => (
-                      <option key={city.value} value={city.value}>
-                        {city.label}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-
-                <Field label={getNeighborhoodFieldLabel(form.city)}>
-                  <select
-                    value={form.neighborhood}
-                    onChange={(e) => updateField("neighborhood", e.target.value)}
-                    className="luxury-input"
-                  >
-                    <option value="">בחרו שכונה / אזור</option>
-                    {neighborhoodZones.map((zone) => (
-                      <optgroup key={zone.zoneLabel} label={zone.zoneLabel}>
-                        {zone.neighborhoods.map((n) => (
-                          <option key={n} value={n}>
-                            {n}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                </Field>
-
-                <Field label="חדרים">
-                  <input
-                    type="number"
-                    value={form.rooms}
-                    onChange={(e) => updateField("rooms", Number(e.target.value))}
-                    className="luxury-input"
-                  />
-                </Field>
-
-                <Field label={'שטח (מ"ר)'}>
-                  <input
-                    type="number"
-                    value={form.area}
-                    onChange={(e) => updateField("area", Number(e.target.value))}
-                    className="luxury-input"
-                  />
-                </Field>
-
-                <Field label="קומה">
-                  <input
-                    type="number"
-                    value={form.floor}
-                    onChange={(e) => updateField("floor", Number(e.target.value))}
-                    className="luxury-input"
-                  />
-                </Field>
-
-                <Field label="קומות בבניין">
-                  <input
-                    type="number"
-                    value={form.totalFloors}
-                    onChange={(e) => updateField("totalFloors", Number(e.target.value))}
-                    className="luxury-input"
-                  />
-                </Field>
-
-                <Field label="רחוב">
-                  <input
-                    value={form.street}
-                    onChange={(e) => updateField("street", e.target.value)}
-                    className="luxury-input"
-                  />
-                </Field>
-
-                <Field label="מספר בית">
-                  <input
-                    value={form.houseNumber}
-                    onChange={(e) => updateField("houseNumber", e.target.value)}
-                    className="luxury-input"
-                  />
-                </Field>
-
-                <Field label="סטטוס">
-                  <select
-                    value={form.status}
-                    onChange={(e) => updateField("status", e.target.value as PropertyStatus)}
-                    className="luxury-input"
-                  >
-                    {STATUS_OPTIONS.map((status) => (
-                      <option key={status} value={status}>
-                        {PROPERTY_STATUS_LABELS[status]}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-
-                <Field label="פרסום באתר">
-                  <select
-                    value={form.published ? "1" : "0"}
-                    onChange={(e) => updateField("published", e.target.value === "1")}
-                    className="luxury-input"
-                  >
-                    <option value="1">מפורסם</option>
-                    <option value="0">לא מפורסם</option>
-                  </select>
-                </Field>
-
-                <div className="sm:col-span-2 flex flex-wrap gap-4">
-                  <Toggle label="ממ״ד" checked={form.mamad} onChange={(v) => updateField("mamad", v)} />
-                  <Toggle label="מרפסת" checked={form.balcony} onChange={(v) => updateField("balcony", v)} />
-                  <Toggle label="חניה" checked={form.parking} onChange={(v) => updateField("parking", v)} />
-                  <Toggle label="מעלית" checked={form.elevator} onChange={(v) => updateField("elevator", v)} />
-                  <Toggle label="מחסן" checked={form.storage} onChange={(v) => updateField("storage", v)} />
-                  <Toggle label="מומלץ" checked={form.featured} onChange={(v) => updateField("featured", v)} />
-                </div>
-
-                <Field label="ניתוב תמונות מתיקייה" className="sm:col-span-2">
-                  <div className="space-y-3 rounded-xl border border-gold-500/20 bg-gold-500/5 p-4">
-                    <p className="text-xs text-white/50">
-                      הזינו נתיב בסיס לתיקיית צילום. המערכת תשלוף 1.jpg כקאבר, 2.jpg, 3.jpg…
-                    </p>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <select
-                        value={form.city}
-                        onChange={(e) => updateField("city", e.target.value as City)}
-                        className="luxury-input"
-                      >
-                        {CITIES.map((city) => (
-                          <option key={city.value} value={city.value}>
-                            {city.label}
-                          </option>
-                        ))}
-                      </select>
-                      <select
-                        value={form.neighborhood}
-                        onChange={(e) => updateField("neighborhood", e.target.value)}
-                        className="luxury-input"
-                      >
-                        <option value="">בחרו שכונה / רובע</option>
-                        {neighborhoodZones.map((zone) => (
-                          <optgroup key={zone.zoneLabel} label={zone.zoneLabel}>
-                            {zone.neighborhoods.map((n) => (
-                              <option key={n} value={n}>
-                                {n}
-                              </option>
-                            ))}
-                          </optgroup>
-                        ))}
-                      </select>
-                    </div>
-                    <input
-                      value={form.media.imageFolderUrl ?? ""}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          media: { ...form.media, imageFolderUrl: e.target.value },
-                        })
-                      }
-                      placeholder="https://drive.../folder או /images/properties/ashdod/marina"
-                      className="luxury-input"
-                    />
-                    <input
-                      value={form.media.matterportUrl ?? ""}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          media: { ...form.media, matterportUrl: e.target.value },
-                        })
-                      }
-                      placeholder="קישור Matterport / סיור וירטואלי"
-                      className="luxury-input"
-                    />
-                    <input
-                      value={form.media.matterportThumbnailUrl ?? ""}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          media: { ...form.media, matterportThumbnailUrl: e.target.value },
-                        })
-                      }
-                      placeholder="Thumbnail לסיור (אופציונלי)"
-                      className="luxury-input"
-                    />
-                    <button
-                      type="button"
-                      onClick={resolveImages}
-                      disabled={resolvingImages}
-                      className="luxury-btn-ghost text-sm disabled:opacity-50"
-                    >
-                      {resolvingImages ? "שולף תמונות…" : "שלוף תמונות מהתיקייה"}
-                    </button>
-                  </div>
-                </Field>
-
-                {Object.keys(form.attributes).length > 0 && (
-                  <Field label="קריטריונים דינמיים (Google Sheets)" className="sm:col-span-2">
-                    <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-3">
-                      {Object.entries(form.attributes).map(([key, value]) => (
-                        <div key={key} className="grid gap-2 sm:grid-cols-[1fr_2fr]">
-                          <span className="text-xs text-white/45">{key}</span>
-                          <input
-                            value={Array.isArray(value) ? value.join(", ") : String(value ?? "")}
-                            onChange={(e) =>
-                              setForm({
-                                ...form,
-                                attributes: { ...form.attributes, [key]: e.target.value },
-                              })
-                            }
-                            className="luxury-input py-2 text-sm"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </Field>
-                )}
-              </div>
-            )}
+            {renderFormBody()}
 
             {error && (
               <p className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
@@ -492,7 +489,7 @@ export default function PropertyEditModal({
             <button
               type="button"
               onClick={handleSave}
-              disabled={saving || loading || !form}
+              disabled={saving || loading || !propertyData}
               className="luxury-btn-primary inline-flex items-center gap-2 px-5 py-2.5 disabled:opacity-50"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
