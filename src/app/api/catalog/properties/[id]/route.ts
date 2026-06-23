@@ -3,7 +3,7 @@ import { canAdminEditCatalog } from "@/lib/auth/admin-access";
 import { getSession } from "@/lib/auth/session";
 import { canEditCatalogProperty } from "@/lib/properties/access";
 import { catalogToPublicProperty } from "@/lib/properties/catalog-schema";
-import { normalizePropertyId } from "@/lib/properties/ids";
+import { getCleanId } from "@/lib/properties/ids";
 import { getCatalogPropertyById } from "@/lib/properties/server";
 
 interface Props {
@@ -12,7 +12,7 @@ interface Props {
 
 export async function GET(_request: Request, { params }: Props) {
   const { id: rawParam } = await params;
-  const id = normalizePropertyId(rawParam);
+  const id = getCleanId(rawParam);
 
   if (!id) {
     return NextResponse.json({ error: "מזהה נכס לא תקין" }, { status: 400 });

@@ -27,11 +27,9 @@ import {
 import { isNextAuthAdminRole } from "@/lib/auth/nextauth";
 import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
 import PropertyEditModal from "@/components/admin/PropertyEditModal";
-import { propertyDetailHref, resolvePropertyRecordId } from "@/lib/properties/ids";
-import {
-  deleteCatalogProperty,
-  duplicateCatalogProperty,
-} from "@/lib/properties/property-actions";
+import { getCleanId, propertyDetailHref } from "@/lib/properties/ids";
+import { deleteCatalogProperty } from "@/lib/properties/property-actions";
+import type { CatalogProperty } from "@/lib/properties/catalog-schema";
 
 interface PropertyCardProps {
   property: Property;
@@ -113,8 +111,9 @@ function DashboardPropertyCard({
   canEdit: boolean;
 }) {
   const router = useRouter();
-  const propertyId = resolvePropertyRecordId(property);
-  const detailHref = propertyDetailHref(propertyId);
+  const propertyRecord = property as Property & { _id?: unknown };
+  const cleanId = getCleanId(propertyRecord._id || property.id);
+  const detailHref = propertyDetailHref(propertyRecord);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
   const [loadingAction, setLoadingAction] = useState<"edit" | "duplicate" | "delete" | null>(
@@ -124,10 +123,12 @@ function DashboardPropertyCard({
 
   const handleOpenEdit = () => {
     setActionError("");
-    const safeId = resolvePropertyRecordId(property);
-    console.log("Modal opening with ID:", safeId);
-    if (!safeId) return;
-    setEditId(safeId);
+    const id = getCleanId(propertyRecord._id || property.id);
+    if (!id) {
+      setActionError("מזהה נכס לא תקין");
+      return;
+    }
+    setEditId(id);
     setIsEditOpen(true);
   };
 
@@ -137,12 +138,39 @@ function DashboardPropertyCard({
   };
 
   const handleDuplicate = async () => {
+    const id = getCleanId(propertyRecord._id || property.id);
+    if (!id) {
+      setActionError("מזהה נכס לא תקין");
+      return;
+    }
+
     setActionError("");
     setLoadingAction("duplicate");
 
     try {
-      await duplicateCatalogProperty(propertyId, router);
+      const response = await fetch(`/api/catalog/properties/${encodeURIComponent(id)}`, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error(`Server status: ${response.status}`);
+
+      const data = await response.json();
+      if (!data.raw) {
+        throw new Error("לא ניתן לטעון את פרטי הנכס לשכפול");
+      }
+
+      const raw = data.raw as CatalogProperty;
+      const { id: _omitId, recruitedAt: _r, updatedAt: _u, ...rest } = raw;
+      sessionStorage.setItem(
+        "rehouse:duplicate-property",
+        JSON.stringify({
+          ...rest,
+          title: `${raw.title} (עותק)`,
+          published: false,
+        }),
+      );
+      router.push(`/admin/property/new?duplicate=1&id=${encodeURIComponent(id)}`);
     } catch (err) {
+      console.error("RAW DUPLICATE ERROR:", err);
       setActionError(err instanceof Error ? err.message : "שכפול הנכס נכשל");
     } finally {
       setLoadingAction(null);
@@ -160,7 +188,7 @@ function DashboardPropertyCard({
     setLoadingAction("delete");
 
     try {
-      await deleteCatalogProperty(propertyId);
+      await deleteCatalogProperty(cleanId);
       router.refresh();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : "מחיקת הנכס נכשלה");
@@ -202,7 +230,7 @@ function DashboardPropertyCard({
                 <span className="rounded border border-navy-200/80 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-slate-600 dark:border-white/20 dark:text-white/70">
                   {property.listingType === "buy" ? "SALE" : "RENT"}
                 </span>
-                {canEdit && propertyId ? (
+                {canEdit && cleanId ? (
                   <PropertyActionMenu
                     onEdit={handleOpenEdit}
                     onDuplicate={handleDuplicate}
@@ -287,8 +315,8 @@ function QuickSpec({
 function LuxuryPropertyCard({ property, index }: { property: Property; index: number }) {
   const { data: session } = useSession();
   const isAdmin = isNextAuthAdminRole(session?.user?.role);
-  const propertyId = resolvePropertyRecordId(property);
-  const detailHref = propertyDetailHref(propertyId);
+  const propertyId = getCleanId((property as Property & { _id?: unknown })._id || property.id);
+  const detailHref = propertyDetailHref(property);
 
   return (
     <motion.article

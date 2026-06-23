@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Pencil } from "lucide-react";
 import PropertyEditModal from "./PropertyEditModal";
-import { normalizePropertyId } from "@/lib/properties/ids";
+import { getCleanId } from "@/lib/properties/ids";
 
 interface EditPropertyButtonProps {
   propertyId: string;
@@ -17,7 +17,7 @@ export default function EditPropertyButton({
   className = "",
 }: EditPropertyButtonProps) {
   const [open, setOpen] = useState(false);
-  const safePropertyId = normalizePropertyId(propertyId);
+  const safePropertyId = getCleanId(propertyId);
 
   if (!safePropertyId) return null;
 

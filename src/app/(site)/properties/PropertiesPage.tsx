@@ -8,7 +8,7 @@ import PropertyCard from "@/components/PropertyCard";
 import { usePropertyFilters } from "@/lib/hooks/usePropertyFilters";
 import { filterProperties, getCityLabel } from "@/lib/constants";
 import type { Property } from "@/lib/types";
-import { resolvePropertyRecordId } from "@/lib/properties/ids";
+import { getCleanId } from "@/lib/properties/ids";
 
 interface PropertiesPageProps {
   initialProperties: Property[];
@@ -134,7 +134,7 @@ function ResultsFeed({
     <AnimatePresence mode="popLayout">
       {results.length > 0 ? (
         <motion.div
-          key={results.length > 0 ? results.map((p) => resolvePropertyRecordId(p)).join(",") : "empty-results"}
+          key={results.length > 0 ? results.map((p) => getCleanId((p as Property & { _id?: unknown })._id || p.id)).join(",") : "empty-results"}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -143,7 +143,7 @@ function ResultsFeed({
         >
           {results.map((property, i) => (
             <PropertyCard
-              key={resolvePropertyRecordId(property) || `property-${i}`}
+              key={getCleanId((property as Property & { _id?: unknown })._id || property.id) || `property-${i}`}
               property={property}
               index={i}
               variant="dashboard"

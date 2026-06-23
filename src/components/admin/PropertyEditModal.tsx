@@ -9,6 +9,7 @@ import { CITIES, getNeighborhoodFieldLabel, getNeighborhoodZones } from "@/lib/c
 import { PROPERTY_STATUS_LABELS } from "@/lib/properties/labels";
 import type { City, ListingType } from "@/lib/types";
 import type { PropertyStatus } from "@/lib/properties/types";
+import { getCleanId } from "@/lib/properties/ids";
 
 interface PropertyEditModalProps {
   propertyId: string;
@@ -26,10 +27,7 @@ export default function PropertyEditModal({
   initialRaw = null,
 }: PropertyEditModalProps) {
   const router = useRouter();
-  const safePropertyId =
-    typeof propertyId === "string" && !propertyId.includes("[object Object]")
-      ? propertyId.trim()
-      : "";
+  const cleanId = getCleanId(propertyId);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [resolvingImages, setResolvingImages] = useState(false);
@@ -37,10 +35,10 @@ export default function PropertyEditModal({
   const [form, setForm] = useState<CatalogProperty | null>(null);
 
   useEffect(() => {
-    if (!open || !safePropertyId) return;
+    if (!open || !cleanId) return;
 
-    if (initialRaw && String(initialRaw.id ?? "").trim() === safePropertyId) {
-      setForm({ ...initialRaw, id: safePropertyId });
+    if (initialRaw && getCleanId(initialRaw.id) === cleanId) {
+      setForm({ ...initialRaw, id: cleanId });
       setLoading(false);
       setError("");
       return;
@@ -53,18 +51,18 @@ export default function PropertyEditModal({
       setError("");
       setForm(null);
 
-      const fetchUrl = `/api/catalog/properties/${encodeURIComponent(safePropertyId)}`;
+      const fetchUrl = `/api/catalog/properties/${encodeURIComponent(cleanId)}`;
 
       try {
         setError("");
-        const res = await fetch(fetchUrl, { credentials: "include" });
-        if (!res.ok) throw new Error(`Server status: ${res.status}`);
-        const data = await res.json();
+        const response = await fetch(fetchUrl, { credentials: "include" });
+        if (!response.ok) throw new Error(`Server status: ${response.status}`);
+        const data = await response.json();
         if (!data.raw) {
           throw new Error("לא ניתן לטעון את פרטי הנכס — חסרות הרשאות עריכה");
         }
         if (!cancelled) {
-          setForm({ ...(data.raw as CatalogProperty), id: safePropertyId });
+          setForm({ ...(data.raw as CatalogProperty), id: cleanId });
         }
       } catch (err) {
         console.error("RAW FETCH ERROR:", err);
@@ -81,7 +79,7 @@ export default function PropertyEditModal({
     return () => {
       cancelled = true;
     };
-  }, [open, safePropertyId, initialRaw]);
+  }, [open, cleanId, initialRaw]);
 
   const propertyData = form;
   const neighborhoodZones = propertyData?.city ? getNeighborhoodZones(propertyData.city) : [];
@@ -165,13 +163,9 @@ export default function PropertyEditModal({
     }
   };
 
-  if (!open || !safePropertyId) return null;
+  if (!open || !cleanId) return null;
 
-  if (
-    !propertyId ||
-    typeof propertyId !== "string" ||
-    propertyId.includes("[object Object]")
-  ) {
+  if (!cleanId || cleanId.includes("[object Object]")) {
     return (
       <div className="p-4 bg-red-100 text-red-700">
         Critical Error: Invalid Property ID provided to Modal.
@@ -179,12 +173,40 @@ export default function PropertyEditModal({
     );
   }
 
-  const renderFormBody = () => {
-    if (loading || !propertyData) {
-      return <div className="p-8 text-center text-slate-600 dark:text-white/70">טוען נתונים...</div>;
-    }
-
+  if (!propertyData) {
     return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm dark:bg-navy-950/80"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl"
+          >
+            <div className="p-4 text-center text-slate-600 dark:text-white/70">טוען נתונים...</div>
+            {error ? (
+              <p className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-300">
+                {error}
+              </p>
+            ) : null}
+            <div className="mt-4 flex justify-end">
+              <button type="button" onClick={onClose} className="luxury-btn-ghost px-4 py-2">
+                סגור
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  const renderFormBody = () => (
       <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="כותרת" className="sm:col-span-2">
                   <input
@@ -442,8 +464,7 @@ export default function PropertyEditModal({
                   </Field>
                 )}
               </div>
-    );
-  };
+  );
 
   return (
     <AnimatePresence>
