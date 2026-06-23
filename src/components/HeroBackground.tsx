@@ -17,11 +17,13 @@ export default function HeroBackground() {
 
   const isLight = mounted && resolvedTheme === "light";
   const backgrounds = getHeroBackgrounds(selectedCity);
+  const daylightSrc = backgrounds.light;
+  const nighttimeSrc = backgrounds.dark;
 
   return (
     <div key={selectedCity} className="hero-bg-city-swap absolute inset-0 z-0">
       <Image
-        src={backgrounds.dark}
+        src={nighttimeSrc}
         alt=""
         fill
         priority
@@ -34,7 +36,7 @@ export default function HeroBackground() {
       />
 
       <Image
-        src={backgrounds.light}
+        src={daylightSrc}
         alt=""
         fill
         priority

@@ -21,8 +21,11 @@ const CITY_BACKGROUNDS: Partial<Record<City, HeroBackgroundSet>> = {
     dark: BRAND.ganYavneHeroDarkSrc,
   },
   ashkelon: {
-    light: BRAND.ashkelonHeroLightSrc,
-    dark: BRAND.ashkelonHeroDarkSrc,
+    // The Ashkelon source files are physically swapped: the file named
+    // "light" holds the nighttime shot and "dark" holds the daylight shot.
+    // Map paths so light=daylight / dark=nighttime without any component-level exception.
+    light: BRAND.ashkelonHeroDarkSrc,
+    dark: BRAND.ashkelonHeroLightSrc,
   },
 };
 

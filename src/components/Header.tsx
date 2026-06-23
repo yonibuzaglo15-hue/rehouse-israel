@@ -48,26 +48,25 @@ export default function Header() {
   return (
     <header
       className={[
-        "site-header top-0 left-0 z-50 w-full transition-all duration-300 ease-out",
-        isHome ? "site-header--home absolute" : "fixed",
+        "top-0 left-0 z-50 w-full transition-all duration-300 ease-out",
+        isHome ? "absolute" : "fixed",
         showAcrylic
           ? "border-b border-navy-200/60 bg-white/90 shadow-lg shadow-navy-900/5 backdrop-blur-md dark:border-white/10 dark:bg-[#0a1929]/70 dark:shadow-[0_8px_32px_rgba(0,0,0,0.24)]"
           : "bg-transparent",
       ].join(" ")}
     >
       <nav
-        className="mx-auto flex w-full max-w-[100vw] flex-nowrap items-center justify-between gap-4 px-6 py-4 sm:gap-6 sm:px-10 lg:px-12 lg:py-5"
+        className="relative mx-auto flex w-full max-w-[100vw] items-center justify-between px-6 py-4 sm:px-10 lg:px-12 lg:py-5"
         style={{ direction: "rtl" }}
         aria-label="ניווט ראשי"
       >
-        {/* Brand — far right in RTL */}
-        <div className="flex shrink-0 items-center gap-2.5 sm:gap-3">
+        <div className="z-10 flex shrink-0 items-center gap-4">
           <Logo variant="header" linked />
+          <ThemeToggle />
         </div>
 
-        {/* Desktop navigation — structural classes must stay on this wrapper */}
-        <div className="site-header__desktop-nav hidden min-w-0 flex-1 flex-row flex-nowrap items-center justify-end gap-4 md:flex lg:gap-6">
-          <ul className="site-header__nav-list m-0 flex list-none flex-row flex-nowrap items-center gap-4 p-0 lg:gap-6">
+        <div className="absolute left-1/2 top-1/2 z-0 hidden -translate-x-1/2 -translate-y-1/2 items-center md:flex">
+          <ul className="m-0 flex list-none flex-row flex-nowrap items-center gap-4 p-0 lg:gap-6">
             {NAV_LINKS.map((link) => {
               const isActive =
                 link.href === "/"
@@ -75,11 +74,11 @@ export default function Header() {
                   : pathname === link.href || pathname.startsWith(`${link.href}/`);
 
               return (
-                <li key={link.href} className="m-0 list-none shrink-0">
+                <li key={link.href} className="m-0 shrink-0 list-none">
                   <Link
                     href={link.href}
                     className={[
-                      "site-header__nav-link relative block whitespace-nowrap rounded-lg px-3 py-2 font-display text-sm font-medium tracking-wide no-underline transition-colors duration-300 lg:px-4",
+                      "relative block whitespace-nowrap rounded-lg px-3 py-2 font-display text-sm font-medium tracking-wide no-underline transition-colors duration-300 lg:px-4",
                       isActive
                         ? "text-gold-600 dark:text-[#c9952e]"
                         : "text-navy-800 hover:text-gold-600 dark:text-white/85 dark:hover:text-[#c9952e]",
@@ -97,27 +96,23 @@ export default function Header() {
               );
             })}
           </ul>
+        </div>
 
-          <div className="site-header__actions flex shrink-0 flex-nowrap items-center gap-3 lg:gap-4">
-            <ThemeToggle />
+        <div className="z-10 flex shrink-0 items-center gap-4">
+          <div className="hidden flex-nowrap items-center gap-4 md:flex">
             <Link
               href="/properties"
               className="luxury-btn-primary shrink-0 whitespace-nowrap !px-5 !py-2.5 text-sm no-underline"
             >
               מצאו נכס
             </Link>
-
             <HeaderUserMenu />
           </div>
-        </div>
 
-        {/* Mobile: theme toggle + menu */}
-        <div className="flex shrink-0 items-center gap-1 md:hidden">
-          <ThemeToggle />
           <button
             type="button"
             onClick={() => setMobileOpen((open) => !open)}
-            className="shrink-0 rounded-lg p-2.5 text-gold-600 transition-colors duration-300 hover:bg-navy-100 hover:text-gold-700 dark:text-[#c9952e] dark:hover:bg-white/10 dark:hover:text-[#dfa84d]"
+            className="shrink-0 rounded-lg p-2.5 text-gold-600 transition-colors duration-300 hover:bg-navy-100 hover:text-gold-700 md:hidden dark:text-[#c9952e] dark:hover:bg-white/10 dark:hover:text-[#dfa84d]"
             aria-label={mobileOpen ? "סגור תפריט" : "פתח תפריט"}
             aria-expanded={mobileOpen}
           >
@@ -142,7 +137,7 @@ export default function Header() {
                   <Link
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="site-header__nav-link block rounded-lg px-4 py-3 font-display text-base text-navy-800 no-underline transition-colors duration-300 hover:bg-navy-50 hover:text-gold-600 dark:text-white/90 dark:hover:bg-white/5 dark:hover:text-[#c9952e]"
+                    className="block rounded-lg px-4 py-3 font-display text-base text-navy-800 no-underline transition-colors duration-300 hover:bg-navy-50 hover:text-gold-600 dark:text-white/90 dark:hover:bg-white/5 dark:hover:text-[#c9952e]"
                   >
                     {link.label}
                   </Link>

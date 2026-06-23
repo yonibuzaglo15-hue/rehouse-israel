@@ -49,3 +49,17 @@ export function formatCurrencyILS(amount: number): string {
     maximumFractionDigits: 0,
   }).format(amount);
 }
+
+/** Strip commas/non-digits — pure number for calculator state */
+export function parseCurrencyInput(raw: string): number {
+  const normalized = raw.replace(/,/g, "").replace(/\D/g, "");
+  if (normalized === "") return 0;
+  const value = Number(normalized);
+  return Number.isFinite(value) ? value : 0;
+}
+
+/** Thousands separators for text inputs — e.g. 2000000 → 2,000,000 */
+export function formatCurrencyInputDisplay(value: number): string {
+  if (!Number.isFinite(value) || value <= 0) return "";
+  return Math.floor(value).toLocaleString("en-US");
+}
