@@ -37,8 +37,7 @@ export default function PropertyDetailPage({
   canEdit = false,
 }: PropertyDetailPageProps) {
   const router = useRouter();
-  const propertyRecord = property as Property & { _id?: unknown };
-  const cleanId = resolvePropertyRecordId(propertyRecord);
+  const cleanId = resolvePropertyRecordId(property);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
   const [loadingAction, setLoadingAction] = useState<"edit" | "duplicate" | "delete" | null>(

@@ -12,70 +12,23 @@ function isServerlessDeploy(): boolean {
   return process.env.VERCEL === "1";
 }
 
-function createDevResilientRepository(primary: PropertyRepository): PropertyRepository {
-  return {
-    ...primary,
-    async listAll() {
-      try {
-        const list = await primary.listAll();
-        return list.length > 0 ? list : await filePropertyRepository.listAll();
-      } catch {
-        return filePropertyRepository.listAll();
-      }
-    },
-    async listPublished() {
-      try {
-        const list = await primary.listPublished();
-        return list.length > 0 ? list : getPublishedOfficialFallback();
-      } catch {
-        return filePropertyRepository.listPublished();
-      }
-    },
-    async getById(id) {
-      try {
-        const item = await primary.getById(id);
-        if (item) return item;
-      } catch {
-        // fall through to local file store in development only
-      }
-      return filePropertyRepository.getById(id);
-    },
-    async getByExternalId(externalId) {
-      try {
-        const item = await primary.getByExternalId(externalId);
-        if (item) return item;
-      } catch {
-        // fall through to local file store in development only
-      }
-      return filePropertyRepository.getByExternalId(externalId);
-    },
-    create: primary.create.bind(primary),
-    update: primary.update.bind(primary),
-    upsert: primary.upsert.bind(primary),
-    importRows: primary.importRows.bind(primary),
-  };
-}
-
 export function getPropertyRepository(): PropertyRepository {
   if (repository) return repository;
 
   const provider = getPropertyRepositoryProvider();
 
-  if (isServerlessDeploy()) {
-    if (provider !== "supabase") {
-      throw new Error(
-        "Production requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY. Local JSON catalog files cannot be used on Vercel.",
-      );
-    }
+  if (provider === "supabase") {
     repository = supabasePropertyRepository;
     return repository;
   }
 
-  repository =
-    provider === "supabase"
-      ? createDevResilientRepository(supabasePropertyRepository)
-      : filePropertyRepository;
+  if (isServerlessDeploy()) {
+    throw new Error(
+      "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required on Vercel. Local JSON catalog storage is not supported in production.",
+    );
+  }
 
+  repository = filePropertyRepository;
   return repository;
 }
 
@@ -84,13 +37,16 @@ export async function listCatalogProperties() {
 }
 
 export async function listPublishedCatalogProperties() {
-  try {
-    const list = await getPropertyRepository().listPublished();
-    const base = list.length > 0 ? list : getPublishedOfficialFallback();
-    return hydrateCatalogPropertiesMedia(base);
-  } catch {
-    return hydrateCatalogPropertiesMedia(getPublishedOfficialFallback());
+  const list = await getPropertyRepository().listPublished();
+  if (list.length > 0) {
+    return hydrateCatalogPropertiesMedia(list);
   }
+
+  if (isServerlessDeploy()) {
+    return [];
+  }
+
+  return hydrateCatalogPropertiesMedia(getPublishedOfficialFallback());
 }
 
 export async function getCatalogPropertyById(id: string) {
@@ -100,19 +56,19 @@ export async function getCatalogPropertyById(id: string) {
 
 export async function updateCatalogProperty(
   id: string,
-  updates: Parameters<PropertyRepository["update"]>[1]
+  updates: Parameters<PropertyRepository["update"]>[1],
 ) {
   return getPropertyRepository().update(id, updates);
 }
 
 export async function createCatalogProperty(
-  input: Parameters<PropertyRepository["create"]>[0]
+  input: Parameters<PropertyRepository["create"]>[0],
 ) {
   return getPropertyRepository().create(input);
 }
 
 export async function importCatalogRows(
-  rows: Parameters<PropertyRepository["importRows"]>[0]
+  rows: Parameters<PropertyRepository["importRows"]>[0],
 ) {
   return getPropertyRepository().importRows(rows);
 }

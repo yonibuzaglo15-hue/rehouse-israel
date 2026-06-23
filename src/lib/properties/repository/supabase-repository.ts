@@ -1,6 +1,6 @@
 import "server-only";
 
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type PostgrestError, type SupabaseClient } from "@supabase/supabase-js";
 import type {
   CatalogProperty,
   CatalogPropertyInput,
@@ -21,14 +21,23 @@ function getClient(): SupabaseClient {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
-    throw new Error("Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.");
+    const message =
+      "Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel environment variables.";
+    console.error("SUPABASE ERROR:", message);
+    throw new Error(message);
   }
   client = createClient(url, key, { auth: { persistSession: false } });
   return client;
 }
 
+function throwIfSupabaseError(operation: string, error: PostgrestError | null): void {
+  if (!error) return;
+  console.error("SUPABASE ERROR:", operation, error);
+  throw new Error(error.message ?? `Supabase ${operation} failed`);
+}
+
 function rowToProperty(row: { id: string; data: CatalogProperty }): CatalogProperty {
-  return row.data;
+  return { ...row.data, id: row.id };
 }
 
 export const supabasePropertyRepository: PropertyRepository = {
@@ -37,7 +46,7 @@ export const supabasePropertyRepository: PropertyRepository = {
       .from(TABLE)
       .select("id, data")
       .order("updated_at", { ascending: false });
-    if (error) throw error;
+    throwIfSupabaseError("listAll", error);
     return (data ?? []).map(rowToProperty);
   },
 
@@ -52,7 +61,7 @@ export const supabasePropertyRepository: PropertyRepository = {
       .select("id, data")
       .eq("id", id)
       .maybeSingle();
-    if (error) throw error;
+    throwIfSupabaseError("getById", error);
     return data ? rowToProperty(data) : null;
   },
 
@@ -62,7 +71,7 @@ export const supabasePropertyRepository: PropertyRepository = {
       .select("id, data")
       .eq("external_id", externalId)
       .maybeSingle();
-    if (error) throw error;
+    throwIfSupabaseError("getByExternalId", error);
     return data ? rowToProperty(data) : null;
   },
 
@@ -75,7 +84,7 @@ export const supabasePropertyRepository: PropertyRepository = {
       data: property,
       updated_at: property.updatedAt,
     });
-    if (error) throw error;
+    throwIfSupabaseError("create", error);
     return property;
   },
 
@@ -97,7 +106,7 @@ export const supabasePropertyRepository: PropertyRepository = {
         updated_at: next.updatedAt,
       })
       .eq("id", id);
-    if (error) throw error;
+    throwIfSupabaseError("update", error);
     return next;
   },
 
@@ -119,7 +128,7 @@ export const supabasePropertyRepository: PropertyRepository = {
           data: next,
           updated_at: next.updatedAt,
         });
-      if (error) throw error;
+      throwIfSupabaseError("upsert", error);
       return next;
     }
 

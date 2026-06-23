@@ -27,9 +27,9 @@ import {
 import { isNextAuthAdminRole } from "@/lib/auth/nextauth";
 import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
 import PropertyEditModal from "@/components/admin/PropertyEditModal";
-import { propertyDetailHref, resolvePropertyRecordId } from "@/lib/properties/ids";
 import { deleteCatalogProperty } from "@/lib/properties/property-actions";
 import type { CatalogProperty } from "@/lib/properties/catalog-schema";
+import { propertyDetailHref, resolvePropertyRecordId } from "@/lib/properties/ids";
 
 interface PropertyCardProps {
   property: Property;
@@ -111,9 +111,8 @@ function DashboardPropertyCard({
   canEdit: boolean;
 }) {
   const router = useRouter();
-  const propertyRecord = property as Property & { _id?: unknown };
-  const cleanId = resolvePropertyRecordId(propertyRecord);
-  const detailHref = propertyDetailHref(propertyRecord);
+  const cleanId = resolvePropertyRecordId(property);
+  const detailHref = propertyDetailHref(property);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
   const [loadingAction, setLoadingAction] = useState<"edit" | "duplicate" | "delete" | null>(

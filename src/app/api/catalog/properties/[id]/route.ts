@@ -3,7 +3,7 @@ import { canAdminEditCatalog } from "@/lib/auth/admin-access";
 import { getSession } from "@/lib/auth/session";
 import { canEditCatalogProperty } from "@/lib/properties/access";
 import { catalogToPublicProperty } from "@/lib/properties/catalog-schema";
-import { getCleanId, isValidCatalogRouteId } from "@/lib/properties/ids";
+import { getCleanId } from "@/lib/properties/ids";
 import { getCatalogPropertyById } from "@/lib/properties/server";
 
 interface Props {
@@ -16,10 +16,6 @@ export async function GET(_request: Request, { params }: Props) {
     const id = getCleanId(rawParam);
 
     if (!id) {
-      return NextResponse.json({ error: "מזהה נכס לא תקין" }, { status: 400 });
-    }
-
-    if (!isValidCatalogRouteId(id)) {
       return NextResponse.json({ error: "מזהה נכס לא תקין" }, { status: 400 });
     }
 
@@ -37,6 +33,7 @@ export async function GET(_request: Request, { params }: Props) {
       ...(canEdit ? { raw: property } : {}),
     });
   } catch (error) {
+    console.error("SUPABASE ERROR:", error);
     console.error("[GET /api/catalog/properties/[id]]", error);
     const message = error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json(
