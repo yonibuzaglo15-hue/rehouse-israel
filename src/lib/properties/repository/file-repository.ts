@@ -20,6 +20,8 @@ const DATA_DIR = path.join(process.cwd(), "data");
 const DATA_FILE = path.join(DATA_DIR, "catalog-properties.json");
 const COMMITTED_SEED_FILE = path.join(DATA_DIR, "official-catalog-properties.json");
 
+const IS_SERVERLESS = process.env.VERCEL === "1";
+
 function isValidCatalogList(value: unknown): value is CatalogProperty[] {
   return Array.isArray(value) && value.length > 0;
 }
@@ -36,6 +38,9 @@ async function readJsonFile(filePath: string): Promise<CatalogProperty[] | null>
 
 async function writeFallbackSeed(): Promise<CatalogProperty[]> {
   const seed = buildOfficialFallbackCatalogProperties();
+  if (IS_SERVERLESS) {
+    return seed;
+  }
   await fs.mkdir(DATA_DIR, { recursive: true });
   const payload = JSON.stringify(seed, null, 2);
   await fs.writeFile(DATA_FILE, payload, "utf8");
@@ -44,6 +49,12 @@ async function writeFallbackSeed(): Promise<CatalogProperty[]> {
 }
 
 async function ensureDataFile(): Promise<CatalogProperty[]> {
+  if (IS_SERVERLESS) {
+    const fromCommittedSeed = await readJsonFile(COMMITTED_SEED_FILE);
+    if (fromCommittedSeed) return fromCommittedSeed;
+    return buildOfficialFallbackCatalogProperties();
+  }
+
   await fs.mkdir(DATA_DIR, { recursive: true });
 
   const fromRuntime = await readJsonFile(DATA_FILE);
@@ -51,7 +62,9 @@ async function ensureDataFile(): Promise<CatalogProperty[]> {
 
   const fromCommittedSeed = await readJsonFile(COMMITTED_SEED_FILE);
   if (fromCommittedSeed) {
-    await fs.writeFile(DATA_FILE, JSON.stringify(fromCommittedSeed, null, 2), "utf8");
+    if (!IS_SERVERLESS) {
+      await fs.writeFile(DATA_FILE, JSON.stringify(fromCommittedSeed, null, 2), "utf8");
+    }
     return fromCommittedSeed;
   }
 
@@ -59,6 +72,11 @@ async function ensureDataFile(): Promise<CatalogProperty[]> {
 }
 
 async function writeAll(properties: CatalogProperty[]): Promise<void> {
+  if (IS_SERVERLESS) {
+    throw new Error(
+      "Cannot write catalog-properties.json on Vercel. Configure Supabase for production persistence.",
+    );
+  }
   await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(DATA_FILE, JSON.stringify(properties, null, 2), "utf8");
 }

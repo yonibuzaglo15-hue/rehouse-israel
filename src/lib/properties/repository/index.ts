@@ -8,7 +8,11 @@ import { getPropertyRepositoryProvider } from "./types";
 
 let repository: PropertyRepository | null = null;
 
-function createResilientRepository(primary: PropertyRepository): PropertyRepository {
+function isServerlessDeploy(): boolean {
+  return process.env.VERCEL === "1";
+}
+
+function createDevResilientRepository(primary: PropertyRepository): PropertyRepository {
   return {
     ...primary,
     async listAll() {
@@ -32,7 +36,7 @@ function createResilientRepository(primary: PropertyRepository): PropertyReposit
         const item = await primary.getById(id);
         if (item) return item;
       } catch {
-        // fall through to file store
+        // fall through to local file store in development only
       }
       return filePropertyRepository.getById(id);
     },
@@ -41,7 +45,7 @@ function createResilientRepository(primary: PropertyRepository): PropertyReposit
         const item = await primary.getByExternalId(externalId);
         if (item) return item;
       } catch {
-        // fall through
+        // fall through to local file store in development only
       }
       return filePropertyRepository.getByExternalId(externalId);
     },
@@ -54,11 +58,24 @@ function createResilientRepository(primary: PropertyRepository): PropertyReposit
 
 export function getPropertyRepository(): PropertyRepository {
   if (repository) return repository;
+
   const provider = getPropertyRepositoryProvider();
+
+  if (isServerlessDeploy()) {
+    if (provider !== "supabase") {
+      throw new Error(
+        "Production requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY. Local JSON catalog files cannot be used on Vercel.",
+      );
+    }
+    repository = supabasePropertyRepository;
+    return repository;
+  }
+
   repository =
     provider === "supabase"
-      ? createResilientRepository(supabasePropertyRepository)
+      ? createDevResilientRepository(supabasePropertyRepository)
       : filePropertyRepository;
+
   return repository;
 }
 
