@@ -3,8 +3,7 @@ import "server-only";
 import { SYSTEM_USERS, getUserByEmail } from "@/lib/auth/users";
 import type { CatalogPropertyInput, PropertyImportResult } from "@/lib/properties/catalog-schema";
 import { mapImportRowToCatalogInput } from "@/lib/properties/import-mapping";
-import { getPropertyRepositoryProvider } from "@/lib/properties/repository/types";
-import { filePropertyRepository, writeCatalogSnapshot } from "@/lib/properties/repository/file-repository";
+import { isSupabaseConfigured } from "@/lib/properties/repository/types";
 import { supabasePropertyRepository } from "@/lib/properties/repository/supabase-repository";
 import {
   GOOGLE_DRIVE_MEDIA_FOLDER_ID,
@@ -57,55 +56,41 @@ export interface GoogleSyncResult {
 }
 
 async function upsertCatalogInputs(inputs: CatalogPropertyInput[]): Promise<PropertyImportResult> {
-  if (getPropertyRepositoryProvider() === "supabase") {
-    const result: PropertyImportResult = {
-      created: 0,
-      updated: 0,
-      skipped: 0,
-      errors: [],
-    };
-
-    for (let i = 0; i < inputs.length; i++) {
-      const input = inputs[i];
-      try {
-        const before = input.id
-          ? await supabasePropertyRepository.getById(input.id)
-          : input.externalId
-            ? await supabasePropertyRepository.getByExternalId(input.externalId)
-            : null;
-
-        await supabasePropertyRepository.upsert(input);
-        if (before) result.updated++;
-        else result.created++;
-      } catch (error) {
-        result.skipped++;
-        result.errors.push({
-          row: i + 1,
-          message: error instanceof Error ? error.message : "שגיאה בשמירה",
-        });
-      }
-    }
-
-    return result;
+  if (!isSupabaseConfigured()) {
+    throw new Error(
+      "Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY before syncing catalog data.",
+    );
   }
 
-  const before = await filePropertyRepository.listAll();
-  const properties = await writeCatalogSnapshot(inputs);
-
-  return {
-    created: properties.length,
+  const result: PropertyImportResult = {
+    created: 0,
     updated: 0,
     skipped: 0,
-    errors:
-      before.length > properties.length
-        ? [
-            {
-              row: 0,
-              message: `הקטלוג עודכן במלואו: ${properties.length} נכסים פעילים (הוסרו ${before.length - properties.length} נכסים ישנים).`,
-            },
-          ]
-        : [],
+    errors: [],
   };
+
+  for (let i = 0; i < inputs.length; i++) {
+    const input = inputs[i];
+    try {
+      const before = input.id
+        ? await supabasePropertyRepository.getById(input.id)
+        : input.externalId
+          ? await supabasePropertyRepository.getByExternalId(input.externalId)
+          : null;
+
+      await supabasePropertyRepository.upsert(input);
+      if (before) result.updated++;
+      else result.created++;
+    } catch (error) {
+      result.skipped++;
+      result.errors.push({
+        row: i + 1,
+        message: error instanceof Error ? error.message : "שגיאה בשמירה",
+      });
+    }
+  }
+
+  return result;
 }
 
 function resolveAgentFromRow(input: CatalogPropertyInput): CatalogPropertyInput {

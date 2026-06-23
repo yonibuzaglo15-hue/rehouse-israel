@@ -27,9 +27,23 @@ function PropertiesLoading() {
   );
 }
 
+async function loadCatalogProperties() {
+  try {
+    return await listPublishedCatalogProperties();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const details =
+      error && typeof error === "object" && "details" in error
+        ? (error as { details?: string }).details
+        : undefined;
+    console.error("CRITICAL SUPABASE ERROR:", message, details);
+    return [];
+  }
+}
+
 export default async function Page() {
   const [properties, session, nextAuthAdmin] = await Promise.all([
-    listPublishedCatalogProperties(),
+    loadCatalogProperties(),
     getSession(),
     canAdminEditCatalog(),
   ]);

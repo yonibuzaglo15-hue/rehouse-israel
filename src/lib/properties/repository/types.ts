@@ -17,11 +17,12 @@ export interface PropertyRepository {
   importRows(rows: PropertyImportRow[]): Promise<PropertyImportResult>;
 }
 
-export type PropertyRepositoryProvider = "file" | "supabase";
+export type PropertyRepositoryProvider = "supabase";
 
 export function getPropertyRepositoryProvider(): PropertyRepositoryProvider {
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return "supabase";
-  }
-  return "file";
+  return "supabase";
+}
+
+export function isSupabaseConfigured(): boolean {
+  return Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }

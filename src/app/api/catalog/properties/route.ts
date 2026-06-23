@@ -19,7 +19,7 @@ export async function GET() {
       count: properties.length,
     });
   } catch (error) {
-    console.error("SUPABASE ERROR:", error);
+    console.error("CRITICAL SUPABASE ERROR:", error instanceof Error ? error.message : error);
     console.error("[GET /api/catalog/properties]", error);
     const message = error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json({ error: message }, { status: 500 });
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
       property: catalogToPublicProperty(property),
     });
   } catch (error) {
-    console.error("SUPABASE ERROR:", error);
+    console.error("CRITICAL SUPABASE ERROR:", error instanceof Error ? error.message : error);
     console.error("[POST /api/catalog/properties]", error);
     const message = error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json({ error: message }, { status: 500 });

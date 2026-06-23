@@ -33,7 +33,7 @@ export async function GET(_request: Request, { params }: Props) {
       ...(canEdit ? { raw: property } : {}),
     });
   } catch (error) {
-    console.error("SUPABASE ERROR:", error);
+    console.error("CRITICAL SUPABASE ERROR:", error instanceof Error ? error.message : error);
     console.error("[GET /api/catalog/properties/[id]]", error);
     const message = error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json(

@@ -23,7 +23,7 @@ function getClient(): SupabaseClient {
   if (!url || !key) {
     const message =
       "Supabase is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Vercel environment variables.";
-    console.error("SUPABASE ERROR:", message);
+    console.error("CRITICAL SUPABASE ERROR:", message, undefined);
     throw new Error(message);
   }
   client = createClient(url, key, { auth: { persistSession: false } });
@@ -32,7 +32,8 @@ function getClient(): SupabaseClient {
 
 function throwIfSupabaseError(operation: string, error: PostgrestError | null): void {
   if (!error) return;
-  console.error("SUPABASE ERROR:", operation, error);
+  console.error("CRITICAL SUPABASE ERROR:", error.message, error.details);
+  console.error(`[supabase ${operation}]`, error);
   throw new Error(error.message ?? `Supabase ${operation} failed`);
 }
 

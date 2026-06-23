@@ -1,34 +1,15 @@
 import "server-only";
 
 import { hydrateCatalogPropertiesMedia, hydrateCatalogPropertyMedia } from "../catalog-media-hydration";
-import { filePropertyRepository, getPublishedOfficialFallback } from "./file-repository";
 import { supabasePropertyRepository } from "./supabase-repository";
 import type { PropertyRepository } from "./types";
-import { getPropertyRepositoryProvider } from "./types";
 
 let repository: PropertyRepository | null = null;
 
-function isServerlessDeploy(): boolean {
-  return process.env.VERCEL === "1";
-}
-
 export function getPropertyRepository(): PropertyRepository {
-  if (repository) return repository;
-
-  const provider = getPropertyRepositoryProvider();
-
-  if (provider === "supabase") {
+  if (!repository) {
     repository = supabasePropertyRepository;
-    return repository;
   }
-
-  if (isServerlessDeploy()) {
-    throw new Error(
-      "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required on Vercel. Local JSON catalog storage is not supported in production.",
-    );
-  }
-
-  repository = filePropertyRepository;
   return repository;
 }
 
@@ -37,16 +18,18 @@ export async function listCatalogProperties() {
 }
 
 export async function listPublishedCatalogProperties() {
-  const list = await getPropertyRepository().listPublished();
-  if (list.length > 0) {
+  try {
+    const list = await getPropertyRepository().listPublished();
     return hydrateCatalogPropertiesMedia(list);
-  }
-
-  if (isServerlessDeploy()) {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    const details =
+      error && typeof error === "object" && "details" in error
+        ? (error as { details?: string }).details
+        : undefined;
+    console.error("CRITICAL SUPABASE ERROR:", message, details);
     return [];
   }
-
-  return hydrateCatalogPropertiesMedia(getPublishedOfficialFallback());
 }
 
 export async function getCatalogPropertyById(id: string) {
