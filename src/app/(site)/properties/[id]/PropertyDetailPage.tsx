@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   ArrowRight,
@@ -16,9 +18,14 @@ import {
 import InquiryForm from "@/components/InquiryForm";
 import PropertyCard from "@/components/PropertyCard";
 import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
+import PropertyEditModal from "@/components/admin/PropertyEditModal";
 import type { Property } from "@/lib/types";
 import { formatPrice, getCityLabel } from "@/lib/constants";
 import { normalizePropertyId } from "@/lib/properties/ids";
+import {
+  deleteCatalogProperty,
+  duplicateCatalogProperty,
+} from "@/lib/properties/property-actions";
 
 interface PropertyDetailPageProps {
   property: Property;
@@ -31,7 +38,53 @@ export default function PropertyDetailPage({
   related = [],
   canEdit = false,
 }: PropertyDetailPageProps) {
+  const router = useRouter();
   const propertyId = normalizePropertyId(property.id);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editId, setEditId] = useState("");
+  const [loadingAction, setLoadingAction] = useState<"edit" | "duplicate" | "delete" | null>(
+    null,
+  );
+  const [actionError, setActionError] = useState("");
+
+  const handleEdit = () => {
+    setActionError("");
+    setEditId(propertyId);
+    setIsEditOpen(true);
+  };
+
+  const handleDuplicate = async () => {
+    setActionError("");
+    setLoadingAction("duplicate");
+
+    try {
+      await duplicateCatalogProperty(propertyId, router);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "שכפול הנכס נכשל");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    setActionError("");
+
+    const confirmed = window.confirm(
+      "האם למחוק את הנכס מהקטלוג? הנכס יוסר מהאתר אך יישמר במערכת כלא מפורסם.",
+    );
+    if (!confirmed) return;
+
+    setLoadingAction("delete");
+
+    try {
+      await deleteCatalogProperty(propertyId);
+      router.refresh();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "מחיקת הנכס נכשלה");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
 
   return (
     <>
@@ -47,7 +100,15 @@ export default function PropertyDetailPage({
 
           {canEdit && propertyId ? (
             <div className="mb-6">
-              <PropertyActionMenu propertyId={propertyId} />
+              <PropertyActionMenu
+                onEdit={handleEdit}
+                onDuplicate={handleDuplicate}
+                onDelete={handleDelete}
+                loadingAction={loadingAction}
+              />
+              {actionError ? (
+                <p className="mt-2 text-sm text-red-500 dark:text-red-400">{actionError}</p>
+              ) : null}
             </div>
           ) : null}
 
@@ -142,6 +203,16 @@ export default function PropertyDetailPage({
           </div>
         </section>
       )}
+      {editId ? (
+        <PropertyEditModal
+          propertyId={editId}
+          open={isEditOpen}
+          onClose={() => {
+            setIsEditOpen(false);
+            setEditId("");
+          }}
+        />
+      ) : null}
     </>
   );
 }

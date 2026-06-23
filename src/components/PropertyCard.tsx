@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import {
@@ -24,7 +26,12 @@ import {
 } from "@/lib/properties/property-images";
 import { isNextAuthAdminRole } from "@/lib/auth/nextauth";
 import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
+import PropertyEditModal from "@/components/admin/PropertyEditModal";
 import { normalizePropertyId, propertyDetailHref } from "@/lib/properties/ids";
+import {
+  deleteCatalogProperty,
+  duplicateCatalogProperty,
+} from "@/lib/properties/property-actions";
 
 interface PropertyCardProps {
   property: Property;
@@ -105,8 +112,54 @@ function DashboardPropertyCard({
   index: number;
   canEdit: boolean;
 }) {
+  const router = useRouter();
   const propertyId = normalizePropertyId(property.id);
   const detailHref = propertyDetailHref(propertyId);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editId, setEditId] = useState("");
+  const [loadingAction, setLoadingAction] = useState<"edit" | "duplicate" | "delete" | null>(
+    null,
+  );
+  const [actionError, setActionError] = useState("");
+
+  const handleEdit = () => {
+    setActionError("");
+    setEditId(propertyId);
+    setIsEditOpen(true);
+  };
+
+  const handleDuplicate = async () => {
+    setActionError("");
+    setLoadingAction("duplicate");
+
+    try {
+      await duplicateCatalogProperty(propertyId, router);
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "שכפול הנכס נכשל");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const handleDelete = async () => {
+    setActionError("");
+
+    const confirmed = window.confirm(
+      "האם למחוק את הנכס מהקטלוג? הנכס יוסר מהאתר אך יישמר במערכת כלא מפורסם.",
+    );
+    if (!confirmed) return;
+
+    setLoadingAction("delete");
+
+    try {
+      await deleteCatalogProperty(propertyId);
+      router.refresh();
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : "מחיקת הנכס נכשלה");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
 
   return (
     <motion.article
@@ -125,21 +178,31 @@ function DashboardPropertyCard({
         </Link>
 
         <div className="flex min-w-0 flex-1 flex-col border-s border-navy-200/70 dark:border-white/10">
-          <div className="flex items-center justify-between gap-2 border-b border-navy-200/70 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-navy-900/60">
-            <Link
-              href={detailHref}
-              className="min-w-0 font-mono text-base font-bold tabular-nums text-gold-600 hover:text-gold-500 dark:text-gold-400 dark:hover:text-gold-300"
-            >
-              {formatPrice(property.price, property.listingType)}
-            </Link>
-            <div className="flex shrink-0 items-center gap-3">
-              <span className="rounded border border-navy-200/80 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-slate-600 dark:border-white/20 dark:text-white/70">
-                {property.listingType === "buy" ? "SALE" : "RENT"}
-              </span>
-              {canEdit && propertyId ? (
-                <PropertyActionMenu propertyId={propertyId} />
-              ) : null}
+          <div className="border-b border-navy-200/70 bg-slate-50 dark:border-white/10 dark:bg-navy-900/60">
+            <div className="flex items-center justify-between gap-2 px-3 py-2">
+              <Link
+                href={detailHref}
+                className="min-w-0 font-mono text-base font-bold tabular-nums text-gold-600 hover:text-gold-500 dark:text-gold-400 dark:hover:text-gold-300"
+              >
+                {formatPrice(property.price, property.listingType)}
+              </Link>
+              <div className="flex shrink-0 items-center gap-3">
+                <span className="rounded border border-navy-200/80 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-slate-600 dark:border-white/20 dark:text-white/70">
+                  {property.listingType === "buy" ? "SALE" : "RENT"}
+                </span>
+                {canEdit && propertyId ? (
+                  <PropertyActionMenu
+                    onEdit={handleEdit}
+                    onDuplicate={handleDuplicate}
+                    onDelete={handleDelete}
+                    loadingAction={loadingAction}
+                  />
+                ) : null}
+              </div>
             </div>
+            {actionError ? (
+              <p className="px-3 pb-2 text-[11px] text-red-600 dark:text-red-400">{actionError}</p>
+            ) : null}
           </div>
 
           <Link href={detailHref} className="group block flex-1">
@@ -178,6 +241,17 @@ function DashboardPropertyCard({
           </Link>
         </div>
       </div>
+
+      {editId ? (
+        <PropertyEditModal
+          propertyId={editId}
+          open={isEditOpen}
+          onClose={() => {
+            setIsEditOpen(false);
+            setEditId("");
+          }}
+        />
+      ) : null}
     </motion.article>
   );
 }
