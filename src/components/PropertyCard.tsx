@@ -27,7 +27,7 @@ import {
 import { isNextAuthAdminRole } from "@/lib/auth/nextauth";
 import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
 import PropertyEditModal from "@/components/admin/PropertyEditModal";
-import { getCleanId, propertyDetailHref } from "@/lib/properties/ids";
+import { propertyDetailHref, resolvePropertyRecordId } from "@/lib/properties/ids";
 import { deleteCatalogProperty } from "@/lib/properties/property-actions";
 import type { CatalogProperty } from "@/lib/properties/catalog-schema";
 
@@ -112,7 +112,7 @@ function DashboardPropertyCard({
 }) {
   const router = useRouter();
   const propertyRecord = property as Property & { _id?: unknown };
-  const cleanId = getCleanId(propertyRecord._id || property.id);
+  const cleanId = resolvePropertyRecordId(propertyRecord);
   const detailHref = propertyDetailHref(propertyRecord);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
@@ -313,7 +313,7 @@ function QuickSpec({
 function LuxuryPropertyCard({ property, index }: { property: Property; index: number }) {
   const { data: session } = useSession();
   const isAdmin = isNextAuthAdminRole(session?.user?.role);
-  const propertyId = getCleanId((property as Property & { _id?: unknown })._id || property.id);
+  const propertyId = resolvePropertyRecordId(property);
   const detailHref = propertyDetailHref(property);
 
   return (

@@ -52,6 +52,7 @@ export default function PropertyEditModal({
       setForm(null);
 
       const fetchUrl = `/api/catalog/properties/${encodeURIComponent(cleanId)}`;
+      console.log("PropertyEditModal fetch:", fetchUrl, "cleanId:", cleanId);
 
       try {
         setError("");

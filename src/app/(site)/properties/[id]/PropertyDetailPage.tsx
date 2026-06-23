@@ -21,7 +21,7 @@ import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
 import PropertyEditModal from "@/components/admin/PropertyEditModal";
 import type { Property } from "@/lib/types";
 import { formatPrice, getCityLabel } from "@/lib/constants";
-import { getCleanId } from "@/lib/properties/ids";
+import { resolvePropertyRecordId } from "@/lib/properties/ids";
 import { deleteCatalogProperty } from "@/lib/properties/property-actions";
 import type { CatalogProperty } from "@/lib/properties/catalog-schema";
 
@@ -38,7 +38,7 @@ export default function PropertyDetailPage({
 }: PropertyDetailPageProps) {
   const router = useRouter();
   const propertyRecord = property as Property & { _id?: unknown };
-  const cleanId = getCleanId(propertyRecord._id || property.id);
+  const cleanId = resolvePropertyRecordId(propertyRecord);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
   const [loadingAction, setLoadingAction] = useState<"edit" | "duplicate" | "delete" | null>(
@@ -48,12 +48,12 @@ export default function PropertyDetailPage({
 
   const handleOpenEdit = () => {
     setActionError("");
-    const id = getCleanId(propertyRecord._id || property.id);
-    if (!id) {
+    if (!cleanId) {
       setActionError("מזהה נכס לא תקין");
       return;
     }
-    setEditId(id);
+    console.log("Modal opening with ID:", cleanId);
+    setEditId(cleanId);
     setIsEditOpen(true);
   };
 
@@ -63,8 +63,7 @@ export default function PropertyDetailPage({
   };
 
   const handleDuplicate = async () => {
-    const id = getCleanId(propertyRecord._id || property.id);
-    if (!id) {
+    if (!cleanId) {
       setActionError("מזהה נכס לא תקין");
       return;
     }
@@ -73,7 +72,7 @@ export default function PropertyDetailPage({
     setLoadingAction("duplicate");
 
     try {
-      const response = await fetch(`/api/catalog/properties/${encodeURIComponent(id)}`, {
+      const response = await fetch(`/api/catalog/properties/${encodeURIComponent(cleanId)}`, {
         credentials: "include",
       });
       if (!response.ok) throw new Error(`Server status: ${response.status}`);
@@ -93,7 +92,7 @@ export default function PropertyDetailPage({
           published: false,
         }),
       );
-      router.push(`/admin/property/new?duplicate=1&id=${encodeURIComponent(id)}`);
+      router.push(`/admin/property/new?duplicate=1&id=${encodeURIComponent(cleanId)}`);
     } catch (err) {
       console.error("RAW DUPLICATE ERROR:", err);
       setActionError(err instanceof Error ? err.message : "שכפול הנכס נכשל");
