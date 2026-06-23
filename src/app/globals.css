@@ -249,9 +249,38 @@
       placeholder:text-white/30 focus:border-gold-500/60 focus:outline-none focus:ring-1 focus:ring-gold-500/30;
   }
 
-  /* GSAP scroll-video scrollytelling — sticky viewport + short scrub track */
+  /* Homepage hero — dynamic background + centered logo overlay */
   .hero-layered {
     --site-header-height: 5rem;
+  }
+
+  .hero-layered--front {
+    padding-bottom: 2.5rem;
+  }
+
+  .hero-layered--front .hero-layered__logo {
+    top: calc(50% + 0.25rem);
+    width: min(88vw, 340px);
+    max-width: calc(100vw - 2rem);
+    padding-inline: 0.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .hero-layered--front .hero-layered__logo {
+      width: min(72vw, 440px);
+      padding-inline: 0;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .hero-layered--front .hero-layered__logo {
+      width: min(52vw, 540px);
+    }
+  }
+
+  .hero-layered--front .hero-layered__logo-img {
+    filter: drop-shadow(0 10px 36px rgba(0, 0, 0, 0.45))
+      drop-shadow(0 2px 12px rgba(0, 0, 0, 0.35));
   }
 
   @media (min-width: 640px) {
@@ -344,21 +373,39 @@
   .hero-search-overlay {
     position: relative;
     z-index: 30;
-    margin-top: -2rem;
-    padding-bottom: 1.5rem;
+    margin-top: -2.5rem;
+    padding-bottom: 0.5rem;
     pointer-events: auto;
   }
 
   @media (min-width: 640px) {
     .hero-search-overlay {
-      margin-top: -2.5rem;
+      margin-top: -3rem;
     }
   }
 
   @media (min-width: 1024px) {
     .hero-search-overlay {
-      margin-top: -3rem;
+      margin-top: -3.5rem;
     }
+  }
+
+  .home-intro-section {
+    margin-top: 0.5rem;
+  }
+
+  .home-intro-card {
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .home-intro-card:hover {
+    border-color: rgba(201, 149, 46, 0.35);
+    background-color: rgba(201, 149, 46, 0.04);
+  }
+
+  .dark .home-intro-card:hover {
+    border-color: rgba(201, 149, 46, 0.4);
+    background-color: rgba(255, 255, 255, 0.06);
   }
 
   .home-page-stack > .hero-search-overlay {

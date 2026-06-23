@@ -1,5 +1,6 @@
 import HeroSection from "@/components/HeroSection";
 import HeroPropertySearch from "@/components/home/HeroPropertySearch";
+import HomeIntroSection from "@/components/home/HomeIntroSection";
 import HomePageShell from "@/components/home/HomePageShell";
 import HotPropertiesSlider from "@/components/home/HotPropertiesSlider";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
@@ -14,7 +15,7 @@ interface HomePageProps {
 
 /**
  * Landing page section stack — visual sketch order:
- * Hero → Search → Hot Properties → Testimonials → Mortgage Calculator
+ * Hero → Search → Intro → Hot Properties → Testimonials → Mortgage Calculator
  */
 export default function HomePage({
   hotProperties,
@@ -25,6 +26,7 @@ export default function HomePage({
       <div className="home-page-stack flex flex-col bg-white transition-colors duration-300 dark:bg-navy-950">
         <HeroSection />
         <HeroPropertySearch />
+        <HomeIntroSection />
         <HotPropertiesSlider properties={hotProperties} />
         <TestimonialsSection testimonials={testimonials} />
         <MortgageCalculator />

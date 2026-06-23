@@ -1,35 +1,41 @@
-/** Homepage hero area highlights — city / neighborhood copy */
+/** Homepage intro copy — rendered below hero search, not on the background */
+export const HOME_INTRO = {
+  headline: "מצאו את הבית שלכם באשדוד, אשקלון ויבנה",
+  subtitle:
+    "Rehouse Israel – ליווי ותיווך פרימיום עם יחס אישי, נכסים נבחרים ושירות ברמה בינלאומית",
+} as const;
+
 export const HERO_AREA_CARDS = [
   {
     id: "ashdod-marina",
     city: "אשדוד",
-    title: "מרינה ורובעי הים",
+    area: "מרינה ורובעי הים",
     description: "נכסי יוקרה על קו החוף הדרומי",
   },
   {
     id: "ashkelon-ir-yamim",
     city: "אשקלון",
-    title: "שכונת עיר ימים",
+    area: "שכונת עיר ימים",
     description:
-      "שכונת עיר ימים הצפונית — אזור מבוסס עם וילות, דירות מרווחות וקרבה לחוף הים",
+      "שכונת עיר ימים הצפונית – אזור מבוסס עם וילות, דירות מרווחות וקרבה לחוף הים",
   },
   {
     id: "ashkelon-ir-hayayin",
     city: "אשקלון",
-    title: "שכונת עיר היין",
+    area: "שכונת עיר היין",
     description:
-      "שכונת עיר היין — אזור תוכנית חדש על קו החוף, בעל אופי עירוני מודרני ונפרד מעיר ימים",
+      "שכונת עיר היין – אזור תוכנית חדש על קו החוף, בעל אופי עירוני מודרני ונפרד מעיר ימים",
   },
   {
     id: "ashkelon-agamim",
     city: "אשקלון",
-    title: "אגמים",
-    description: "שכונת אגמים הנחשקת בדרום העיר",
+    area: "אגמים",
+    description: "שכונת אגמים המתפתחת בדרום העיר",
   },
   {
     id: "yavne",
     city: "יבנה",
-    title: "יבנה הירוקה",
+    area: "יבנה הירוקה",
     description: "שכונות חדשות ומשפחתיות בלב העיר",
   },
 ] as const;

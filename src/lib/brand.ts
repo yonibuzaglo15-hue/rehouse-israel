@@ -1,9 +1,16 @@
 /** Official Rehouse Israel brand assets and copy */
+
+/** Header / footer / favicon — transparent PNG */
+export const HEADER_LOGO_SRC = "/assets/rehouse-logo-transparent.png";
+
+/** Homepage hero center overlay — committed at public/assets/rehouse-logo-hero.png */
+export const HERO_FRONT_LOGO_SRC = "/assets/rehouse-logo-hero.png";
+
 export const BRAND = {
-  /** Gold emblem + REHOUSE — transparent PNG (header, hero, footer) */
-  heroLogoSrc: "/assets/rehouse-logo-transparent.png",
-  /** @deprecated Use heroLogoSrc — kept for backward compatibility */
-  logoSrc: "/assets/rehouse-logo-transparent.png",
+  heroLogoSrc: HEADER_LOGO_SRC,
+  heroFrontLogoSrc: HERO_FRONT_LOGO_SRC,
+  /** @deprecated Use heroLogoSrc */
+  logoSrc: HEADER_LOGO_SRC,
   heroBgSrc: "/assets/hero-bg.jpg",
   heroBgLightSrc: "/assets/hero-bg-light.jpg",
   yavneHeroLightSrc: "/assets/yavne-hero-light.jpg",
