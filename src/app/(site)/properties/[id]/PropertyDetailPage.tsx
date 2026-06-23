@@ -47,10 +47,19 @@ export default function PropertyDetailPage({
   );
   const [actionError, setActionError] = useState("");
 
-  const handleEdit = () => {
+  const handleOpenEdit = () => {
     setActionError("");
-    setEditId(propertyId);
+    const rawId =
+      (property as Property & { _id?: unknown })._id ?? property.id;
+    const safeId = String(rawId || "").trim();
+    if (!safeId) return;
+    setEditId(safeId);
     setIsEditOpen(true);
+  };
+
+  const handleCloseEdit = () => {
+    setIsEditOpen(false);
+    setEditId("");
   };
 
   const handleDuplicate = async () => {
@@ -101,7 +110,7 @@ export default function PropertyDetailPage({
           {canEdit && propertyId ? (
             <div className="mb-6">
               <PropertyActionMenu
-                onEdit={handleEdit}
+                onEdit={handleOpenEdit}
                 onDuplicate={handleDuplicate}
                 onDelete={handleDelete}
                 loadingAction={loadingAction}
@@ -203,14 +212,11 @@ export default function PropertyDetailPage({
           </div>
         </section>
       )}
-      {editId ? (
+      {isEditOpen && editId ? (
         <PropertyEditModal
           propertyId={editId}
-          open={isEditOpen}
-          onClose={() => {
-            setIsEditOpen(false);
-            setEditId("");
-          }}
+          open
+          onClose={handleCloseEdit}
         />
       ) : null}
     </>

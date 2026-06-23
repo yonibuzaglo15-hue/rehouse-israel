@@ -122,10 +122,19 @@ function DashboardPropertyCard({
   );
   const [actionError, setActionError] = useState("");
 
-  const handleEdit = () => {
+  const handleOpenEdit = () => {
     setActionError("");
-    setEditId(propertyId);
+    const rawId =
+      (property as Property & { _id?: unknown })._id ?? property.id;
+    const safeId = String(rawId || "").trim();
+    if (!safeId) return;
+    setEditId(safeId);
     setIsEditOpen(true);
+  };
+
+  const handleCloseEdit = () => {
+    setIsEditOpen(false);
+    setEditId("");
   };
 
   const handleDuplicate = async () => {
@@ -186,13 +195,17 @@ function DashboardPropertyCard({
               >
                 {formatPrice(property.price, property.listingType)}
               </Link>
-              <div className="flex shrink-0 items-center gap-3">
+              <div
+                className="flex shrink-0 items-center gap-3"
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
                 <span className="rounded border border-navy-200/80 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-slate-600 dark:border-white/20 dark:text-white/70">
                   {property.listingType === "buy" ? "SALE" : "RENT"}
                 </span>
                 {canEdit && propertyId ? (
                   <PropertyActionMenu
-                    onEdit={handleEdit}
+                    onEdit={handleOpenEdit}
                     onDuplicate={handleDuplicate}
                     onDelete={handleDelete}
                     loadingAction={loadingAction}
@@ -242,14 +255,11 @@ function DashboardPropertyCard({
         </div>
       </div>
 
-      {editId ? (
+      {isEditOpen && editId ? (
         <PropertyEditModal
           propertyId={editId}
-          open={isEditOpen}
-          onClose={() => {
-            setIsEditOpen(false);
-            setEditId("");
-          }}
+          open
+          onClose={handleCloseEdit}
         />
       ) : null}
     </motion.article>

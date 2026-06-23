@@ -156,7 +156,7 @@ export default function PropertyEditModal({
     }
   };
 
-  if (!open) return null;
+  if (!open || !safePropertyId) return null;
 
   return (
     <AnimatePresence>

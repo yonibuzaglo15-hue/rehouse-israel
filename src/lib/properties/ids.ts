@@ -5,6 +5,7 @@ export function normalizePropertyId(id: unknown): string {
   if (typeof id === "object") {
     const record = id as Record<string, unknown>;
     if (typeof record.$oid === "string") return record.$oid.trim();
+    if (typeof record._id === "string") return record._id.trim();
     if (typeof record.id === "string") return record.id.trim();
   }
 
