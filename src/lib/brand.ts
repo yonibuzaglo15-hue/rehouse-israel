@@ -3,8 +3,8 @@
 /** Header / footer / favicon — transparent PNG */
 export const HEADER_LOGO_SRC = "/assets/rehouse-logo-transparent.png";
 
-/** Homepage hero center overlay — committed at public/assets/rehouse-logo-hero.png */
-export const HERO_FRONT_LOGO_SRC = "/assets/rehouse-logo-hero.png";
+/** Homepage hero center overlay — transparent gold logo (no solid background) */
+export const HERO_FRONT_LOGO_SRC = "/assets/rehouse-logo-transparent.png";
 
 export const BRAND = {
   heroLogoSrc: HEADER_LOGO_SRC,

@@ -71,7 +71,6 @@ export default function RootLayout({
         <link rel="preload" as="image" href={BRAND.heroBgSrc} type="image/jpeg" />
         <link rel="preload" as="image" href={BRAND.heroBgLightSrc} type="image/jpeg" />
         <link rel="preload" as="image" href={BRAND.heroFrontLogoSrc} type="image/png" />
-        <link rel="preload" as="image" href={BRAND.heroLogoSrc} type="image/png" />
       </head>
       <body
         className={`${heebo.variable} ${rubik.variable} font-body overflow-x-hidden bg-white text-navy-950 transition-colors duration-300 dark:bg-navy-950 dark:text-white`}

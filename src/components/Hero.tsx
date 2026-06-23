@@ -70,6 +70,7 @@ export default function Hero({
                   : "(max-width: 640px) 72vw, (max-width: 1024px) 50vw, 520px"
               }
               priority
+              unoptimized={height === "front"}
             />
           </Link>
         </div>
