@@ -2,7 +2,7 @@ import type { City, Property, PropertyFilters } from "./types";
 import { getFlatNeighborhoods } from "./neighborhoods";
 import { neighborhoodsMatch } from "./neighborhood-utils";
 
-export { MOCK_AGENTS, LEADERSHIP_AGENTS, getAgentById } from "./mock-data/agents";
+export { MOCK_AGENTS, CORE_TEAM_AGENTS, LEADERSHIP_AGENTS, getAgentById } from "./mock-data/agents";
 export { MOCK_PROPERTIES, getPropertyById } from "./mock-data/properties";
 export {
   CITY_NEIGHBORHOOD_ZONES,

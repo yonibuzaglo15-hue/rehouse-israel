@@ -28,7 +28,7 @@ export default function HeroPropertySearch() {
   return (
     <section
       id="property-search"
-      className="hero-search-overlay relative z-30 -mt-12 px-4 sm:-mt-16 sm:px-6 lg:-mt-20 lg:px-8"
+      className="hero-search-overlay relative z-30 px-4 sm:px-6 lg:px-8"
       aria-label="חיפוש נכסים"
     >
       <div className="mx-auto max-w-5xl">

@@ -2,11 +2,11 @@ import type { Agent } from "@/lib/types";
 import { agentImage } from "@/lib/images";
 
 /** Core leadership team — canonical profiles with local image assets */
-export const LEADERSHIP_AGENTS: Agent[] = [
+export const CORE_TEAM_AGENTS: Agent[] = [
   {
     id: "usr_yonatan_buzaglo",
     name: "יונתן בוזגלו",
-    title: "מנכ״ל | יועץ נדל״ן בכיר",
+    title: "יועץ נדל״ן בכיר | מנכ״ל",
     specialization: "מומחה נדל״ן · אשדוד והסביבה",
     description:
       "יונתן בוזגלו, מנכ״ל ויועץ נדל״ן בכיר ב-Rehouse Israel — ליווי אישי ומקצועי ללקוחות נדל״ן יוקרה.",
@@ -49,6 +49,9 @@ export const LEADERSHIP_AGENTS: Agent[] = [
     calendarUrl: "https://calendly.com",
   },
 ];
+
+/** @deprecated Use CORE_TEAM_AGENTS */
+export const LEADERSHIP_AGENTS = CORE_TEAM_AGENTS;
 
 export const MOCK_AGENTS: Agent[] = [
   {
@@ -119,5 +122,5 @@ export const MOCK_AGENTS: Agent[] = [
 ];
 
 export function getAgentById(id: string): Agent | undefined {
-  return [...LEADERSHIP_AGENTS, ...MOCK_AGENTS].find((a) => a.id === id);
+  return [...CORE_TEAM_AGENTS, ...MOCK_AGENTS].find((a) => a.id === id);
 }
