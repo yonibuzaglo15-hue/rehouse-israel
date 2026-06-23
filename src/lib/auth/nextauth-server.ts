@@ -1,10 +1,10 @@
 import "server-only";
 
 import { getServerSession } from "next-auth/next";
-import { authOptions, isNextAuthAdminRole } from "@/lib/auth/nextauth";
+import { getAuthOptions, isNextAuthAdminRole } from "@/lib/auth/nextauth";
 
 export async function getNextAuthSession() {
-  return getServerSession(authOptions);
+  return getServerSession(getAuthOptions());
 }
 
 export async function getNextAuthAdminSession() {

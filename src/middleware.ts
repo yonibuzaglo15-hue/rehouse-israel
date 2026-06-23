@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { jwtVerify } from "jose";
 import { SESSION_COOKIE_NAME } from "@/lib/auth/session";
+import { getNextAuthSecret } from "@/lib/auth/nextauth-env";
 import type { SystemRole } from "@/lib/auth/types";
 import {
   canAccessPath,
@@ -11,17 +12,7 @@ import {
 } from "@/lib/auth/routes";
 
 function getAuthSecret(): Uint8Array {
-  const secret =
-    process.env.AUTH_SECRET ?? "rehouse-dev-secret-change-in-production";
-  return new TextEncoder().encode(secret);
-}
-
-function getNextAuthSecret(): string {
-  return (
-    process.env.NEXTAUTH_SECRET ??
-    process.env.AUTH_SECRET ??
-    "rehouse-dev-secret-change-in-production"
-  );
+  return new TextEncoder().encode(getNextAuthSecret());
 }
 
 interface MiddlewareSession {

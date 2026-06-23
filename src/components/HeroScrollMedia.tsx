@@ -3,6 +3,7 @@
 import { memo, useEffect, useRef, useState, type RefObject } from "react";
 import type gsap from "gsap";
 import type { ScrollTrigger as ScrollTriggerPlugin } from "gsap/ScrollTrigger";
+import Image from "next/image";
 import { IMAGES } from "@/lib/images";
 import {
   describeVideo,
@@ -290,9 +291,12 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
             ref={brandRevealRef}
             className="brand-reveal-overlay flex items-center justify-center"
           >
-            <img
+            <Image
               src={BRAND.heroLogoSrc}
               alt=""
+              width={420}
+              height={240}
+              unoptimized
               className="h-auto w-[min(72vw,420px)] max-w-full object-contain drop-shadow-2xl"
             />
           </div>
