@@ -9,7 +9,6 @@ import { CITIES, getNeighborhoodFieldLabel, getNeighborhoodZones } from "@/lib/c
 import { PROPERTY_STATUS_LABELS } from "@/lib/properties/labels";
 import type { City, ListingType } from "@/lib/types";
 import type { PropertyStatus } from "@/lib/properties/types";
-import { normalizePropertyId, propertyApiPath } from "@/lib/properties/ids";
 
 interface PropertyEditModalProps {
   propertyId: string;
@@ -27,7 +26,10 @@ export default function PropertyEditModal({
   initialRaw = null,
 }: PropertyEditModalProps) {
   const router = useRouter();
-  const safePropertyId = normalizePropertyId(propertyId);
+  const safePropertyId =
+    typeof propertyId === "string" && !propertyId.includes("[object Object]")
+      ? propertyId.trim()
+      : "";
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [resolvingImages, setResolvingImages] = useState(false);
@@ -37,37 +39,48 @@ export default function PropertyEditModal({
   useEffect(() => {
     if (!open || !safePropertyId) return;
 
-    if (
-      initialRaw &&
-      normalizePropertyId(initialRaw.id) === safePropertyId
-    ) {
+    if (initialRaw && String(initialRaw.id ?? "").trim() === safePropertyId) {
       setForm({ ...initialRaw, id: safePropertyId });
       setLoading(false);
       setError("");
       return;
     }
 
-    setLoading(true);
-    setError("");
-    setForm(null);
+    let cancelled = false;
 
-    const fetchUrl = `/api/catalog/properties/${encodeURIComponent(safePropertyId)}`;
+    async function loadProperty() {
+      setLoading(true);
+      setError("");
+      setForm(null);
 
-    fetch(fetchUrl, { credentials: "include" })
-      .then(async (res) => {
+      const fetchUrl = `/api/catalog/properties/${encodeURIComponent(safePropertyId)}`;
+
+      try {
+        setError("");
+        const res = await fetch(fetchUrl, { credentials: "include" });
+        if (!res.ok) throw new Error(`Server status: ${res.status}`);
         const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error ?? "טעינת הנכס נכשלה");
-        }
         if (!data.raw) {
           throw new Error("לא ניתן לטעון את פרטי הנכס — חסרות הרשאות עריכה");
         }
-        setForm({ ...(data.raw as CatalogProperty), id: safePropertyId });
-      })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : "לא ניתן לטעון את פרטי הנכס");
-      })
-      .finally(() => setLoading(false));
+        if (!cancelled) {
+          setForm({ ...(data.raw as CatalogProperty), id: safePropertyId });
+        }
+      } catch (err) {
+        console.error("RAW FETCH ERROR:", err);
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "שגיאת תקשורת בטעינת הנכס");
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void loadProperty();
+
+    return () => {
+      cancelled = true;
+    };
   }, [open, safePropertyId, initialRaw]);
 
   const propertyData = form;
@@ -78,10 +91,7 @@ export default function PropertyEditModal({
     setResolvingImages(true);
     setError("");
     try {
-      const resolvePath = propertyApiPath(form.id);
-      if (!resolvePath) throw new Error("מזהה נכס לא תקין");
-
-      const res = await fetch(`${resolvePath}/resolve-images`, {
+      const res = await fetch(`/api/properties/${encodeURIComponent(form.id)}/resolve-images`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -114,10 +124,7 @@ export default function PropertyEditModal({
     setError("");
 
     try {
-      const savePath = propertyApiPath(form.id);
-      if (!savePath) throw new Error("מזהה נכס לא תקין");
-
-      const res = await fetch(savePath, {
+      const res = await fetch(`/api/properties/${encodeURIComponent(form.id)}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

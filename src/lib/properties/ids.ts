@@ -74,12 +74,12 @@ export function propertyDetailHref(id: unknown): string {
 
 export function catalogPropertyApiPath(id: unknown): string {
   const normalized = normalizePropertyId(id);
-  if (!isValidCatalogPropertyId(normalized)) return "";
+  if (!normalized) return "";
   return `/api/catalog/properties/${encodeURIComponent(normalized)}`;
 }
 
 export function propertyApiPath(id: unknown): string {
   const normalized = normalizePropertyId(id);
-  if (!isValidCatalogPropertyId(normalized)) return "";
+  if (!normalized) return "";
   return `/api/properties/${encodeURIComponent(normalized)}`;
 }
