@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -17,11 +17,16 @@ import {
 import { CITIES } from "@/lib/constants";
 import { PROPERTY_STATUS_LABELS } from "@/lib/properties/labels";
 import {
+  getOptionalWebUrlError,
+  normalizeOptionalWebUrl,
+} from "@/lib/validation/urls";
+import {
   PROPERTY_TYPE_OPTIONS,
   type PropertyTypeOption,
 } from "@/lib/properties/property-types";
 import type { City } from "@/lib/types";
 import type { PropertyStatus } from "@/lib/properties/types";
+import type { CatalogProperty } from "@/lib/properties/catalog-schema";
 
 export interface AdminPropertyFormValues {
   title: string;
@@ -134,6 +139,43 @@ export default function AdminPropertyForm({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  useEffect(() => {
+    if (mode !== "create") return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("duplicate") !== "1") return;
+
+    const stored = sessionStorage.getItem("rehouse:duplicate-property");
+    if (!stored) return;
+
+    try {
+      const raw = JSON.parse(stored) as CatalogProperty;
+      setForm((prev) => ({
+        ...prev,
+        title: raw.title || prev.title,
+        price: raw.price ? String(raw.price) : prev.price,
+        city: raw.city || prev.city,
+        rooms: raw.rooms ? String(raw.rooms) : prev.rooms,
+        status: raw.status || prev.status,
+        floor: raw.floor !== undefined ? String(raw.floor) : prev.floor,
+        totalFloors:
+          raw.totalFloors !== undefined ? String(raw.totalFloors) : prev.totalFloors,
+        hasSafeRoom: raw.mamad ?? prev.hasSafeRoom,
+        hasBalcony: raw.balcony ?? prev.hasBalcony,
+        hasElevator: raw.elevator ?? prev.hasElevator,
+        images: raw.media?.images?.length ? raw.media.images : prev.images,
+        coverImage:
+          raw.media?.coverImage ?? raw.media?.images?.[0] ?? prev.coverImage,
+        virtualTourUrl: raw.media?.matterportUrl ?? prev.virtualTourUrl,
+      }));
+      toast.success("נתוני הנכס שוכפלו לטופס יצירה");
+    } catch {
+      toast.error("לא ניתן לטעון נתוני שכפול");
+    } finally {
+      sessionStorage.removeItem("rehouse:duplicate-property");
+    }
+  }, [mode]);
+
   const pageTitle = useMemo(
     () => (mode === "create" ? "הוספת נכס חדש" : "עריכת נכס"),
     [mode]
@@ -175,6 +217,14 @@ export default function AdminPropertyForm({
     const images = getValidImages(form.images);
     const coverImage = resolveCoverImage(form.images, form.coverImage);
 
+    const virtualTourUrl = normalizeOptionalWebUrl(form.virtualTourUrl);
+    const virtualTourError = getOptionalWebUrlError(virtualTourUrl, "קישור לסיור וירטואלי");
+    if (virtualTourError) {
+      setError(virtualTourError);
+      setSaving(false);
+      return;
+    }
+
     const payload = {
       title: form.title.trim(),
       price: Number(form.price),
@@ -189,7 +239,7 @@ export default function AdminPropertyForm({
       hasElevator: form.hasElevator,
       images,
       coverImage,
-      virtualTourUrl: form.virtualTourUrl.trim(),
+      virtualTourUrl,
     };
 
     try {
@@ -527,6 +577,11 @@ export default function AdminPropertyForm({
             קישור לסיור וירטואלי
           </span>
           <input
+            type="text"
+            inputMode="url"
+            autoComplete="off"
+            spellCheck={false}
+            dir="ltr"
             value={form.virtualTourUrl}
             onChange={(e) =>
               setForm((prev) => ({ ...prev, virtualTourUrl: e.target.value }))

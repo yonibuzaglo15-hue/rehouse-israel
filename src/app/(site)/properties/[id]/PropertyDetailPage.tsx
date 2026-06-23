@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import InquiryForm from "@/components/InquiryForm";
 import PropertyCard from "@/components/PropertyCard";
-import EditPropertyButton from "@/components/admin/EditPropertyButton";
+import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
 import type { Property } from "@/lib/types";
 import { formatPrice, getCityLabel } from "@/lib/constants";
 
@@ -45,7 +45,7 @@ export default function PropertyDetailPage({
 
           {canEdit && (
             <div className="mb-6">
-              <EditPropertyButton propertyId={property.id} />
+              <PropertyActionMenu propertyId={property.id} />
             </div>
           )}
 

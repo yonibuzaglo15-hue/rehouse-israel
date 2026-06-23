@@ -14,6 +14,7 @@ interface PropertyEditModalProps {
   propertyId: string;
   open: boolean;
   onClose: () => void;
+  initialRaw?: CatalogProperty | null;
 }
 
 const STATUS_OPTIONS: PropertyStatus[] = ["active", "exclusive", "frozen", "sold"];
@@ -22,6 +23,7 @@ export default function PropertyEditModal({
   propertyId,
   open,
   onClose,
+  initialRaw = null,
 }: PropertyEditModalProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -32,17 +34,35 @@ export default function PropertyEditModal({
 
   useEffect(() => {
     if (!open) return;
+
+    if (initialRaw && initialRaw.id === propertyId) {
+      setForm(initialRaw);
+      setLoading(false);
+      setError("");
+      return;
+    }
+
     setLoading(true);
     setError("");
-    fetch(`/api/catalog/properties/${propertyId}`)
+    setForm(null);
+
+    const encodedId = encodeURIComponent(propertyId);
+    fetch(`/api/catalog/properties/${encodedId}`, { credentials: "include" })
       .then(async (res) => {
-        if (!res.ok) throw new Error("טעינת הנכס נכשלה");
         const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error ?? "טעינת הנכס נכשלה");
+        }
+        if (!data.raw) {
+          throw new Error("לא ניתן לטעון את פרטי הנכס — חסרות הרשאות עריכה");
+        }
         setForm(data.raw as CatalogProperty);
       })
-      .catch(() => setError("לא ניתן לטעון את פרטי הנכס"))
+      .catch((err) =>
+        setError(err instanceof Error ? err.message : "לא ניתן לטעון את פרטי הנכס"),
+      )
       .finally(() => setLoading(false));
-  }, [open, propertyId]);
+  }, [open, propertyId, initialRaw]);
 
   const neighborhoodZones = form?.city ? getNeighborhoodZones(form.city) : [];
 
@@ -133,7 +153,7 @@ export default function PropertyEditModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex items-end justify-center bg-navy-950/80 p-4 backdrop-blur-sm sm:items-center"
+        className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-900/50 p-4 backdrop-blur-sm dark:bg-navy-950/80 sm:items-center"
         onClick={onClose}
       >
         <motion.div
@@ -143,15 +163,19 @@ export default function PropertyEditModal({
           onClick={(e) => e.stopPropagation()}
           className="glass-panel max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl shadow-2xl"
         >
-          <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+          <div className="flex items-center justify-between border-b border-navy-200/70 px-5 py-4 dark:border-white/10">
             <div>
-              <p className="text-xs tracking-widest text-gold-400 uppercase">Admin Edit</p>
-              <h2 className="font-display text-xl font-semibold text-white">עריכת נכס</h2>
+              <p className="text-xs tracking-widest text-gold-600 uppercase dark:text-gold-400">
+                Admin Edit
+              </p>
+              <h2 className="font-display text-xl font-semibold text-slate-900 dark:text-white">
+                עריכת נכס
+              </h2>
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-2 text-white/50 transition-colors hover:bg-white/10 hover:text-white"
+              className="rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-white/50 dark:hover:bg-white/10 dark:hover:text-white"
             >
               <X className="h-5 w-5" />
             </button>
@@ -159,7 +183,7 @@ export default function PropertyEditModal({
 
           <div className="max-h-[calc(90vh-140px)] overflow-y-auto px-5 py-5">
             {loading && (
-              <div className="flex items-center justify-center py-16 text-white/50">
+              <div className="flex items-center justify-center py-16 text-slate-500 dark:text-white/50">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
             )}
@@ -431,7 +455,7 @@ export default function PropertyEditModal({
             )}
           </div>
 
-          <div className="flex justify-end gap-3 border-t border-white/10 px-5 py-4">
+          <div className="flex justify-end gap-3 border-t border-navy-200/70 px-5 py-4 dark:border-white/10">
             <button type="button" onClick={onClose} className="luxury-btn-ghost px-5 py-2.5">
               ביטול
             </button>
@@ -462,7 +486,7 @@ function Field({
 }) {
   return (
     <label className={className}>
-      <span className="mb-1.5 block text-xs font-medium text-white/60">{label}</span>
+      <span className="mb-1.5 block text-xs font-medium text-slate-600 dark:text-white/60">{label}</span>
       {children}
     </label>
   );
@@ -478,7 +502,7 @@ function Toggle({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-2 text-sm text-white/70">
+    <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-700 dark:text-white/70">
       <input
         type="checkbox"
         checked={checked}

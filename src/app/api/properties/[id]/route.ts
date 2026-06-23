@@ -121,3 +121,34 @@ export async function PATCH(
     property: updated ? catalogToManagedProperty(updated) : null,
   });
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  if (!(await canEditProperty())) {
+    return NextResponse.json({ error: "לא מחובר או אין הרשאה" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const property = await getCatalogPropertyById(id);
+  if (!property) {
+    return NextResponse.json({ error: "נכס לא נמצא" }, { status: 404 });
+  }
+
+  const updated = await updateCatalogProperty(id, {
+    published: false,
+    status: "frozen",
+  });
+
+  if (!updated) {
+    return NextResponse.json({ error: "מחיקת הנכס נכשלה" }, { status: 500 });
+  }
+
+  revalidatePath("/properties");
+  revalidatePath(`/properties/${id}`);
+  revalidatePath("/");
+  revalidatePath("/admin");
+
+  return NextResponse.json({ success: true, property: updated });
+}

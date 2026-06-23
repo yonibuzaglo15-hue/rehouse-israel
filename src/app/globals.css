@@ -205,17 +205,19 @@
     transform: translateY(-1px);
   }
 
-  /* Concierge Dashboard / Bloomberg-terminal aesthetic */
+  /* Concierge Dashboard / Bloomberg-terminal aesthetic — theme-aware */
   .dashboard-panel {
-    @apply border border-white/15 bg-navy-950/95 backdrop-blur-sm;
+    @apply border border-navy-200/80 bg-white/95 backdrop-blur-sm
+      dark:border-white/15 dark:bg-navy-950/95;
   }
 
   .terminal-label {
-    @apply text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-500/90;
+    @apply text-[10px] font-semibold uppercase tracking-[0.14em] text-gold-600/90
+      dark:text-gold-500/90;
   }
 
   .terminal-value {
-    @apply font-mono text-sm font-medium tabular-nums text-white;
+    @apply font-mono text-sm font-medium tabular-nums text-slate-900 dark:text-white;
   }
 
   .filter-chip {
@@ -224,11 +226,14 @@
   }
 
   .filter-chip-inactive {
-    @apply filter-chip border-white/15 bg-navy-900 text-white/55 hover:border-gold-500/40 hover:text-white;
+    @apply filter-chip border-navy-200/80 bg-slate-100 text-slate-600
+      hover:border-gold-500/40 hover:text-gold-700
+      dark:border-white/15 dark:bg-navy-900 dark:text-white/55 dark:hover:text-white;
   }
 
   .filter-chip-active {
-    @apply filter-chip border-gold-500 bg-gold-500/20 text-gold-300;
+    @apply filter-chip border-gold-500 bg-gold-500/15 text-gold-700
+      dark:bg-gold-500/20 dark:text-gold-300;
   }
 
   .spec-chip {
@@ -236,7 +241,8 @@
   }
 
   .spec-chip-on {
-    @apply spec-chip border-emerald-500/50 bg-emerald-500/15 text-emerald-300;
+    @apply spec-chip border-emerald-500/50 bg-emerald-500/15 text-emerald-700
+      dark:text-emerald-300;
   }
 
   .spec-chip-off {
@@ -245,8 +251,9 @@
   }
 
   .dashboard-input {
-    @apply w-full rounded border border-white/15 bg-navy-900 px-2.5 py-1.5 font-mono text-xs text-white
-      placeholder:text-white/30 focus:border-gold-500/60 focus:outline-none focus:ring-1 focus:ring-gold-500/30;
+    @apply w-full rounded border border-navy-200/80 bg-white px-2.5 py-1.5 font-mono text-xs text-slate-900
+      placeholder:text-slate-400 focus:border-gold-500/60 focus:outline-none focus:ring-1 focus:ring-gold-500/30
+      dark:border-white/15 dark:bg-navy-900 dark:text-white dark:placeholder:text-white/30;
   }
 
   /* Homepage hero — dynamic background + centered logo overlay */

@@ -125,19 +125,21 @@ function DashboardFilters({
 
   return (
     <aside className={`dashboard-panel flex h-full flex-col ${className ?? ""}`}>
-      <div className="border-b border-gold-500/30 bg-navy-900/80 px-4 py-3">
+      <div className="border-b border-gold-500/30 bg-slate-50 px-4 py-3 dark:bg-navy-900/80">
         <div className="flex items-center justify-between">
           <span className="terminal-label">סינון נכסים</span>
           {activeCount > 0 && (
-            <span className="rounded bg-gold-500 px-1.5 py-0.5 font-mono text-[10px] font-bold text-navy-950">
+            <span className="rounded bg-gold-500 px-1.5 py-0.5 font-mono text-[10px] font-bold text-white dark:text-navy-950">
               {activeCount}
             </span>
           )}
         </div>
         {resultCount !== undefined && (
-          <p className="mt-1.5 font-mono text-lg font-bold tabular-nums text-white">
+          <p className="mt-1.5 font-mono text-lg font-bold tabular-nums text-slate-900 dark:text-white">
             {resultCount}
-            <span className="ms-1.5 text-xs font-normal text-white/45">תוצאות</span>
+            <span className="ms-1.5 text-xs font-normal text-slate-500 dark:text-white/45">
+              תוצאות
+            </span>
           </p>
         )}
       </div>
@@ -195,7 +197,7 @@ function DashboardFilters({
               </button>
               {neighborhoodZones.map((zone) => (
                 <div key={zone.zoneLabel}>
-                  <p className="mb-1.5 text-[10px] font-medium text-white/40">
+                  <p className="mb-1.5 text-[10px] font-medium text-slate-500 dark:text-white/40">
                     {zone.zoneLabel}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
@@ -336,11 +338,11 @@ function DashboardFilters({
       </div>
 
       {activeCount > 0 && (
-        <div className="border-t border-white/10 p-3">
+        <div className="border-t border-navy-200/70 p-3 dark:border-white/10">
           <button
             type="button"
             onClick={handleReset}
-            className="flex w-full items-center justify-center gap-2 rounded border border-white/15 py-2 text-xs font-medium text-white/60 transition-colors hover:border-gold-500/40 hover:text-gold-400"
+            className="flex w-full items-center justify-center gap-2 rounded border border-navy-200/80 py-2 text-xs font-medium text-slate-600 transition-colors hover:border-gold-500/40 hover:text-gold-600 dark:border-white/15 dark:text-white/60 dark:hover:text-gold-400"
           >
             <RotateCcw className="h-3.5 w-3.5" />
             איפוס סינון

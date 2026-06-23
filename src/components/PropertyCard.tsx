@@ -23,20 +23,23 @@ import {
   resolvePropertyCardImage,
 } from "@/lib/properties/property-images";
 import { isNextAuthAdminRole } from "@/lib/auth/nextauth";
+import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
 
 interface PropertyCardProps {
   property: Property;
   index?: number;
   variant?: "luxury" | "dashboard";
+  canEdit?: boolean;
 }
 
 export default function PropertyCard({
   property,
   index = 0,
   variant = "luxury",
+  canEdit = false,
 }: PropertyCardProps) {
   if (variant === "dashboard") {
-    return <DashboardPropertyCard property={property} index={index} />;
+    return <DashboardPropertyCard property={property} index={index} canEdit={canEdit} />;
   }
 
   return <LuxuryPropertyCard property={property} index={index} />;
@@ -57,7 +60,7 @@ function PropertyCardMedia({
   const hasTour = hasPropertyVirtualTour(property);
 
   return (
-    <div className={`relative overflow-hidden bg-navy-900/80 ${className}`}>
+    <div className={`relative overflow-hidden bg-slate-200 dark:bg-navy-900/80 ${className}`}>
       {imageSrc ? (
         <Image
           src={imageSrc}
@@ -74,14 +77,14 @@ function PropertyCardMedia({
           }
         />
       ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-navy-900 via-navy-800 to-navy-950 text-white/35">
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 text-slate-400 dark:from-navy-900 dark:via-navy-800 dark:to-navy-950 dark:text-white/35">
           <ImageIcon className="h-8 w-8" />
           <span className="text-xs tracking-wide">תמונות בקרוב</span>
         </div>
       )}
 
       {hasTour && (
-        <div className="absolute end-3 top-3 flex items-center gap-1 rounded-full border border-gold-500/40 bg-navy-950/75 px-2.5 py-1 text-[11px] font-medium text-gold-300 backdrop-blur-sm">
+        <div className="absolute end-3 top-3 flex items-center gap-1 rounded-full border border-gold-500/40 bg-white/85 px-2.5 py-1 text-[11px] font-medium text-gold-700 backdrop-blur-sm dark:bg-navy-950/75 dark:text-gold-300">
           <Play className="h-3 w-3 fill-current" />
           סיור
         </div>
@@ -92,13 +95,28 @@ function PropertyCardMedia({
 
 /* ─── Dashboard: dense, high-contrast, specs always visible ─── */
 
-function DashboardPropertyCard({ property, index }: { property: Property; index: number }) {
+function DashboardPropertyCard({
+  property,
+  index,
+  canEdit,
+}: {
+  property: Property;
+  index: number;
+  canEdit: boolean;
+}) {
   return (
     <motion.article
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2, delay: index * 0.03 }}
+      className="relative"
     >
+      {canEdit ? (
+        <div className="absolute end-3 top-3 z-20">
+          <PropertyActionMenu propertyId={property.id} />
+        </div>
+      ) : null}
+
       <Link href={`/properties/${property.id}`} className="group block">
         <div className="dashboard-panel flex overflow-hidden transition-colors hover:border-gold-500/40">
           <PropertyCardMedia
@@ -107,44 +125,44 @@ function DashboardPropertyCard({ property, index }: { property: Property; index:
             sizes="176px"
           />
 
-          <div className="flex min-w-0 flex-1 flex-col border-s border-white/10">
-            <div className="flex items-center justify-between gap-2 border-b border-white/10 bg-navy-900/60 px-3 py-2">
-              <span className="font-mono text-base font-bold tabular-nums text-gold-400">
+          <div className="flex min-w-0 flex-1 flex-col border-s border-navy-200/70 dark:border-white/10">
+            <div className="flex items-center justify-between gap-2 border-b border-navy-200/70 bg-slate-50 px-3 py-2 dark:border-white/10 dark:bg-navy-900/60">
+              <span className="font-mono text-base font-bold tabular-nums text-gold-600 dark:text-gold-400">
                 {formatPrice(property.price, property.listingType)}
               </span>
-              <span className="rounded border border-white/20 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-white/70">
+              <span className="rounded border border-navy-200/80 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-slate-600 dark:border-white/20 dark:text-white/70">
                 {property.listingType === "buy" ? "SALE" : "RENT"}
               </span>
             </div>
 
             <div className="flex-1 px-3 py-2">
-              <h3 className="truncate text-sm font-semibold text-white group-hover:text-gold-300">
+              <h3 className="truncate text-sm font-semibold text-slate-900 group-hover:text-gold-600 dark:text-white dark:group-hover:text-gold-300">
                 {property.title}
               </h3>
-              <div className="mt-0.5 flex items-center gap-1 text-xs text-white/50">
-                <MapPin className="h-3 w-3 shrink-0 text-gold-500/60" />
+              <div className="mt-0.5 flex items-center gap-1 text-xs text-slate-500 dark:text-white/50">
+                <MapPin className="h-3 w-3 shrink-0 text-gold-600/80 dark:text-gold-500/60" />
                 <span className="truncate">
                   {getCityLabel(property.city)} · {property.neighborhood}
                 </span>
               </div>
 
-              <div className="mt-2 flex gap-3 font-mono text-xs text-white/70">
+              <div className="mt-2 flex gap-3 font-mono text-xs text-slate-600 dark:text-white/70">
                 <span className="flex items-center gap-1">
-                  <Bed className="h-3 w-3 text-white/40" />
+                  <Bed className="h-3 w-3 text-slate-400 dark:text-white/40" />
                   {property.rooms}
                 </span>
                 <span className="flex items-center gap-1">
-                  <Maximize className="h-3 w-3 text-white/40" />
+                  <Maximize className="h-3 w-3 text-slate-400 dark:text-white/40" />
                   {property.area}מ״ר
                 </span>
                 <span className="flex items-center gap-1">
-                  <Building2 className="h-3 w-3 text-white/40" />
+                  <Building2 className="h-3 w-3 text-slate-400 dark:text-white/40" />
                   {property.floor}/{property.totalFloors}
                 </span>
               </div>
             </div>
 
-            <div className="flex gap-1 border-t border-white/10 bg-navy-950/80 px-3 py-2">
+            <div className="flex gap-1 border-t border-navy-200/70 bg-slate-50/80 px-3 py-2 dark:border-white/10 dark:bg-navy-950/80">
               <QuickSpec active={property.mamad} icon={<Shield className="h-3 w-3" />} label="ממ״ד" />
               <QuickSpec active={property.balcony} icon={<Sun className="h-3 w-3" />} label="מרפסת" />
               <QuickSpec active={property.parking} icon={<Car className="h-3 w-3" />} label="חניה" />

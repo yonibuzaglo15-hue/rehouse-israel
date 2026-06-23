@@ -3,6 +3,10 @@ import { isCity, isValidNeighborhood } from "./neighborhoods";
 import type { CatalogPropertyUpdateInput } from "./catalog-schema";
 import type { PropertyStatus } from "./types";
 import { isPropertyType } from "./property-types";
+import {
+  getOptionalWebUrlError,
+  normalizeOptionalWebUrl,
+} from "@/lib/validation/urls";
 
 const VALID_STATUSES: PropertyStatus[] = ["active", "exclusive", "frozen", "sold"];
 
@@ -165,16 +169,23 @@ export function validateCatalogPropertyUpdate(
 
   if (raw.media !== undefined && typeof raw.media === "object" && raw.media) {
     const media = raw.media as Record<string, unknown>;
+    const matterportCandidate =
+      media.matterportUrl !== undefined
+        ? normalizeOptionalWebUrl(String(media.matterportUrl))
+        : media.virtualTourUrl !== undefined
+          ? normalizeOptionalWebUrl(String(media.virtualTourUrl))
+          : undefined;
+
+    if (matterportCandidate !== undefined) {
+      const urlError = getOptionalWebUrlError(matterportCandidate, "קישור לסיור וירטואלי");
+      if (urlError) return { success: false, error: urlError };
+    }
+
     updates.media = {
       ...(Array.isArray(media.images) ? { images: media.images.map(String) } : {}),
       ...(media.coverImage !== undefined ? { coverImage: String(media.coverImage) } : {}),
       ...(media.videoUrl !== undefined ? { videoUrl: String(media.videoUrl) } : {}),
-      ...(media.matterportUrl !== undefined
-        ? { matterportUrl: String(media.matterportUrl) }
-        : {}),
-      ...(media.virtualTourUrl !== undefined
-        ? { matterportUrl: String(media.virtualTourUrl) }
-        : {}),
+      ...(matterportCandidate !== undefined ? { matterportUrl: matterportCandidate } : {}),
     };
   }
 
@@ -193,9 +204,13 @@ export function validateCatalogPropertyUpdate(
   }
 
   if (raw.virtualTourUrl !== undefined) {
+    const virtualTourUrl = normalizeOptionalWebUrl(String(raw.virtualTourUrl));
+    const urlError = getOptionalWebUrlError(virtualTourUrl, "קישור לסיור וירטואלי");
+    if (urlError) return { success: false, error: urlError };
+
     updates.media = {
       ...updates.media,
-      matterportUrl: String(raw.virtualTourUrl).trim(),
+      matterportUrl: virtualTourUrl,
     };
   }
 
@@ -280,6 +295,11 @@ export function validateCatalogPropertyCreate(
   }
 
   const coverImage = String(raw.coverImage ?? "").trim() || images[0] || "";
+  const virtualTourUrl = normalizeOptionalWebUrl(String(raw.virtualTourUrl ?? ""));
+  const virtualTourError = getOptionalWebUrlError(virtualTourUrl, "קישור לסיור וירטואלי");
+  if (virtualTourError) {
+    return { success: false, error: virtualTourError };
+  }
 
   return {
     success: true,
@@ -291,7 +311,7 @@ export function validateCatalogPropertyCreate(
       status,
       images,
       coverImage,
-      virtualTourUrl: String(raw.virtualTourUrl ?? "").trim(),
+      virtualTourUrl,
       propertyType,
       floor: floorResult,
       totalFloors,
