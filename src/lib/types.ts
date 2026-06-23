@@ -29,15 +29,27 @@ export interface Property {
   price: number;
   rooms: number;
   area: number;
+  /** סוג נכס — דירה, וילה, פנטהאוז וכו׳ */
+  propertyType?: string;
   floor: number;
   totalFloors: number;
+  /** ממ״ד */
+  hasSafeRoom?: boolean;
+  /** מרפסת */
+  hasBalcony?: boolean;
+  /** מעלית */
+  hasElevator?: boolean;
   mamad: boolean;
   balcony: boolean;
   parking: boolean;
   elevator?: boolean;
   storage?: boolean;
+  /** תמונת תצוגה ראשית */
+  coverImage?: string;
   image: string;
   images?: string[];
+  /** 3D / virtual tour link (Matterport, etc.) */
+  virtualTourUrl?: string;
   matterportUrl?: string;
   matterportThumbnail?: string;
   agentId?: string;

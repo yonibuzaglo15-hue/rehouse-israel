@@ -10,13 +10,13 @@ export const AGENT_PLACEHOLDER = `${UNSPLASH}/photo-1560250097-0b93528c311a?w=80
 
 export const IMAGES = {
   hero: {
-    poster: `${UNSPLASH}/photo-1600596542815-ffad4c1539a9?w=1920&q=80`,
-    posterLow: `${UNSPLASH}/photo-1600596542815-ffad4c1539a9?w=640&q=60`,
+    poster: "/assets/hero-bg.jpg",
+    posterLow: "/assets/hero-bg.jpg",
     video: "/videos/rehouse-hero-gemini.mp4",
     logoOverlay: "/videos/rehouse-logo-overlay-v2.mp4",
     fallback: `${UNSPLASH}/photo-1613490493576-7fde63acd811?w=1920&q=80`,
   },
-  logo: "/images/logo.png",
+  logo: "/assets/rehouse-logo-transparent.png",
   properties: [
     `${UNSPLASH}/photo-1600596542815-ffad4c1539a9?w=800&q=80`,
     `${UNSPLASH}/photo-1600585154340-be6161a56a0c?w=800&q=80`,

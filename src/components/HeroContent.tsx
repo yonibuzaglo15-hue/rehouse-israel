@@ -102,18 +102,18 @@ function HeroStatCard({
 }
 
 interface HeroContentProps {
-  contentRef: React.RefObject<HTMLDivElement | null>;
   onBrowseProperties: () => void;
+  /** When true, GSAP scroll timeline controls visibility — skip mount animation */
+  scrollControlled?: boolean;
 }
 
-function HeroContent({ contentRef, onBrowseProperties }: HeroContentProps) {
+function HeroContent({ onBrowseProperties, scrollControlled = false }: HeroContentProps) {
   return (
     <motion.div
-      ref={contentRef}
-      className="hero-content"
+      className="hero-content hero-content--layered"
       variants={cascadeContainer}
-      initial="hidden"
-      animate="visible"
+      initial={scrollControlled ? false : "hidden"}
+      animate={scrollControlled ? false : "visible"}
     >
       <div className="hero-content__main">
         <motion.h1

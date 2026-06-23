@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { canAdminEditCatalog } from "@/lib/auth/admin-access";
 import { getSession } from "@/lib/auth/session";
 import { canEditCatalogProperty } from "@/lib/properties/access";
 import { catalogToPublicProperty } from "@/lib/properties/catalog-schema";
@@ -16,7 +17,8 @@ export async function GET(_request: Request, { params }: Props) {
   }
 
   const session = await getSession();
-  const canEdit = session ? canEditCatalogProperty(session) : false;
+  const canEdit =
+    (await canAdminEditCatalog()) || (session ? canEditCatalogProperty(session) : false);
 
   return NextResponse.json({
     property: catalogToPublicProperty(property),

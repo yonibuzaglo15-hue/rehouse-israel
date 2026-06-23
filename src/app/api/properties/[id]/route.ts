@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { getSession } from "@/lib/auth/session";
+import { canAdminEditCatalog } from "@/lib/auth/admin-access";
 import {
   canEditCatalogProperty,
   canEditManagedProperty,
@@ -11,18 +11,24 @@ import {
   getCatalogPropertyById,
   updateCatalogProperty,
 } from "@/lib/properties/server";
+import { getSession } from "@/lib/auth/session";
 import { isValidNeighborhood } from "@/lib/properties/neighborhoods";
 import type { PropertyStatus } from "@/lib/properties/types";
 
 const VALID_STATUSES: PropertyStatus[] = ["active", "exclusive", "frozen", "sold"];
 
+async function canEditProperty(): Promise<boolean> {
+  if (await canAdminEditCatalog()) return true;
+  const session = await getSession();
+  return session ? canEditCatalogProperty(session) : false;
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "לא מחובר" }, { status: 401 });
+  if (!(await canEditProperty())) {
+    return NextResponse.json({ error: "לא מחובר או אין הרשאה" }, { status: 401 });
   }
 
   const { id } = await params;
@@ -31,7 +37,12 @@ export async function PUT(
     return NextResponse.json({ error: "נכס לא נמצא" }, { status: 404 });
   }
 
-  if (!canEditCatalogProperty(session)) {
+  const legacySession = await getSession();
+  if (
+    legacySession &&
+    !canEditCatalogProperty(legacySession) &&
+    !(await canAdminEditCatalog())
+  ) {
     return NextResponse.json({ error: "אין הרשאה לערוך נכס זה" }, { status: 403 });
   }
 

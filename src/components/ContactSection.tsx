@@ -15,7 +15,7 @@ const CONTACT_INFO = [
 export default function ContactSection() {
   return (
     <section className="home-contact-section relative overflow-hidden pb-24">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0a1929] via-navy-900/80 to-navy-950" />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-100 via-white to-slate-50 dark:from-[#0a1929] dark:via-navy-900/80 dark:to-navy-950" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(201,149,46,0.08),transparent_60%)]" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -29,10 +29,10 @@ export default function ContactSection() {
           <span className="mb-3 inline-block text-xs font-medium tracking-widest text-gold-400 uppercase">
             יצירת קשר
           </span>
-          <h2 className="font-display text-3xl font-bold text-white sm:text-4xl">
+          <h2 className="font-display text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">
             מוכנים למצוא את <span className="gold-gradient-text">הבית הבא</span>?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-white/50">
+          <p className="mx-auto mt-4 max-w-xl text-slate-600 dark:text-white/50">
             הצוות שלנו זמין לליווי אישי — משיחת היכרות ועד מסירת המפתחות
           </p>
         </motion.div>
@@ -54,19 +54,19 @@ export default function ContactSection() {
                   <item.icon className="h-5 w-5 text-gold-400" />
                 </div>
                 <div>
-                  <div className="text-xs font-medium tracking-wider text-white/40 uppercase">
+                  <div className="text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-white/40">
                     {item.label}
                   </div>
                   {item.href ? (
                     <a
                       href={item.href}
-                      className="mt-1 block text-lg text-white transition-colors hover:text-gold-400"
+                      className="mt-1 block text-lg text-slate-900 transition-colors hover:text-gold-600 dark:text-white dark:hover:text-gold-400"
                       dir={item.icon === Phone ? "ltr" : undefined}
                     >
                       {item.value}
                     </a>
                   ) : (
-                    <div className="mt-1 text-lg text-white">{item.value}</div>
+                    <div className="mt-1 text-lg text-slate-900 dark:text-white">{item.value}</div>
                   )}
                 </div>
               </div>

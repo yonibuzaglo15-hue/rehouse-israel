@@ -31,15 +31,15 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             <div>
-              <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">
+              <h2 className="font-display text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
                 מי אנחנו?
               </h2>
-              <p className="mt-4 leading-relaxed text-white/60">
+              <p className="mt-4 leading-relaxed text-slate-600 dark:text-white/60">
                 אנחנו צוות של מומחי נדל״ן המתמחים באזור החוף הדרומי. עם מאות עסקאות
                 מוצלחות ושביעות רצון של 98% מהלקוחות, אנחנו מציעים ליווי אישי
                 משלב החיפוש ועד מסירת המפתחות.
               </p>
-              <p className="mt-4 leading-relaxed text-white/60">
+              <p className="mt-4 leading-relaxed text-slate-600 dark:text-white/60">
                 הגישה שלנו משלבת מקצועיות, שקיפות וטכנולוגיה מתקדמת — כדי שתמצאו
                 את הבית המושלם בקלות ובביטחון.
               </p>
@@ -52,7 +52,7 @@ export default function AboutPage() {
               {VALUES.map((v) => (
                 <div key={v.title} className="glass-panel rounded-xl p-5">
                   <h3 className="font-display font-semibold text-gold-400">{v.title}</h3>
-                  <p className="mt-2 text-sm text-white/50">{v.desc}</p>
+                  <p className="mt-2 text-sm text-slate-600 dark:text-white/50">{v.desc}</p>
                 </div>
               ))}
             </div>

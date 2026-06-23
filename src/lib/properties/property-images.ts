@@ -3,8 +3,13 @@ import type { Property } from "@/lib/types";
 
 /** Card/gallery image — null means render the clean empty-media state (no placeholder file). */
 export function resolvePropertyCardImage(
-  property: Pick<Property, "image" | "images" | "matterportThumbnail" | "matterportUrl">
+  property: Pick<
+    Property,
+    "image" | "images" | "coverImage" | "matterportThumbnail" | "matterportUrl" | "virtualTourUrl"
+  >
 ): string | null {
+  if (property.coverImage?.trim()) return property.coverImage;
+
   const firstImage = property.images?.find((url) => url?.trim());
   if (firstImage) return firstImage;
 
@@ -24,6 +29,8 @@ export function isPlaceholderImage(url: string): boolean {
 }
 
 export function catalogPrimaryImage(property: CatalogProperty): string {
+  if (property.media.coverImage?.trim()) return property.media.coverImage;
+
   const first = property.media.images.find((url) => url?.trim());
   if (first) return first;
 
@@ -38,9 +45,9 @@ export function catalogPrimaryImage(property: CatalogProperty): string {
 }
 
 export function hasPropertyVirtualTour(
-  property: Pick<Property, "matterportUrl">
+  property: Pick<Property, "matterportUrl" | "virtualTourUrl">
 ): boolean {
-  return Boolean(property.matterportUrl?.trim());
+  return Boolean(property.virtualTourUrl?.trim() || property.matterportUrl?.trim());
 }
 
 export function buildEmptyMediaPatch(

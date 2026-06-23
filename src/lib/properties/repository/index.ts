@@ -88,6 +88,12 @@ export async function updateCatalogProperty(
   return getPropertyRepository().update(id, updates);
 }
 
+export async function createCatalogProperty(
+  input: Parameters<PropertyRepository["create"]>[0]
+) {
+  return getPropertyRepository().create(input);
+}
+
 export async function importCatalogRows(
   rows: Parameters<PropertyRepository["importRows"]>[0]
 ) {

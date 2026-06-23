@@ -7,6 +7,8 @@ export type PropertyAttributeValue = string | number | boolean | string[] | null
 
 export interface CatalogPropertyMedia {
   images: string[];
+  /** Explicit cover / hero image — falls back to first image in `images` */
+  coverImage?: string;
   videoUrl: string;
   matterportUrl: string;
   /** Cloud/local folder base URL for numbered images (1.jpg, 2.jpg, …) */
@@ -110,6 +112,16 @@ export function catalogPrimaryImage(property: CatalogProperty): string {
 }
 
 export function catalogToPublicProperty(property: CatalogProperty): Property {
+  const coverImage =
+    property.media.coverImage?.trim() ||
+    property.media.images.find((url) => url?.trim()) ||
+    "";
+
+  const propertyType =
+    typeof property.attributes.propertyType === "string"
+      ? property.attributes.propertyType
+      : undefined;
+
   return {
     id: property.id,
     title: property.title,
@@ -120,15 +132,21 @@ export function catalogToPublicProperty(property: CatalogProperty): Property {
     price: property.price,
     rooms: property.rooms,
     area: property.area,
+    propertyType,
     floor: property.floor,
     totalFloors: property.totalFloors,
+    hasSafeRoom: property.mamad,
+    hasBalcony: property.balcony,
+    hasElevator: property.elevator,
     mamad: property.mamad,
     balcony: property.balcony,
     parking: property.parking,
     elevator: property.elevator,
     storage: property.storage,
+    coverImage: coverImage || undefined,
     image: catalogPrimaryImage(property),
     images: property.media.images,
+    virtualTourUrl: property.media.matterportUrl || undefined,
     matterportUrl: property.media.matterportUrl || undefined,
     matterportThumbnail: property.media.matterportThumbnailUrl || undefined,
     agentId: property.agentId || undefined,
@@ -172,6 +190,7 @@ export function createEmptyCatalogProperty(
     houseNumber: partial.houseNumber ?? "",
     media: {
       images: partial.media?.images ?? [],
+      coverImage: partial.media?.coverImage,
       videoUrl: partial.media?.videoUrl ?? "",
       matterportUrl: partial.media?.matterportUrl ?? "",
       imageFolderUrl: partial.media?.imageFolderUrl,

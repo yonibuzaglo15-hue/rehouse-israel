@@ -14,6 +14,9 @@ import HeroEvaporatingLogo, {
   type HeroEvaporatingLogoHandle,
 } from "@/components/HeroEvaporatingLogo";
 import HeroScrollHint from "@/components/HeroScrollHint";
+import HeroBrandBadge from "@/components/HeroBrandBadge";
+import HeroBackground from "@/components/HeroBackground";
+import { BRAND } from "@/lib/brand";
 
 const SCRUB_SMOOTHING = 0.35;
 const HERO_VIDEO_DURATION = 10;
@@ -31,6 +34,7 @@ interface HeroScrollMediaProps {
 
 function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
   const [isHydrated, setIsHydrated] = useState(false);
+  const [useStaticFallback, setUseStaticFallback] = useState(false);
   const animationTrackRef = useRef<HTMLDivElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const heroVideoRef = useRef<HTMLVideoElement>(null);
@@ -134,17 +138,32 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
         return;
       }
 
-      await Promise.all([
-        waitForVideoReady(heroVideo!, "hero"),
-        waitForVideoReady(logoVideo!, "logo"),
-      ]);
+      let staticFallback = false;
+
+      try {
+        await Promise.all([
+          waitForVideoReady(heroVideo!, "hero"),
+          waitForVideoReady(logoVideo!, "logo"),
+        ]);
+      } catch (error) {
+        heroDebug("video:fallback", error);
+        staticFallback = true;
+        setUseStaticFallback(true);
+      }
 
       if (!isActive) return;
 
       heroVideo!.pause();
       logoVideo!.pause();
-      heroVideo!.currentTime = 0;
-      logoVideo!.currentTime = 0;
+
+      if (staticFallback) {
+        heroVideo!.style.opacity = "0";
+        logoVideo!.style.display = "none";
+      } else {
+        heroVideo!.currentTime = 0;
+        logoVideo!.currentTime = 0;
+        heroVideo!.style.opacity = "1";
+      }
 
       gsap.set(brandReveal, {
         autoAlpha: 0,
@@ -186,17 +205,19 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
         },
       });
 
-      timeline.to(
-        heroVideo,
-        { currentTime: agentDuration, ease: "none", duration: PHASE_3_START },
-        0
-      );
+      if (!staticFallback) {
+        timeline.to(
+          heroVideo,
+          { currentTime: agentDuration, ease: "none", duration: PHASE_3_START },
+          0
+        );
 
-      timeline.to(
-        logoVideo,
-        { currentTime: logoDuration, ease: "none", duration: PHASE_3_DURATION },
-        PHASE_3_START
-      );
+        timeline.to(
+          logoVideo,
+          { currentTime: logoDuration, ease: "none", duration: PHASE_3_DURATION },
+          PHASE_3_START
+        );
+      }
 
       timeline.to(
         brandReveal,
@@ -251,6 +272,8 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
   return (
     <div ref={animationTrackRef} className="hero-animation-track">
       <div ref={videoWrapperRef} className="video-wrapper hero-video-stage">
+        <HeroBackground />
+
         <video
           ref={heroVideoRef}
           className="hero-video"
@@ -262,11 +285,24 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
           <source src={IMAGES.hero.video} type="video/mp4" />
         </video>
 
-        <HeroEvaporatingLogo
-          ref={logoCanvasRef}
-          logoVideoRef={logoVideoRef}
-          logoLayerRef={brandRevealRef}
-        />
+        {useStaticFallback ? (
+          <div
+            ref={brandRevealRef}
+            className="brand-reveal-overlay flex items-center justify-center"
+          >
+            <img
+              src={BRAND.heroLogoSrc}
+              alt=""
+              className="h-auto w-[min(72vw,420px)] max-w-full object-contain drop-shadow-2xl"
+            />
+          </div>
+        ) : (
+          <HeroEvaporatingLogo
+            ref={logoCanvasRef}
+            logoVideoRef={logoVideoRef}
+            logoLayerRef={brandRevealRef}
+          />
+        )}
 
         <div
           className="hero-cinematic-overlays pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a1929]/35 via-transparent to-[#0a1929]/35"
@@ -288,6 +324,8 @@ function HeroScrollMedia({ contentRef }: HeroScrollMediaProps) {
           <div className="absolute -top-1/4 -end-1/4 h-[600px] w-[600px] rounded-full bg-[#c9952e]/[0.06] blur-3xl" />
           <div className="absolute -bottom-1/4 -start-1/4 h-[500px] w-[500px] rounded-full bg-navy-700/25 blur-3xl" />
         </div>
+
+        <HeroBrandBadge layout="compact" className="hero-brand-badge--video-overlay" />
 
         <HeroScrollHint />
       </div>

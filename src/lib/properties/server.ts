@@ -7,6 +7,7 @@ export {
   listPublishedCatalogProperties,
   getCatalogPropertyById,
   updateCatalogProperty,
+  createCatalogProperty,
   importCatalogRows,
 } from "./repository";
 

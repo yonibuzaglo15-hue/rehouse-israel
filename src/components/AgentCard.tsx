@@ -93,15 +93,15 @@ export default function AgentCard({ agent, index = 0, onScheduleMeeting }: Agent
         {/* Info */}
         <div className="p-5">
           <Link href={`/agents/${agent.id}`}>
-            <h3 className="font-display text-xl font-bold text-white transition-colors group-hover:text-gold-300">
+            <h3 className="font-display text-xl font-bold text-slate-900 transition-colors group-hover:text-gold-600 dark:text-white dark:group-hover:text-gold-300">
               {agent.name}
             </h3>
           </Link>
-          <p className="mt-1 text-sm text-white/50">{agent.title}</p>
+          <p className="mt-1 text-sm text-slate-600 dark:text-white/50">{agent.title}</p>
 
           {/* Quick contact */}
           <div className="mt-5">
-            <p className="mb-3 text-xs font-medium tracking-wider text-white/40 uppercase">
+            <p className="mb-3 text-xs font-medium tracking-wider text-slate-500 uppercase dark:text-white/40">
               יצירת קשר מהירה
             </p>
             <div className="flex flex-wrap gap-2">
@@ -112,7 +112,7 @@ export default function AgentCard({ agent, index = 0, onScheduleMeeting }: Agent
                   target={key === "phone" || key === "email" ? undefined : "_blank"}
                   rel={key === "phone" || key === "email" ? undefined : "noopener noreferrer"}
                   aria-label={`${label} — ${agent.name}`}
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/60 transition-all duration-300 ${hoverClass}`}
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl border border-navy-200/80 bg-slate-50 text-navy-600 transition-all duration-300 dark:border-white/10 dark:bg-white/5 dark:text-white/60 ${hoverClass}`}
                 >
                   <Icon className="h-4 w-4" />
                 </a>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import {
   MapPin,
   Bed,
@@ -13,6 +14,7 @@ import {
   Building2,
   ImageIcon,
   Play,
+  Pencil,
 } from "lucide-react";
 import type { Property } from "@/lib/types";
 import { formatPrice, getCityLabel } from "@/lib/constants";
@@ -20,6 +22,7 @@ import {
   hasPropertyVirtualTour,
   resolvePropertyCardImage,
 } from "@/lib/properties/property-images";
+import { isNextAuthAdminRole } from "@/lib/auth/nextauth";
 
 interface PropertyCardProps {
   property: Property;
@@ -164,7 +167,7 @@ function QuickSpec({
 }) {
   return (
     <span className={active ? "spec-chip-on flex-1 justify-center" : "spec-chip-off flex-1 justify-center"}>
-      <span className={active ? "text-emerald-400" : "text-white/20"}>{icon}</span>
+      <span className={active ? "text-emerald-500 dark:text-emerald-400" : "text-navy-300 dark:text-white/20"}>{icon}</span>
       {label}
     </span>
   );
@@ -173,6 +176,9 @@ function QuickSpec({
 /* ─── Luxury: homepage grid cards ─── */
 
 function LuxuryPropertyCard({ property, index }: { property: Property; index: number }) {
+  const { data: session } = useSession();
+  const isAdmin = isNextAuthAdminRole(session?.user?.role);
+
   return (
     <motion.article
       initial={{ opacity: 0, y: 24 }}
@@ -181,60 +187,71 @@ function LuxuryPropertyCard({ property, index }: { property: Property; index: nu
       transition={{ duration: 0.5, delay: index * 0.08 }}
       className="group"
     >
-      <Link href={`/properties/${property.id}`} className="block">
-        <div className="glass-panel overflow-hidden rounded-2xl transition-all duration-500 group-hover:border-gold-500/30 group-hover:shadow-xl group-hover:shadow-gold-500/5">
-          <div className="relative">
-            <PropertyCardMedia
-              property={property}
-              className="aspect-[4/3]"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/80 via-transparent to-transparent" />
-            <div className="absolute start-4 top-4 flex gap-2">
-              {property.featured && (
-                <span className="rounded-full bg-gold-500/90 px-3 py-1 text-xs font-medium text-navy-950">
-                  מומלץ
+      <div className="relative">
+        <Link href={`/properties/${property.id}`} className="block">
+          <div className="glass-panel overflow-hidden rounded-2xl transition-all duration-500 group-hover:border-gold-500/30 group-hover:shadow-xl group-hover:shadow-gold-500/5">
+            <div className="relative">
+              <PropertyCardMedia
+                property={property}
+                className="aspect-[4/3]"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-navy-950/80 via-transparent to-transparent" />
+              <div className="absolute start-4 top-4 flex gap-2">
+                {property.featured && (
+                  <span className="rounded-full bg-gold-500/90 px-3 py-1 text-xs font-medium text-navy-950">
+                    מומלץ
+                  </span>
+                )}
+                <span className="rounded-full bg-navy-950/70 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                  {property.listingType === "buy" ? "למכירה" : "להשכרה"}
                 </span>
-              )}
-              <span className="rounded-full bg-navy-950/70 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
-                {property.listingType === "buy" ? "למכירה" : "להשכרה"}
-              </span>
+              </div>
+              <div className="absolute bottom-4 start-4">
+                <div className="font-display text-2xl font-bold text-white">
+                  {formatPrice(property.price, property.listingType)}
+                </div>
+              </div>
             </div>
-            <div className="absolute bottom-4 start-4">
-              <div className="font-display text-2xl font-bold text-white">
-                {formatPrice(property.price, property.listingType)}
+
+            <div className="p-5">
+              <h3 className="mb-2 font-display text-lg font-semibold text-slate-900 transition-colors group-hover:text-gold-600 dark:text-white dark:group-hover:text-gold-300">
+                {property.title}
+              </h3>
+              <div className="mb-3 flex items-center gap-1.5 text-sm text-slate-600 dark:text-white/50">
+                <MapPin className="h-3.5 w-3.5 shrink-0 text-gold-600/80 dark:text-gold-500/70" />
+                <span>
+                  {getCityLabel(property.city)}, {property.neighborhood}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 text-sm text-slate-700 dark:text-white/60">
+                <span className="flex items-center gap-1.5">
+                  <Bed className="h-3.5 w-3.5" />
+                  {property.rooms} חדרים
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Maximize className="h-3.5 w-3.5" />
+                  {property.area} מ״ר
+                </span>
+              </div>
+              <div className="mt-3 flex gap-1.5">
+                <QuickSpec active={property.mamad} icon={<Shield className="h-3 w-3" />} label="ממ״ד" />
+                <QuickSpec active={property.balcony} icon={<Sun className="h-3 w-3" />} label="מרפסת" />
+                <QuickSpec active={property.parking} icon={<Car className="h-3 w-3" />} label="חניה" />
               </div>
             </div>
           </div>
-
-          <div className="p-5">
-            <h3 className="mb-2 font-display text-lg font-semibold text-white transition-colors group-hover:text-gold-300">
-              {property.title}
-            </h3>
-            <div className="mb-3 flex items-center gap-1.5 text-sm text-white/50">
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-gold-500/70" />
-              <span>
-                {getCityLabel(property.city)}, {property.neighborhood}
-              </span>
-            </div>
-            <div className="flex items-center gap-4 text-sm text-white/60">
-              <span className="flex items-center gap-1.5">
-                <Bed className="h-3.5 w-3.5" />
-                {property.rooms} חדרים
-              </span>
-              <span className="flex items-center gap-1.5">
-                <Maximize className="h-3.5 w-3.5" />
-                {property.area} מ״ר
-              </span>
-            </div>
-            <div className="mt-3 flex gap-1.5">
-              <QuickSpec active={property.mamad} icon={<Shield className="h-3 w-3" />} label="ממ״ד" />
-              <QuickSpec active={property.balcony} icon={<Sun className="h-3 w-3" />} label="מרפסת" />
-              <QuickSpec active={property.parking} icon={<Car className="h-3 w-3" />} label="חניה" />
-            </div>
-          </div>
-        </div>
-      </Link>
+        </Link>
+        {isAdmin && (
+          <Link
+            href={`/admin/property/${property.id}/edit`}
+            className="absolute end-4 top-[calc(75%-2.5rem)] z-10 inline-flex items-center gap-1.5 rounded-full border border-gold-500/50 bg-navy-950/85 px-3 py-1.5 text-xs font-medium text-gold-300 backdrop-blur-sm transition-colors hover:border-gold-400 hover:bg-navy-950"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+            ערוך נכס
+          </Link>
+        )}
+      </div>
     </motion.article>
   );
 }

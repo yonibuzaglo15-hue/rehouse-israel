@@ -305,30 +305,35 @@ function DashboardFilters({
               onClick={() => update("mamad", !filters.mamad)}
               icon={<Shield className="h-3.5 w-3.5" />}
               label="ממ״ד"
+              variant="dashboard"
             />
             <ToggleChip
               active={filters.balcony}
               onClick={() => update("balcony", !filters.balcony)}
               icon={<Sun className="h-3.5 w-3.5" />}
               label="מרפסת"
+              variant="dashboard"
             />
             <ToggleChip
               active={filters.parking}
               onClick={() => update("parking", !filters.parking)}
               icon={<Car className="h-3.5 w-3.5" />}
               label="חניה"
+              variant="dashboard"
             />
             <ToggleChip
               active={filters.storage}
               onClick={() => update("storage", !filters.storage)}
               icon={<Warehouse className="h-3.5 w-3.5" />}
               label="מחסן"
+              variant="dashboard"
             />
             <ToggleChip
               active={filters.elevator}
               onClick={() => update("elevator", !filters.elevator)}
               icon={<ArrowUpFromDot className="h-3.5 w-3.5" />}
               label="מעלית"
+              variant="dashboard"
             />
           </div>
         </FilterSection>
@@ -370,23 +375,39 @@ function ToggleChip({
   onClick,
   icon,
   label,
+  variant = "hero",
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
+  variant?: "hero" | "dashboard";
 }) {
+  const inactiveClass =
+    variant === "dashboard"
+      ? "border-white/10 bg-navy-900 text-white/45 hover:border-white/25 hover:text-white/70"
+      : "border-navy-200/80 bg-slate-50 text-navy-600 hover:border-gold-500/40 hover:text-navy-900 dark:border-white/10 dark:bg-navy-900 dark:text-white/45 dark:hover:border-white/25 dark:hover:text-white/70";
+
+  const iconClass =
+    variant === "dashboard"
+      ? active
+        ? "text-gold-400"
+        : "text-white/30"
+      : active
+        ? "text-gold-400"
+        : "text-navy-400 dark:text-white/30";
+
   return (
     <button
       type="button"
       onClick={onClick}
       className={`flex w-full items-center gap-2 rounded border px-3 py-2 text-xs font-medium transition-colors ${
         active
-          ? "border-gold-500/60 bg-gold-500/15 text-gold-300"
-          : "border-white/10 bg-navy-900 text-white/45 hover:border-white/25 hover:text-white/70"
+          ? "border-gold-500/60 bg-gold-500/15 text-gold-700 dark:text-gold-300"
+          : inactiveClass
       }`}
     >
-      <span className={active ? "text-gold-400" : "text-white/30"}>{icon}</span>
+      <span className={iconClass}>{icon}</span>
       {label}
       <span className="ms-auto font-mono text-[10px]">{active ? "ON" : "—"}</span>
     </button>
@@ -442,18 +463,20 @@ function HeroFilters({
       className={`${isHero ? "w-full max-w-5xl" : "w-full"} ${className ?? ""}`}
     >
       <div
-        className={`glass-panel overflow-hidden rounded-2xl ${
+        className={`property-search-panel glass-panel overflow-hidden rounded-2xl ${
           isHero ? "shadow-2xl shadow-black/40" : "shadow-lg shadow-black/20"
         }`}
       >
-        <div className="flex border-b border-white/10">
+        <div className="flex border-b border-navy-200/70 dark:border-white/10">
           {(["buy", "rent"] as const).map((type) => (
             <button
               key={type}
               type="button"
               onClick={() => update("listingType", type)}
               className={`relative flex-1 py-4 text-sm font-medium transition-colors sm:text-base ${
-                filters.listingType === type ? "text-gold-400" : "text-white/50 hover:text-white/80"
+                filters.listingType === type
+                  ? "text-gold-600 dark:text-gold-400"
+                  : "text-navy-500 hover:text-navy-800 dark:text-white/50 dark:hover:text-white/80"
               }`}
             >
               {filters.listingType === type && (
@@ -462,13 +485,13 @@ function HeroFilters({
                   className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-l from-gold-600 to-gold-400"
                 />
               )}
-              {type === "buy" ? "לקנייה" : "להשכרה"}
+              {type === "buy" ? "מכירה" : "השכרה"}
             </button>
           ))}
         </div>
 
         {isCatalog && resultCount !== undefined && (
-          <div className="border-b border-white/5 bg-white/[0.02] px-4 py-2 text-center text-xs text-white/40">
+          <div className="border-b border-navy-200/50 bg-slate-50/80 px-4 py-2 text-center text-xs text-navy-500 dark:border-white/5 dark:bg-white/[0.02] dark:text-white/40">
             {resultCount > 0
               ? `${resultCount} נכסים מתאימים — עדכון בזמן אמת`
               : "לא נמצאו נכסים"}
@@ -516,7 +539,7 @@ function HeroFilters({
             <button
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className={`luxury-btn-ghost relative px-4 py-3 ${showAdvanced ? "border-gold-500/40 bg-white/10" : ""}`}
+              className={`luxury-btn-ghost relative px-4 py-3 ${showAdvanced ? "border-gold-500/40 bg-gold-500/10 dark:bg-white/10" : ""}`}
             >
               <span className="hidden sm:inline">סינון</span>
               {activeCount > 0 && (
@@ -538,19 +561,19 @@ function HeroFilters({
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden border-t border-white/10 p-4 sm:p-6"
+              className="overflow-hidden border-t border-navy-200/70 p-4 dark:border-white/10 sm:p-6"
             >
               <div className="mb-4 flex justify-between">
-                <h3 className="text-sm text-white/80">סינון מתקדם</h3>
+                <h3 className="text-sm text-navy-800 dark:text-white/80">סינון מתקדם</h3>
                 {activeCount > 0 && (
-                  <button type="button" onClick={resetFilters} className="text-xs text-gold-400">
+                  <button type="button" onClick={resetFilters} className="text-xs text-gold-600 dark:text-gold-400">
                     <X className="inline h-3 w-3" /> נקה
                   </button>
                 )}
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-xs text-white/60">מחיר מינימום</label>
+                  <label className="mb-1.5 block text-xs text-navy-600 dark:text-white/60">מחיר מינימום</label>
                   <input
                     type="number"
                     value={filters.priceMin}
@@ -561,7 +584,7 @@ function HeroFilters({
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs text-white/60">מחיר מקסימום</label>
+                  <label className="mb-1.5 block text-xs text-navy-600 dark:text-white/60">מחיר מקסימום</label>
                   <input
                     type="number"
                     value={filters.priceMax}
@@ -668,18 +691,18 @@ function NeighborhoodMultiSelect({
 
   return (
     <div ref={containerRef} className="relative flex-1">
-      <label className="mb-1.5 block text-xs font-medium text-white/60">{label}</label>
+      <label className="mb-1.5 block text-xs font-medium text-navy-600 dark:text-white/60">{label}</label>
       <button
         type="button"
         disabled={disabled}
         onClick={() => !disabled && setOpen((v) => !v)}
         className="luxury-input flex w-full items-center justify-between gap-2 text-start disabled:opacity-40"
       >
-        <span className={`truncate ${selected.length === 0 ? "text-white/40" : ""}`}>
+        <span className={`truncate ${selected.length === 0 ? "text-navy-400 dark:text-white/40" : ""}`}>
           {triggerLabel}
         </span>
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-white/40 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-4 w-4 shrink-0 text-navy-400 transition-transform dark:text-white/40 ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -690,9 +713,9 @@ function NeighborhoodMultiSelect({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.15 }}
-            className="absolute z-50 mt-1 max-h-72 w-full overflow-y-auto rounded-xl border border-white/10 bg-navy-900/95 shadow-2xl shadow-black/40 backdrop-blur-xl"
+            className="absolute z-50 mt-1 max-h-72 w-full overflow-y-auto rounded-xl border border-navy-200/80 bg-white shadow-2xl shadow-black/10 backdrop-blur-xl dark:border-white/10 dark:bg-navy-900/95 dark:shadow-black/40"
           >
-            <div className="sticky top-0 border-b border-white/10 bg-navy-900/95 px-3 py-2 backdrop-blur-xl">
+            <div className="sticky top-0 border-b border-navy-200/70 bg-white px-3 py-2 backdrop-blur-xl dark:border-white/10 dark:bg-navy-900/95">
               <button
                 type="button"
                 onClick={() => onChange([])}
@@ -703,8 +726,8 @@ function NeighborhoodMultiSelect({
             </div>
 
             {zones.map((zone) => (
-              <div key={zone.zoneLabel} className="border-b border-white/5 last:border-0">
-                <p className="px-3 py-2 text-[10px] font-semibold tracking-wide text-white/35 uppercase">
+              <div key={zone.zoneLabel} className="border-b border-navy-100 last:border-0 dark:border-white/5">
+                <p className="px-3 py-2 text-[10px] font-semibold tracking-wide text-navy-400 uppercase dark:text-white/35">
                   {zone.zoneLabel}
                 </p>
                 {zone.neighborhoods.map((n) => {
@@ -714,13 +737,13 @@ function NeighborhoodMultiSelect({
                       key={n}
                       type="button"
                       onClick={() => toggle(n)}
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-white/80 transition-colors hover:bg-white/5"
+                      className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-navy-800 transition-colors hover:bg-slate-50 dark:text-white/80 dark:hover:bg-white/5"
                     >
                       <span
                         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors ${
                           isChecked
-                            ? "border-gold-500 bg-gold-500/20 text-gold-400"
-                            : "border-white/25 bg-white/5"
+                            ? "border-gold-500 bg-gold-500/20 text-gold-600 dark:text-gold-400"
+                            : "border-navy-200 bg-slate-50 dark:border-white/25 dark:bg-white/5"
                         }`}
                       >
                         {isChecked && <Check className="h-3 w-3" strokeWidth={3} />}
@@ -755,18 +778,18 @@ function HeroSelect({
 }) {
   return (
     <div className="flex-1">
-      <label className="mb-1.5 block text-xs font-medium text-white/60">{label}</label>
+      <label className="mb-1.5 block text-xs font-medium text-navy-600 dark:text-white/60">{label}</label>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         className="luxury-input appearance-none disabled:opacity-40"
       >
-        <option value="" className="bg-navy-900">
+        <option value="" className="bg-white text-navy-900 dark:bg-navy-900 dark:text-white">
           {placeholder}
         </option>
         {options?.map((o) => (
-          <option key={o.value} value={o.value} className="bg-navy-900">
+          <option key={o.value} value={o.value} className="bg-white text-navy-900 dark:bg-navy-900 dark:text-white">
             {o.label}
           </option>
         ))}

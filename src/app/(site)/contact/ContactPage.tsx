@@ -34,17 +34,17 @@ export default function ContactPage() {
                     <item.icon className="h-5 w-5 text-gold-400" />
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-white/50">{item.label}</div>
+                    <div className="text-sm font-medium text-slate-600 dark:text-white/50">{item.label}</div>
                     {item.href ? (
                       <a
                         href={item.href}
-                        className="mt-1 block text-white transition-colors hover:text-gold-400"
+                        className="mt-1 block text-slate-900 transition-colors hover:text-gold-600 dark:text-white dark:hover:text-gold-400"
                         dir={item.icon === Phone ? "ltr" : undefined}
                       >
                         {item.value}
                       </a>
                     ) : (
-                      <div className="mt-1 text-white">{item.value}</div>
+                      <div className="mt-1 text-slate-900 dark:text-white">{item.value}</div>
                     )}
                   </div>
                 </div>

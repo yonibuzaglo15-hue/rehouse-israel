@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { Heebo, Rubik } from "next/font/google";
 import "./globals.css";
 import { LOGO_SRC } from "@/components/Logo";
-import { IMAGES } from "@/lib/images";
+import ThemeProvider from "@/components/ThemeProvider";
+import AuthSessionProvider from "@/components/providers/AuthSessionProvider";
+import { THEME_INIT_SCRIPT } from "@/lib/theme";
+
+/** ISR baseline (seconds) — on-demand via /api/revalidate webhook */
+export const revalidate = 300;
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -60,23 +65,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="he" dir="rtl" suppressHydrationWarning>
       <head>
         <link
           rel="preload"
-          as="video"
-          href={IMAGES.hero.video}
-          type="video/mp4"
+          as="image"
+          href="/assets/hero-bg.jpg"
+          type="image/jpeg"
         />
         <link
           rel="preload"
-          as="video"
-          href={IMAGES.hero.logoOverlay}
-          type="video/mp4"
+          as="image"
+          href="/assets/hero-bg-light.jpg"
+          type="image/jpeg"
+        />
+        <link
+          rel="preload"
+          as="image"
+          href="/assets/rehouse-logo-transparent.png"
+          type="image/png"
         />
       </head>
-      <body className={`${heebo.variable} ${rubik.variable} font-body overflow-x-hidden`}>
-        {children}
+      <body
+        className={`${heebo.variable} ${rubik.variable} font-body overflow-x-hidden bg-white text-navy-950 transition-colors duration-300 dark:bg-navy-950 dark:text-white`}
+      >
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <ThemeProvider>
+          <AuthSessionProvider>{children}</AuthSessionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

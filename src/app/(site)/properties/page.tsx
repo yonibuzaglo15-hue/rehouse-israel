@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { canAdminEditCatalog } from "@/lib/auth/admin-access";
 import { getSession } from "@/lib/auth/session";
 import { canEditCatalogProperty } from "@/lib/properties/access";
 import { catalogToPublicProperty } from "@/lib/properties/catalog-schema";
@@ -27,12 +28,14 @@ function PropertiesLoading() {
 }
 
 export default async function Page() {
-  const [properties, session] = await Promise.all([
+  const [properties, session, nextAuthAdmin] = await Promise.all([
     listPublishedCatalogProperties(),
     getSession(),
+    canAdminEditCatalog(),
   ]);
 
-  const canEdit = session ? canEditCatalogProperty(session) : false;
+  const canEdit =
+    nextAuthAdmin || (session ? canEditCatalogProperty(session) : false);
 
   return (
     <Suspense fallback={<PropertiesLoading />}>
