@@ -21,7 +21,7 @@ import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
 import PropertyEditModal from "@/components/admin/PropertyEditModal";
 import type { Property } from "@/lib/types";
 import { formatPrice, getCityLabel } from "@/lib/constants";
-import { normalizePropertyId } from "@/lib/properties/ids";
+import { normalizePropertyId, resolvePropertyRecordId } from "@/lib/properties/ids";
 import {
   deleteCatalogProperty,
   duplicateCatalogProperty,
@@ -39,7 +39,7 @@ export default function PropertyDetailPage({
   canEdit = false,
 }: PropertyDetailPageProps) {
   const router = useRouter();
-  const propertyId = normalizePropertyId(property.id);
+  const propertyId = resolvePropertyRecordId(property);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
   const [loadingAction, setLoadingAction] = useState<"edit" | "duplicate" | "delete" | null>(
@@ -49,9 +49,8 @@ export default function PropertyDetailPage({
 
   const handleOpenEdit = () => {
     setActionError("");
-    const rawId =
-      (property as Property & { _id?: unknown })._id ?? property.id;
-    const safeId = String(rawId || "").trim();
+    const safeId = resolvePropertyRecordId(property);
+    console.log("Modal opening with ID:", safeId);
     if (!safeId) return;
     setEditId(safeId);
     setIsEditOpen(true);

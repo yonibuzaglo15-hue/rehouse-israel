@@ -9,7 +9,7 @@ import { CITIES, getNeighborhoodFieldLabel, getNeighborhoodZones } from "@/lib/c
 import { PROPERTY_STATUS_LABELS } from "@/lib/properties/labels";
 import type { City, ListingType } from "@/lib/types";
 import type { PropertyStatus } from "@/lib/properties/types";
-import { catalogPropertyApiPath, normalizePropertyId } from "@/lib/properties/ids";
+import { catalogPropertyApiPath, isValidCatalogPropertyId, normalizePropertyId, propertyApiPath } from "@/lib/properties/ids";
 
 interface PropertyEditModalProps {
   propertyId: string;
@@ -52,13 +52,22 @@ export default function PropertyEditModal({
     setForm(null);
 
     const apiPath = catalogPropertyApiPath(safePropertyId);
-    if (!apiPath) {
+    if (!apiPath || !isValidCatalogPropertyId(safePropertyId)) {
       setError("מזהה נכס לא תקין");
       setLoading(false);
       return;
     }
 
-    fetch(apiPath, { credentials: "include" })
+    let fetchUrl: string;
+    try {
+      fetchUrl = new URL(apiPath, window.location.origin).toString();
+    } catch {
+      setError("מזהה נכס לא תקין");
+      setLoading(false);
+      return;
+    }
+
+    fetch(fetchUrl, { credentials: "include" })
       .then(async (res) => {
         const data = await res.json();
         if (!res.ok) {
@@ -67,11 +76,15 @@ export default function PropertyEditModal({
         if (!data.raw) {
           throw new Error("לא ניתן לטעון את פרטי הנכס — חסרות הרשאות עריכה");
         }
-        setForm(data.raw as CatalogProperty);
+        setForm({ ...(data.raw as CatalogProperty), id: safePropertyId });
       })
-      .catch((err) =>
-        setError(err instanceof Error ? err.message : "לא ניתן לטעון את פרטי הנכס"),
-      )
+      .catch((err) => {
+        if (err instanceof TypeError && /pattern/i.test(err.message)) {
+          setError("מזהה נכס לא תקין");
+          return;
+        }
+        setError(err instanceof Error ? err.message : "לא ניתן לטעון את פרטי הנכס");
+      })
       .finally(() => setLoading(false));
   }, [open, safePropertyId, initialRaw]);
 
@@ -82,7 +95,10 @@ export default function PropertyEditModal({
     setResolvingImages(true);
     setError("");
     try {
-      const res = await fetch(`/api/properties/${form.id}/resolve-images`, {
+      const resolvePath = propertyApiPath(form.id);
+      if (!resolvePath) throw new Error("מזהה נכס לא תקין");
+
+      const res = await fetch(`${resolvePath}/resolve-images`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -115,7 +131,10 @@ export default function PropertyEditModal({
     setError("");
 
     try {
-      const res = await fetch(`/api/properties/${form.id}`, {
+      const savePath = propertyApiPath(form.id);
+      if (!savePath) throw new Error("מזהה נכס לא תקין");
+
+      const res = await fetch(savePath, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

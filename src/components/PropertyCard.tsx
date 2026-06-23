@@ -27,7 +27,7 @@ import {
 import { isNextAuthAdminRole } from "@/lib/auth/nextauth";
 import PropertyActionMenu from "@/components/admin/PropertyActionMenu";
 import PropertyEditModal from "@/components/admin/PropertyEditModal";
-import { normalizePropertyId, propertyDetailHref } from "@/lib/properties/ids";
+import { propertyDetailHref, resolvePropertyRecordId } from "@/lib/properties/ids";
 import {
   deleteCatalogProperty,
   duplicateCatalogProperty,
@@ -113,7 +113,7 @@ function DashboardPropertyCard({
   canEdit: boolean;
 }) {
   const router = useRouter();
-  const propertyId = normalizePropertyId(property.id);
+  const propertyId = resolvePropertyRecordId(property);
   const detailHref = propertyDetailHref(propertyId);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editId, setEditId] = useState("");
@@ -124,9 +124,8 @@ function DashboardPropertyCard({
 
   const handleOpenEdit = () => {
     setActionError("");
-    const rawId =
-      (property as Property & { _id?: unknown })._id ?? property.id;
-    const safeId = String(rawId || "").trim();
+    const safeId = resolvePropertyRecordId(property);
+    console.log("Modal opening with ID:", safeId);
     if (!safeId) return;
     setEditId(safeId);
     setIsEditOpen(true);
@@ -288,7 +287,7 @@ function QuickSpec({
 function LuxuryPropertyCard({ property, index }: { property: Property; index: number }) {
   const { data: session } = useSession();
   const isAdmin = isNextAuthAdminRole(session?.user?.role);
-  const propertyId = normalizePropertyId(property.id);
+  const propertyId = resolvePropertyRecordId(property);
   const detailHref = propertyDetailHref(propertyId);
 
   return (
