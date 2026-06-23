@@ -33,6 +33,19 @@ export function getCleanId(id: unknown): string {
   return isInvalidIdString(str) ? "" : str;
 }
 
+/** MongoDB ObjectId: 24 hex characters */
+export function isMongoObjectId(id: string): boolean {
+  return /^[a-fA-F0-9]{24}$/.test(id);
+}
+
+/** Accept catalog slugs (prop_*) or MongoDB ObjectId strings for API routes */
+export function isValidCatalogRouteId(id: string): boolean {
+  if (!id || isInvalidIdString(id)) return false;
+  if (id.startsWith("prop_")) return /^prop_[a-zA-Z0-9_-]+$/.test(id);
+  if (isMongoObjectId(id)) return true;
+  return /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$/.test(id);
+}
+
 /** @deprecated Use getCleanId — kept for existing imports */
 export function normalizePropertyId(id: unknown): string {
   return getCleanId(id);

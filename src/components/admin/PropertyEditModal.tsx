@@ -56,7 +56,12 @@ export default function PropertyEditModal({
       try {
         setError("");
         const response = await fetch(fetchUrl, { credentials: "include" });
-        if (!response.ok) throw new Error(`Server status: ${response.status}`);
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({}));
+          const serverMessage =
+            typeof payload?.error === "string" ? payload.error : `Server status: ${response.status}`;
+          throw new Error(serverMessage);
+        }
         const data = await response.json();
         if (!data.raw) {
           throw new Error("לא ניתן לטעון את פרטי הנכס — חסרות הרשאות עריכה");
@@ -163,7 +168,7 @@ export default function PropertyEditModal({
     }
   };
 
-  if (!open || !cleanId) return null;
+  if (!open) return null;
 
   if (!cleanId || cleanId.includes("[object Object]")) {
     return (

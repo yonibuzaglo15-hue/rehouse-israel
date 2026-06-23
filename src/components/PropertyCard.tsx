@@ -123,12 +123,11 @@ function DashboardPropertyCard({
 
   const handleOpenEdit = () => {
     setActionError("");
-    const id = getCleanId(propertyRecord._id || property.id);
-    if (!id) {
+    if (!cleanId) {
       setActionError("מזהה נכס לא תקין");
       return;
     }
-    setEditId(id);
+    setEditId(cleanId);
     setIsEditOpen(true);
   };
 
@@ -138,8 +137,7 @@ function DashboardPropertyCard({
   };
 
   const handleDuplicate = async () => {
-    const id = getCleanId(propertyRecord._id || property.id);
-    if (!id) {
+    if (!cleanId) {
       setActionError("מזהה נכס לא תקין");
       return;
     }
@@ -148,7 +146,7 @@ function DashboardPropertyCard({
     setLoadingAction("duplicate");
 
     try {
-      const response = await fetch(`/api/catalog/properties/${encodeURIComponent(id)}`, {
+      const response = await fetch(`/api/catalog/properties/${encodeURIComponent(cleanId)}`, {
         credentials: "include",
       });
       if (!response.ok) throw new Error(`Server status: ${response.status}`);
@@ -168,7 +166,7 @@ function DashboardPropertyCard({
           published: false,
         }),
       );
-      router.push(`/admin/property/new?duplicate=1&id=${encodeURIComponent(id)}`);
+      router.push(`/admin/property/new?duplicate=1&id=${encodeURIComponent(cleanId)}`);
     } catch (err) {
       console.error("RAW DUPLICATE ERROR:", err);
       setActionError(err instanceof Error ? err.message : "שכפול הנכס נכשל");
