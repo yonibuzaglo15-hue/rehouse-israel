@@ -27,6 +27,7 @@ import {
 import type { City } from "@/lib/types";
 import type { PropertyStatus } from "@/lib/properties/types";
 import type { CatalogProperty } from "@/lib/properties/catalog-schema";
+import PropertyImageUploadZone from "@/components/admin/PropertyImageUploadZone";
 
 export interface AdminPropertyFormValues {
   title: string;
@@ -207,6 +208,12 @@ export default function AdminPropertyForm({
 
   const setCoverImage = (url: string) => {
     setForm((prev) => ({ ...prev, coverImage: url }));
+  };
+
+  const handleImagesUploaded = (urls: string[]) => {
+    if (urls.length === 0) return;
+    const existing = getValidImages(form.images);
+    syncImages([...existing, ...urls]);
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -479,20 +486,31 @@ export default function AdminPropertyForm({
 
         <section className="space-y-4">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-lg font-semibold text-slate-900 dark:text-white">
-              קישורי תמונות
-            </h2>
+            <div>
+              <h2 className="font-display text-lg font-semibold text-slate-900 dark:text-white">
+                תמונות הנכס
+              </h2>
+              <p className="mt-1 text-xs text-slate-500 dark:text-white/45">
+                העלו תמונות ישירות ל-Supabase או הוסיפו קישורים ידנית
+              </p>
+            </div>
             <button
               type="button"
               onClick={addImageField}
               className="inline-flex items-center gap-1.5 rounded-lg border border-gold-500/30 px-3 py-1.5 text-xs font-medium text-gold-700 transition-colors hover:border-gold-500/60 hover:text-gold-600 dark:text-gold-300"
             >
               <Plus className="h-3.5 w-3.5" />
-              הוסף תמונה
+              הוסף קישור
             </button>
           </div>
 
-          <div className="space-y-3">
+          <PropertyImageUploadZone onUploaded={handleImagesUploaded} disabled={saving} />
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-slate-700 dark:text-white/80">
+              קישורי תמונות (אופציונלי)
+            </p>
+            <div className="space-y-3">
             {form.images.map((imageUrl, index) => (
               <div key={`image-${index}`} className="flex gap-2">
                 <input
@@ -513,6 +531,7 @@ export default function AdminPropertyForm({
                 )}
               </div>
             ))}
+            </div>
           </div>
 
           {validImages.length > 0 && (
