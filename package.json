@@ -10,6 +10,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "postinstall": "prisma generate",
     "auth:generate-users": "node scripts/generate-user-credentials.mjs",
     "properties:seed": "node scripts/seed-properties.mjs",
     "properties:seed-official": "node --import ./scripts/register-loader.mjs --experimental-strip-types scripts/seed-official-catalog.mjs",
