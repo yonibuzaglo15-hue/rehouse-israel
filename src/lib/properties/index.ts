@@ -10,6 +10,7 @@ export {
   PROPERTY_STATUS_STYLES,
 } from "./labels";
 export {
+  canEditCatalogProperty,
   canEditManagedProperty,
   filterPropertiesForSession,
   getPropertiesListTitle,
@@ -22,6 +23,5 @@ export {
   isCity,
   isValidNeighborhood,
 } from "./neighborhoods";
-export { canEditCatalogProperty } from "./access";
 export type { CatalogProperty, CatalogPropertyUpdateInput } from "./catalog-schema";
 export { CORE_FIELD_ALIASES } from "./import-mapping";

@@ -25,11 +25,6 @@ export function resolvePropertyRecordId(record: { id?: unknown }): string {
   return getCleanId(record.id);
 }
 
-/** @deprecated Use getCleanId */
-export function normalizePropertyId(id: unknown): string {
-  return getCleanId(id);
-}
-
 export function propertyDetailHref(record: { id?: unknown }): string {
   const cleanId = getCleanId(record.id);
   if (!cleanId) return "/properties";

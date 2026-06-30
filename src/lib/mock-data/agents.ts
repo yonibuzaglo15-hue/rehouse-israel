@@ -50,9 +50,6 @@ export const CORE_TEAM_AGENTS: Agent[] = [
   },
 ];
 
-/** @deprecated Use CORE_TEAM_AGENTS */
-export const LEADERSHIP_AGENTS = CORE_TEAM_AGENTS;
-
 export const MOCK_AGENTS: Agent[] = [
   {
     id: "1",
@@ -120,7 +117,3 @@ export const MOCK_AGENTS: Agent[] = [
     calendarUrl: "https://calendly.com",
   },
 ];
-
-export function getAgentById(id: string): Agent | undefined {
-  return [...CORE_TEAM_AGENTS, ...MOCK_AGENTS].find((a) => a.id === id);
-}

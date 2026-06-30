@@ -8,6 +8,11 @@ import {
   sessionCookieOptions,
 } from "@/lib/auth/session";
 
+/**
+ * Org staff login — email + password for dev/admin/agent roles.
+ * Issues a JWT session cookie (`SESSION_COOKIE_NAME`) used by middleware and dashboard APIs.
+ * Separate from NextAuth (admin portal credentials / Google OAuth on the default login form).
+ */
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as {

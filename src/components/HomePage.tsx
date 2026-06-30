@@ -1,4 +1,4 @@
-import HeroSection from "@/components/HeroSection";
+import Hero from "@/components/Hero";
 import HeroPropertySearch from "@/components/home/HeroPropertySearch";
 import HomeIntroSection from "@/components/home/HomeIntroSection";
 import HomePageShell from "@/components/home/HomePageShell";
@@ -24,7 +24,7 @@ export default function HomePage({
   return (
     <HomePageShell>
       <div className="home-page-stack flex flex-col bg-white transition-colors duration-300 dark:bg-navy-950">
-        <HeroSection />
+        <Hero height="front" showLogo logoVariant="front" />
         <HeroPropertySearch />
         <HomeIntroSection />
         <HotPropertiesSlider properties={hotProperties} />

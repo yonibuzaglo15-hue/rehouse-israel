@@ -101,9 +101,6 @@ export function getAuthOptions(): NextAuthOptions {
   };
 }
 
-/** @deprecated Use getAuthOptions() */
-export const authOptions: NextAuthOptions = getAuthOptions();
-
 export function isNextAuthAdminRole(role: string | undefined | null): boolean {
   return role === "admin";
 }

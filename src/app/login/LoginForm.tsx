@@ -62,7 +62,7 @@ export default function LoginForm() {
     }
   }
 
-  async function handleLegacySubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleOrgLoginSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     setLoading(true);
@@ -225,7 +225,7 @@ export default function LoginForm() {
             </form>
           </>
         ) : (
-          <form onSubmit={handleLegacySubmit} className="space-y-5">
+          <form onSubmit={handleOrgLoginSubmit} className="space-y-5">
             <div>
               <label
                 htmlFor="email"

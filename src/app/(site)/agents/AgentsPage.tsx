@@ -6,7 +6,7 @@ import { Users, Shield, Clock, Star } from "lucide-react";
 import AgentCard from "@/components/AgentCard";
 import MeetingModal from "@/components/MeetingModal";
 import PageHero from "@/components/PageHero";
-import { MOCK_AGENTS, LEADERSHIP_AGENTS } from "@/lib/constants";
+import { MOCK_AGENTS, CORE_TEAM_AGENTS } from "@/lib/constants";
 import type { Agent } from "@/lib/types";
 
 const TRUST_SIGNALS = [
@@ -30,7 +30,7 @@ export default function AgentsPage({
   const agents = initialAgents?.length ? initialAgents : MOCK_AGENTS;
   const owners = companyOwners.length
     ? companyOwners
-    : LEADERSHIP_AGENTS;
+    : CORE_TEAM_AGENTS;
 
   return (
     <>

@@ -182,7 +182,3 @@ export const MOCK_PROPERTIES: Property[] = [
     image: propertyImage(8),
   },
 ];
-
-export function getPropertyById(id: string): Property | undefined {
-  return MOCK_PROPERTIES.find((p) => p.id === id);
-}
