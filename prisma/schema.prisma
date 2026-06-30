@@ -1,0 +1,870 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Website property catalog (JSON documents). Maps to existing Supabase table.
+model CatalogProperty {
+  id         String   @id
+  externalId String?  @unique @map("external_id")
+  published  Boolean  @default(true)
+  data       Json
+  updatedAt  DateTime @default(now()) @map("updated_at") @db.Timestamptz(6)
+
+  @@index([published])
+  @@index([updatedAt(sort: Desc)])
+  @@index([data], map: "catalog_properties_data_gin_idx", type: Gin)
+  @@map("catalog_properties")
+}
+
+model Account {
+  id                String  @id
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Agency {
+  id                       String                     @id
+  name                     String
+  slug                     String                     @unique
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime
+  AgentMediaAsset          AgentMediaAsset[]
+  AgentPersona             AgentPersona[]
+  AgentTelegramUserAccount AgentTelegramUserAccount[]
+  AppendedProperty         AppendedProperty[]
+  Appointment              Appointment[]
+  AuditLog                 AuditLog[]
+  CallLog                  CallLog[]
+  CommunicationLog         CommunicationLog[]
+  Contact                  Contact[]
+  ContactMergeSuggestion   ContactMergeSuggestion[]
+  ContractDocument         ContractDocument[]
+  Deal                     Deal[]
+  FormDocument             FormDocument[]
+  MarketLead               MarketLead[]
+  OutboundTelegramMessage  OutboundTelegramMessage[]
+  Property                 Property[]
+  TelegramChatSession      TelegramChatSession[]
+  TrainingMaterial         TrainingMaterial[]
+  User                     User[]
+  WhatsAppCampaign         WhatsAppCampaign[]
+}
+
+model AgentMediaAsset {
+  id                 String            @id
+  agencyId           String
+  personaSeedKey     String
+  kind               MediaAssetKind
+  status             MediaAssetStatus  @default(QUEUED)
+  prompt             String
+  seed               Int?
+  model              String            @default("")
+  falSourceUrl       String?
+  publicUrl          String?
+  contactId          String?
+  dealId             String?
+  propertyId         String?
+  communicationLogId String?
+  metadata           Json?
+  errorMessage       String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime
+  completedAt        DateTime?
+  Agency             Agency            @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  CommunicationLog   CommunicationLog? @relation(fields: [communicationLogId], references: [id])
+  Contact            Contact?          @relation(fields: [contactId], references: [id])
+  Property           Property?         @relation(fields: [propertyId], references: [id])
+
+  @@index([agencyId, personaSeedKey])
+  @@index([contactId])
+  @@index([createdAt])
+  @@index([dealId])
+  @@index([propertyId])
+  @@index([status])
+}
+
+model AgentPersona {
+  id               String         @id
+  agencyId         String
+  agentId          String         @unique
+  fullName         String
+  age              Int
+  visualLook       String
+  catchphrase      String
+  superpower       String
+  humanTouch       String
+  toneOfVoice      String
+  contentPillars   String[]       @default([])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime
+  cluster          String         @default("")
+  instagramBio     String         @default("")
+  registryPath     String         @default("")
+  avatarUrl        String?
+  characterBible   Json           @default("{}")
+  managerName      String         @default("")
+  orgRole          PersonaOrgRole @default(AGENT)
+  region           String         @default("")
+  avatarModel      String?        @default("fal-ai/flux-pro/v1.1")
+  avatarSeed       Int?
+  telegramBotToken String?
+  telegramUsername String?
+  Agency           Agency         @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  User             User           @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([fullName])
+  @@index([managerName])
+  @@index([orgRole])
+  @@index([region])
+  @@index([telegramUsername])
+}
+
+model AgentTask {
+  id          String    @id
+  agencyId    String
+  userId      String
+  type        String
+  status      String    @default("OPEN")
+  title       String
+  description String?
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([dueDate])
+  @@index([status])
+  @@index([type])
+  @@index([userId])
+}
+
+model AgentTelegramUserAccount {
+  id               String                    @id
+  agencyId         String
+  personaSeedKey   String                    @unique
+  phoneE164        String
+  telegramUserId   String?
+  apiId            Int
+  apiHashEncrypted String?
+  sessionEncrypted String
+  sessionVersion   Int                       @default(1)
+  status           TelegramUserAccountStatus @default(PENDING_AUTH)
+  lastUsedAt       DateTime?
+  lastError        String?
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime
+  Agency           Agency                    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([personaSeedKey])
+  @@index([status])
+}
+
+model AppendedProperty {
+  id              String       @id
+  agencyId        String
+  agentId         String?
+  contactId       String
+  formDocumentId  String
+  propertyId      String?
+  propertyAddress String
+  approvalToken   String       @unique
+  approvedAt      DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime
+  Agency          Agency       @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  FormDocument    FormDocument @relation(fields: [formDocumentId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([agentId])
+  @@index([approvedAt])
+  @@index([contactId])
+  @@index([formDocumentId])
+  @@index([propertyId])
+}
+
+model Appointment {
+  id         String    @id
+  agencyId   String
+  title      String
+  date       DateTime
+  contactId  String
+  propertyId String?
+  status     String    @default("Scheduled")
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime
+  Agency     Agency    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  Contact    Contact   @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  Property   Property? @relation(fields: [propertyId], references: [id])
+
+  @@index([agencyId])
+  @@index([contactId])
+  @@index([date])
+  @@index([propertyId])
+}
+
+model AuditLog {
+  id             String            @id
+  agencyId       String
+  agentId        String?
+  contactId      String?
+  formDocumentId String?
+  actionType     String
+  clientName     String?
+  documentType   FormDocumentType?
+  metadata       Json?
+  createdAt      DateTime          @default(now())
+  Agency         Agency            @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  User           User?             @relation(fields: [agentId], references: [id])
+
+  @@index([actionType])
+  @@index([agencyId])
+  @@index([agentId])
+  @@index([contactId])
+  @@index([createdAt])
+  @@index([formDocumentId])
+}
+
+model CallLog {
+  id            String   @id
+  agencyId      String
+  contactId     String
+  direction     String
+  status        String
+  duration      Int      @default(0)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime
+  recordingUrl  String?
+  summary       String?
+  transcription String?
+  Agency        Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  Contact       Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([contactId])
+  @@index([createdAt])
+  @@index([status])
+}
+
+model CommunicationLog {
+  id              String                 @id
+  agencyId        String
+  contactId       String?
+  channel         CommunicationChannel   @default(WhatsApp)
+  direction       CommunicationDirection @default(Inbound)
+  status          CommunicationStatus    @default(Received)
+  phone           String                 @default("")
+  body            String                 @default("")
+  externalId      String?
+  source          String                 @default("webhook")
+  rawPayload      Json?
+  metadata        Json?
+  processedAt     DateTime?
+  agentContext    Json?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime
+  AgentMediaAsset AgentMediaAsset[]
+  Agency          Agency                 @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  Contact         Contact?               @relation(fields: [contactId], references: [id])
+
+  @@index([agencyId])
+  @@index([channel])
+  @@index([contactId])
+  @@index([createdAt])
+  @@index([direction])
+  @@index([externalId])
+  @@index([phone])
+}
+
+model Contact {
+  id                     String                   @id
+  agencyId               String
+  firstName              String
+  lastName               String
+  phone                  String?
+  email                  String?
+  status                 ContactStatus            @default(New)
+  notes                  String?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime
+  name                   String?
+  requirements           String?
+  agentId                String?
+  pipelineStage          PipelineStage            @default(NewLead)
+  preferredAreas         String[]                 @default([])
+  preferredDistricts     String[]                 @default([])
+  telegramUserId         String?
+  assignedPersonaSeedKey String?
+  idNumber               String?
+  AgentMediaAsset        AgentMediaAsset[]
+  Appointment            Appointment[]
+  CallLog                CallLog[]
+  CommunicationLog       CommunicationLog[]
+  Agency                 Agency                   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  ContactMergeSuggestion ContactMergeSuggestion[]
+  ContractDocument       ContractDocument[]
+  Deal                   Deal?
+  FormDocument           FormDocument[]
+  PropertyOffer          PropertyOffer[]
+  TelegramChatSession    TelegramChatSession[]
+
+  @@index([agencyId])
+  @@index([agentId])
+  @@index([idNumber])
+  @@index([pipelineStage])
+  @@index([status])
+  @@index([telegramUserId])
+}
+
+model ContactMergeSuggestion {
+  id                String                @id
+  agencyId          String
+  agentId           String?
+  existingContactId String
+  incomingName      String
+  incomingPhone     String?
+  incomingIdNumber  String?
+  incomingEmail     String?
+  incomingSource    String
+  conflictingFields String[]              @default([])
+  incomingSnapshot  Json                  @default("{}")
+  status            MergeSuggestionStatus @default(PENDING)
+  createdAt         DateTime              @default(now())
+  resolvedAt        DateTime?
+  Agency            Agency                @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  Contact           Contact               @relation(fields: [existingContactId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([createdAt])
+  @@index([existingContactId])
+  @@index([status])
+}
+
+model ContractDocument {
+  id               String                 @id
+  agencyId         String
+  agentId          String?
+  contactId        String?
+  type             ContractDocumentType
+  status           ContractDocumentStatus @default(Draft)
+  title            String
+  clientName       String?
+  clientIdNumber   String?
+  clientPhone      String?
+  clientEmail      String?
+  clientAddress    String?
+  propertyAddress  String?
+  propertyCity     String?
+  propertyDetails  Json                   @default("{}")
+  financialTerms   Json                   @default("{}")
+  dateTerms        Json                   @default("{}")
+  formVariables    Json                   @default("{}")
+  signingToken     String?                @unique
+  signatureDataUrl String?
+  pdfUrl           String?
+  sentAt           DateTime?
+  signedAt         DateTime?
+  lockedAt         DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime
+  formData         Json                   @default("{}")
+  internalNotes    String?
+  propertyId       String?
+  templateVersion  String                 @default("il-rehouse-v1")
+  Agency           Agency                 @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  User             User?                  @relation(fields: [agentId], references: [id])
+  Contact          Contact?               @relation(fields: [contactId], references: [id])
+  Property         Property?              @relation(fields: [propertyId], references: [id])
+
+  @@index([agencyId])
+  @@index([agentId])
+  @@index([contactId])
+  @@index([createdAt])
+  @@index([propertyCity])
+  @@index([propertyId])
+  @@index([signedAt])
+  @@index([status])
+  @@index([type])
+}
+
+model Deal {
+  id        String        @id
+  agencyId  String
+  agentId   String?
+  contactId String        @unique
+  title     String?
+  stage     PipelineStage @default(NewLead)
+  value     Decimal?      @db.Decimal(14, 2)
+  currency  String        @default("ILS")
+  notes     String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime
+  Agency    Agency        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  User      User?         @relation(fields: [agentId], references: [id])
+  Contact   Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([agentId])
+  @@index([stage])
+  @@index([updatedAt])
+}
+
+model DiscAgentPersona {
+  id                  String   @id
+  name                String
+  discType            String
+  telegramUsername    String?
+  telegramBotToken    String?
+  telegramWebhookSlug String   @unique
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime
+
+  @@index([discType])
+  @@index([telegramUsername])
+}
+
+model FormDocument {
+  id                String             @id
+  agencyId          String
+  contactId         String
+  type              FormDocumentType
+  status            FormDocumentStatus @default(PendingSignature)
+  title             String
+  clientName        String
+  clientIdNumber    String?
+  clientPhone       String?
+  clientAddress     String?
+  requirements      Json
+  financials        Json
+  visitedProperties Json
+  signingToken      String             @unique
+  signatureDataUrl  String?
+  pdfUrl            String?
+  signedAt          DateTime?
+  lockedAt          DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime
+  partnerIdNumber   String?
+  partnerName       String?
+  partnerPhone      String?
+  budget            String?
+  commissionRate    String?
+  floor             String?
+  rooms             String?
+  agentId           String?
+  AppendedProperty  AppendedProperty[]
+  Agency            Agency             @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  Contact           Contact            @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([agentId])
+  @@index([contactId])
+  @@index([createdAt])
+  @@index([status])
+  @@index([type])
+}
+
+model MarketLead {
+  id                    String           @id
+  agencyId              String
+  city                  String
+  neighborhood          String           @default("")
+  street                String           @default("")
+  price                 String           @default("")
+  propertyLink          String           @unique
+  contactPhone          String?
+  status                MarketLeadStatus @default(NEW)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime
+  assignedAgent         String           @default("")
+  regionalCluster       String           @default("")
+  regionalManager       String           @default("")
+  cityDivision          String           @default("")
+  hasUpdates            Boolean          @default(false)
+  currentPrice          String           @default("")
+  daysOnMarket          Int              @default(0)
+  lastPriceChangedAt    DateTime?
+  listingUrl            String?          @unique
+  originalPrice         String           @default("")
+  priceChangeAmount     String           @default("")
+  priceChangePercentage Float            @default(0)
+  priceDropPercentage   Float            @default(0)
+  Agency                Agency           @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([assignedAgent])
+  @@index([cityDivision])
+  @@index([city])
+  @@index([createdAt])
+  @@index([daysOnMarket])
+  @@index([hasUpdates])
+  @@index([lastPriceChangedAt])
+  @@index([neighborhood])
+  @@index([priceChangePercentage])
+  @@index([regionalCluster])
+  @@index([regionalManager])
+  @@index([status])
+}
+
+model OutboundTelegramMessage {
+  id                      String                        @id
+  agencyId                String
+  personaSeedKey          String
+  recipientTelegramUserId String
+  body                    String
+  status                  OutboundTelegramMessageStatus @default(QUEUED)
+  channel                 TelegramOutboundChannel       @default(USER_ACCOUNT)
+  triggerSource           String                        @default("manual")
+  contactId               String?
+  dealId                  String?
+  communicationLogId      String?
+  attempts                Int                           @default(0)
+  maxAttempts             Int                           @default(3)
+  lastError               String?
+  scheduledAt             DateTime                      @default(now())
+  sentAt                  DateTime?
+  createdAt               DateTime                      @default(now())
+  updatedAt               DateTime
+  Agency                  Agency                        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([createdAt])
+  @@index([personaSeedKey])
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+model Property {
+  id                     String                     @id
+  agencyId               String
+  title                  String
+  description            String?
+  price                  Decimal                    @db.Decimal(14, 2)
+  type                   PropertyListingType
+  address                String
+  status                 PropertyAvailabilityStatus @default(Available)
+  viewCount              Int                        @default(0)
+  createdAt              DateTime                   @default(now())
+  updatedAt              DateTime
+  matterportUrl          String?
+  mediaUrls              String[]                   @default([])
+  balconySize            Float?
+  city                   String?
+  hasBalcony             Boolean                    @default(false)
+  hasStorage             Boolean                    @default(false)
+  parkingCount           Int                        @default(0)
+  propertySize           Float?
+  rooms                  Float?
+  safeRoom               String?
+  zone                   String?
+  agentId                String?
+  area                   String?
+  district               String?
+  hasUpdates             Boolean                    @default(false)
+  handlingAgentName      String?
+  handlingAgentSecondary String?
+  isManuallyEdited       Boolean                    @default(false)
+  AgentMediaAsset        AgentMediaAsset[]
+  Appointment            Appointment[]
+  ContractDocument       ContractDocument[]
+  Agency                 Agency                     @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  PropertyOffer          PropertyOffer[]
+
+  @@index([agencyId])
+  @@index([agentId])
+  @@index([area])
+  @@index([district])
+  @@index([handlingAgentName])
+  @@index([status])
+  @@index([type])
+}
+
+model PropertyOffer {
+  id            String             @id
+  contactId     String
+  propertyId    String
+  messageStatus OfferMessageStatus @default(Pending)
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime
+  Contact       Contact            @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  Property      Property           @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+
+  @@unique([contactId, propertyId])
+  @@index([messageStatus])
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model TelegramChatSession {
+  id                   String            @id
+  agencyId             String
+  telegramChatId       String
+  telegramUserId       String
+  contactId            String?
+  activePersonaSeedKey String            @default("rehouse-front-desk")
+  phase                TelegramChatPhase @default(FRONT_DESK)
+  qualification        Json?
+  handedOffAt          DateTime?
+  lastInboundAt        DateTime          @default(now())
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime
+  Agency               Agency            @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  Contact              Contact?          @relation(fields: [contactId], references: [id])
+
+  @@unique([agencyId, telegramChatId])
+  @@index([activePersonaSeedKey])
+  @@index([contactId])
+  @@index([phase])
+  @@index([telegramUserId])
+}
+
+model TrainingMaterial {
+  id          String   @id
+  agencyId    String
+  title       String
+  description String
+  videoUrl    String?
+  documentUrl String?
+  category    String   @default("General")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  Agency      Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([category])
+  @@index([createdAt])
+}
+
+model User {
+  id               String             @id
+  agencyId         String?
+  email            String             @unique
+  firstName        String?
+  lastName         String?
+  role             UserRole           @default(SUB_ACCOUNT_USER)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  accessRole       Role               @default(AGENT)
+  monthlyGoal      Int                @default(4)
+  emailVerified    DateTime?
+  image            String?
+  name             String?
+  Account          Account[]
+  AgentPersona     AgentPersona?
+  AgentTask        AgentTask[]
+  AuditLog         AuditLog[]
+  ContractDocument ContractDocument[]
+  Deal             Deal[]
+  Session          Session[]
+  Agency           Agency?            @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model WhatsAppCampaign {
+  id          String   @id
+  agencyId    String
+  title       String
+  messageBody String
+  status      String   @default("Draft")
+  sentCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  Agency      Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+
+  @@index([agencyId])
+  @@index([createdAt])
+  @@index([status])
+}
+
+enum CommunicationChannel {
+  WhatsApp
+  SMS
+  Email
+  Telegram
+}
+
+enum CommunicationDirection {
+  Inbound
+  Outbound
+}
+
+enum CommunicationStatus {
+  Received
+  Queued
+  Sent
+  Delivered
+  Read
+  Failed
+}
+
+enum ContactStatus {
+  New
+  Contacted
+  Qualified
+  Lost
+}
+
+enum ContractDocumentStatus {
+  Draft
+  ReadyForReview
+  Sent
+  PendingSignature
+  Signed
+  Archived
+  Cancelled
+}
+
+enum ContractDocumentType {
+  SellerQuestionnaire
+  BrokerageOrderRenter
+  ExclusivityAgreement
+  BrokerageOrderSeller
+  StandardLeaseAgreement
+}
+
+enum FormDocumentStatus {
+  Draft
+  PendingSignature
+  Signed
+}
+
+enum FormDocumentType {
+  BuyerAgreement
+  Exclusivity
+  PriceOffer
+}
+
+enum MarketLeadStatus {
+  NEW
+  CONTACTED
+  ARCHIVED
+}
+
+enum MediaAssetKind {
+  PROPERTY_IMAGE
+  AGENT_SCENE_IMAGE
+  AGENT_VIDEO
+  MARKETING_IMAGE
+}
+
+enum MediaAssetStatus {
+  QUEUED
+  GENERATING
+  READY
+  FAILED
+}
+
+enum MergeSuggestionStatus {
+  PENDING
+  MERGED
+  DISMISSED
+}
+
+enum OfferMessageStatus {
+  Pending
+  QueuedForWhatsApp
+  Sent
+  Failed
+}
+
+enum OutboundTelegramMessageStatus {
+  QUEUED
+  SENDING
+  SENT
+  FAILED
+}
+
+enum PersonaOrgRole {
+  MANAGER
+  AGENT
+}
+
+enum PipelineStage {
+  NewLead
+  TourShowing
+  Negotiation
+  LegalContracts
+  ClosedSigned
+  LostArchived
+  Qualification
+}
+
+enum PropertyAvailabilityStatus {
+  Available
+  Sold
+  Rented
+  Removed
+}
+
+enum PropertyListingType {
+  Rent
+  Sale
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  DEV
+}
+
+enum TelegramChatPhase {
+  FRONT_DESK
+  AGENT_ACTIVE
+}
+
+enum TelegramOutboundChannel {
+  USER_ACCOUNT
+  BOT_API
+}
+
+enum TelegramUserAccountStatus {
+  PENDING_AUTH
+  ACTIVE
+  SESSION_EXPIRED
+  DISABLED
+  BANNED
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  AGENCY_OWNER
+  SUB_ACCOUNT_USER
+}

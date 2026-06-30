@@ -23,8 +23,8 @@ export const BRAND = {
   nameEn: "REHOUSE",
   tagline: "international real estate and realty investment company",
   social: {
-    facebook: "https://facebook.com/rehouseisrael",
-    instagram: "https://instagram.com/rehouseisrael",
+    facebook: "https://www.facebook.com/rehouse.isr",
+    instagram: "https://www.instagram.com/rehouse_int",
     youtube: "https://youtube.com/@rehouseisrael",
     whatsapp: "https://wa.me/972501234567",
   },
